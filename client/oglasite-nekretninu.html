@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oglasite Nekretninu | ProVizija – Besplatna Procena i Profesionalni Marketing</title>
+    <meta name="description" content="Prodajte ili iznajmite vašu nekretninu putem ProVizija agencije. Besplatna procena, profesionalna fotografija i ciljani marketing. Popunite formular – javimo se u roku od 24h.">
+    <meta name="keywords" content="oglasite nekretninu, prodaja stana, iznajmljivanje stana, procena nekretnine, ProVizija, Beograd">
+    <meta property="og:title" content="Oglasite Nekretninu | ProVizija Nekretnine">
+    <meta property="og:description" content="Besplatna procena i profesionalni marketing vaše nekretnine. Prodajte brže i po boljoj ceni.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://provizija.rs/oglasite-nekretninu">
+    <link rel="canonical" href="https://provizija.rs/oglasite-nekretninu">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand" href="index.html"><img src="images/logo-dark.png" alt="ProVizija Nekretnine Logo" class="navbar-logo" width="120" height="45"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Otvori navigaciju"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="nekretnine.html">Nekretnine</a></li>
+                    <li class="nav-item"><a class="nav-link" href="agenti.html">Agenti</a></li>
+                    <li class="nav-item"><a class="nav-link" href="o-nama.html">O Nama</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="oglasite-nekretninu.html">Oglasite</a></li>
+                    <li class="nav-item"><a class="nav-link btn-contact" href="kontakt.html">Kontaktirajte Nas</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="page-hero" aria-label="Oglasite nekretninu">
+        <div class="container">
+            <div class="page-hero-tag">Prodajte ili iznajmite</div>
+            <h1 class="page-hero-title">Oglasite Svoju<br>Nekretninu</h1>
+            <p class="page-hero-subtitle">Besplatna procena, profesionalna fotografija i ciljani marketing. Prodajte brže i za bolju cenu.</p>
+            <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+                <a href="index.html">Početna</a><span class="separator">/</span><span class="current">Oglasite Nekretninu</span>
+            </nav>
+        </div>
+    </section>
+
+    <!-- MAIN -->
+    <section class="oglasite-section" aria-label="Forma za oglašavanje nekretnine">
+        <div class="container">
+            <div class="row g-5">
+
+                <!-- LEFT: Form -->
+                <div class="col-lg-8">
+                    <div class="oglasite-form-card">
+
+                        <!-- Step 1 -->
+                        <div class="form-step-header">
+                            <div class="form-step-number">1</div>
+                            <h3>Tip i namena nekretnine</h3>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label for="og-namena">Šta želite?</label>
+                                    <select id="og-namena" class="form-control">
+                                        <option>Prodaja</option>
+                                        <option>Iznajmljivanje</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label for="og-tip">Tip nekretnine</label>
+                                    <select id="og-tip" class="form-control">
+                                        <option>Stan</option>
+                                        <option>Kuća</option>
+                                        <option>Poslovni prostor</option>
+                                        <option>Zemljište</option>
+                                        <option>Garaža</option>
+                                        <option>Ostalo</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 2 -->
+                        <div class="form-step-header">
+                            <div class="form-step-number">2</div>
+                            <h3>Lokacija nekretnine</h3>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label for="og-grad">Grad</label>
+                                    <select id="og-grad" class="form-control">
+                                        <option>Beograd</option><option>Novi Sad</option><option>Niš</option><option>Kragujevac</option><option>Subotica</option><option>Ostalo</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label for="og-opstina">Opština / Kvart</label>
+                                    <select id="og-opstina" class="form-control">
+                                        <option value="">Odaberite...</option>
+                                        <option>Novi Beograd</option><option>Vračar</option><option>Zemun</option><option>Palilula</option>
+                                        <option>Stari Grad</option><option>Zvezdara</option><option>Čukarica</option><option>Voždovac</option><option>Dedinje</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group-custom">
+                                    <label for="og-adresa">Ulica i broj (opciono)</label>
+                                    <input type="text" id="og-adresa" class="form-control" placeholder="Npr. Kneza Miloša 15">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 3 -->
+                        <div class="form-step-header">
+                            <div class="form-step-number">3</div>
+                            <h3>Karakteristike nekretnine</h3>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="form-group-custom">
+                                    <label for="og-povrsina">Površina (m²)</label>
+                                    <input type="number" id="og-povrsina" class="form-control" placeholder="Npr. 75" min="1">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group-custom">
+                                    <label for="og-sobe">Broj soba</label>
+                                    <select id="og-sobe" class="form-control">
+                                        <option>Garsonjera</option><option>1 soba</option><option>2 sobe</option><option>3 sobe</option><option>4 sobe</option><option>5+ soba</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group-custom">
+                                    <label for="og-sprat">Sprat</label>
+                                    <select id="og-sprat" class="form-control">
+                                        <option>Prizemlje</option><option>1. sprat</option><option>2. sprat</option><option>3. sprat</option><option>4. sprat</option><option>5+ sprat</option><option>Poslednji sprat</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label for="og-grejanje">Grejanje</label>
+                                    <select id="og-grejanje" class="form-control">
+                                        <option>Centralno</option><option>Podno grejanje</option><option>Gas</option><option>Struja</option><option>TA peć</option><option>Klima</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label for="og-godina">Godina izgradnje</label>
+                                    <input type="number" id="og-godina" class="form-control" placeholder="Npr. 2015" min="1900" max="2025">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group-custom">
+                                    <label>Dodatne karakteristike</label>
+                                    <div class="row g-2" style="margin-top:4px;">
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-lift" style="accent-color:var(--accent);"><label class="form-check-label" for="f-lift" style="font-size:14px;">Lift</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-parking" style="accent-color:var(--accent);"><label class="form-check-label" for="f-parking" style="font-size:14px;">Parking</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-terasa" style="accent-color:var(--accent);"><label class="form-check-label" for="f-terasa" style="font-size:14px;">Terasa</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-bazen" style="accent-color:var(--accent);"><label class="form-check-label" for="f-bazen" style="font-size:14px;">Bazen</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-dvor" style="accent-color:var(--accent);"><label class="form-check-label" for="f-dvor" style="font-size:14px;">Dvorište</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-klima" style="accent-color:var(--accent);"><label class="form-check-label" for="f-klima" style="font-size:14px;">Klima</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-internet" style="accent-color:var(--accent);"><label class="form-check-label" for="f-internet" style="font-size:14px;">Internet</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-alarm" style="accent-color:var(--accent);"><label class="form-check-label" for="f-alarm" style="font-size:14px;">Alarm</label></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 4 -->
+                        <div class="form-step-header">
+                            <div class="form-step-number">4</div>
+                            <h3>Cena i opis</h3>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label for="og-cena">Očekivana cena (€)</label>
+                                    <input type="number" id="og-cena" class="form-control" placeholder="Npr. 120000" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label for="og-pregovaranje">Cena je</label>
+                                    <select id="og-pregovaranje" class="form-control">
+                                        <option>Fiksna</option><option>Po dogovoru</option><option>Hitna prodaja</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group-custom">
+                                    <label for="og-opis">Opis nekretnine</label>
+                                    <textarea id="og-opis" class="form-control" style="height:120px;" placeholder="Opišite vašu nekretninu, posebnosti, renovacije, karakteristike lokacije..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Step 5 -->
+                        <div class="form-step-header">
+                            <div class="form-step-number">5</div>
+                            <h3>Vaši kontakt podaci</h3>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label for="og-ime">Ime i prezime</label>
+                                    <input type="text" id="og-ime" class="form-control" placeholder="Vaše ime i prezime" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group-custom">
+                                    <label for="og-tel">Telefon</label>
+                                    <input type="tel" id="og-tel" class="form-control" placeholder="+381 6x xxx xxxx" required>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group-custom">
+                                    <label for="og-email">Email adresa</label>
+                                    <input type="email" id="og-email" class="form-control" placeholder="vas@email.com">
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check" style="margin-bottom:20px;">
+                                    <input type="checkbox" class="form-check-input" id="og-gdpr" required style="accent-color:var(--accent);">
+                                    <label class="form-check-label" for="og-gdpr" style="font-size:13px;color:var(--text-light);">Slažem se sa <a href="#" style="color:var(--accent);">politikom privatnosti</a> i obradom podataka.</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn-submit-full" style="font-size:16px;padding:18px;">
+                                    <i class="bi bi-send" aria-hidden="true"></i> Pošaljite Oglas na Procenu
+                                </button>
+                                <p style="font-size:13px;color:var(--text-light);text-align:center;margin-top:12px;">
+                                    <i class="bi bi-clock" aria-hidden="true"></i> Javićemo vam se u roku od 24 sata
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- RIGHT: Sticky benefits -->
+                <div class="col-lg-4">
+                    <div class="oglasite-benefits-wrap">
+                        <div class="oglasite-benefits">
+                            <h2>Zašto prodati<br>putem ProVizija?</h2>
+                            <p>Prepustite nam brigu o svemu — od procene do potpisivanja ugovora.</p>
+
+                            <div class="benefit-item">
+                                <div class="benefit-icon"><i class="bi bi-cash-coin" aria-hidden="true"></i></div>
+                                <div class="benefit-text"><h6>Besplatna procena</h6><p>Stručna tržišna procena vrednosti vaše nekretnine bez ikakvih troškova.</p></div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon"><i class="bi bi-camera" aria-hidden="true"></i></div>
+                                <div class="benefit-text"><h6>Profesionalna fotografija</h6><p>Naš fotograf snima vašu nekretninu u najboljem svetlu za privlačne oglase.</p></div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon"><i class="bi bi-megaphone" aria-hidden="true"></i></div>
+                                <div class="benefit-text"><h6>Agresivni marketing</h6><p>Oglas na svim vodećim platformama i u bazi od 10.000+ kupaca.</p></div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon"><i class="bi bi-shield-check" aria-hidden="true"></i></div>
+                                <div class="benefit-text"><h6>Pravna zaštita</h6><p>Kompletna provera dokumentacije i podrška tokom potpisivanja.</p></div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon"><i class="bi bi-person-check" aria-hidden="true"></i></div>
+                                <div class="benefit-text"><h6>Lični agent</h6><p>Jedan agent posvećen samo vašoj nekretnini, od početka do kraja.</p></div>
+                            </div>
+                            <div class="benefit-item">
+                                <div class="benefit-icon"><i class="bi bi-graph-up-arrow" aria-hidden="true"></i></div>
+                                <div class="benefit-text"><h6>Bolja cena</h6><p>Naša pregovaračka strategija u proseku donosi 5–8% višu cenu od tržišne.</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4"><h3 class="footer-brand">ProVizija</h3><p class="footer-text">Vodimo vas kroz svaki korak ka prodaji ili iznajmljivanju vaše nekretnine. Sa preko 15 godina iskustva.</p></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Istraži</h4><ul class="footer-links"><li><a href="nekretnine.html">Stanovi</a></li><li><a href="nekretnine.html">Kuće</a></li><li><a href="nekretnine.html">Poslovni prostor</a></li></ul></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Kompanija</h4><ul class="footer-links"><li><a href="o-nama.html">O Nama</a></li><li><a href="agenti.html">Naš Tim</a></li><li><a href="kontakt.html">Kontakt</a></li><li><a href="oglasite-nekretninu.html">Oglasite</a></li></ul></div>
+                <div class="col-lg-4 col-md-4"><h4 class="footer-title">Kontakt</h4><ul class="footer-links"><li><a href="tel:+381111234567">+381 11 123 4567</a></li><li><a href="mailto:info@provizija.rs">info@provizija.rs</a></li><li>Bulevar Oslobodjenja 10, Novi Sad</li></ul></div>
+            </div>
+            <div class="row mt-4"><div class="col-12"><div class="footer-bottom text-center"><p>&copy; 2025 ProVizija Nekretnine. Sva prava zadržana.</p></div></div></div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

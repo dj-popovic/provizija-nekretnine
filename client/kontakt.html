@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontakt | ProVizija Nekretnine – Stupite u Kontakt sa Nama</title>
+    <meta name="description" content="Kontaktirajte ProVizija agenciju za nekretnine. Adresa: Kneza Miloša 15, Beograd. Telefon: +381 11 123 4567. Radno vreme: pon–pet 9–20h, sub 10–16h.">
+    <meta name="keywords" content="kontakt ProVizija, agencija nekretnine kontakt, Beograd, telefon, email, adresa, radno vreme">
+    <meta property="og:title" content="Kontakt | ProVizija Nekretnine">
+    <meta property="og:description" content="Javite nam se – tu smo da odgovorimo na sva vaša pitanja o nekretninama.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://provizija.rs/kontakt">
+    <link rel="canonical" href="https://provizija.rs/kontakt">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Local Business structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "RealEstateAgent",
+      "name": "ProVizija Nekretnine",
+      "url": "https://provizija.rs",
+      "telephone": "+381-11-123-4567",
+      "email": "info@provizija.rs",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Kneza Miloša 15",
+        "addressLocality": "Beograd",
+        "postalCode": "11000",
+        "addressCountry": "RS"
+      },
+      "openingHours": ["Mo-Fr 09:00-20:00", "Sa 10:00-16:00"]
+    }
+    </script>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand" href="index.html"><img src="images/logo-dark.png" alt="ProVizija Nekretnine Logo" class="navbar-logo" width="120" height="45"></a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Otvori navigaciju"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="nekretnine.html">Nekretnine</a></li>
+                    <li class="nav-item"><a class="nav-link" href="agenti.html">Agenti</a></li>
+                    <li class="nav-item"><a class="nav-link" href="o-nama.html">O Nama</a></li>
+                    <li class="nav-item"><a class="nav-link" href="oglasite-nekretninu.html">Oglasite</a></li>
+                    <li class="nav-item"><a class="nav-link active btn-contact" href="kontakt.html">Kontaktirajte Nas</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="page-hero" aria-label="Kontakt stranica">
+        <div class="container">
+            <div class="page-hero-tag">Dostupni smo za vas</div>
+            <h1 class="page-hero-title">Stupite u Kontakt<br>sa Nama</h1>
+            <p class="page-hero-subtitle">Naš tim je tu da odgovori na sva vaša pitanja. Javite se – odgovorimo u roku od 2 sata.</p>
+            <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+                <a href="index.html">Početna</a><span class="separator">/</span><span class="current">Kontakt</span>
+            </nav>
+        </div>
+    </section>
+
+    <!-- MAIN CONTACT SECTION -->
+    <section class="kontakt-section" aria-label="Kontakt forma i informacije">
+        <div class="container">
+
+            <!-- ROW: Form LEFT + Info cards RIGHT (same height alignment) -->
+            <div class="row g-4 align-items-start">
+
+                <!-- Contact Form -->
+                <div class="col-lg-7">
+                    <div class="kontakt-form-card">
+                        <h2>Pošaljite nam poruku</h2>
+                        <p>Ispunite formular i javićemo vam se u najkraćem mogućem roku.</p>
+                        <form class="needs-validation" novalidate aria-label="Kontakt forma">
+                            <div class="row g-0">
+                                <div class="col-md-6 pe-md-2">
+                                    <div class="form-group-custom">
+                                        <label for="k-ime">Ime</label>
+                                        <input type="text" id="k-ime" class="form-control" placeholder="Vaše ime" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 ps-md-2">
+                                    <div class="form-group-custom">
+                                        <label for="k-prezime">Prezime</label>
+                                        <input type="text" id="k-prezime" class="form-control" placeholder="Vaše prezime" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 pe-md-2">
+                                    <div class="form-group-custom">
+                                        <label for="k-tel">Telefon</label>
+                                        <input type="tel" id="k-tel" class="form-control" placeholder="+381 6x xxx xxxx" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 ps-md-2">
+                                    <div class="form-group-custom">
+                                        <label for="k-email">Email</label>
+                                        <input type="email" id="k-email" class="form-control" placeholder="vas@email.com" required>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group-custom">
+                                        <label for="k-tema">Tema upita</label>
+                                        <select id="k-tema" class="form-select" style="border:2px solid #e5e5e5;border-radius:8px;padding:12px 14px;font-family:'DM Sans',sans-serif;margin-bottom:16px;">
+                                            <option value="">Odaberite temu...</option>
+                                            <option>Kupovina nekretnine</option>
+                                            <option>Iznajmljivanje</option>
+                                            <option>Prodaja nekretnine</option>
+                                            <option>Procena vrednosti</option>
+                                            <option>Investicija</option>
+                                            <option>Ostalo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group-custom">
+                                        <label for="k-poruka">Poruka</label>
+                                        <textarea id="k-poruka" class="form-control" placeholder="Opišite vaš zahtev..." required></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check" style="margin-bottom:20px;">
+                                        <input type="checkbox" class="form-check-input" id="gdpr" required style="accent-color:var(--accent);">
+                                        <label class="form-check-label" for="gdpr" style="font-size:13px;color:var(--text-light);">Slažem se sa <a href="#" style="color:var(--accent);">politikom privatnosti</a> i obradom mojih podataka u svrhu odgovora na upit.</label>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn-submit-full" style="font-size:16px;">
+                                        <i class="bi bi-send" aria-hidden="true"></i> Pošaljite Poruku
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Info Cards -->
+                <div class="col-lg-5">
+                    <div class="info-cards-grid">
+
+                        <div class="info-card">
+                            <div class="info-card-icon"><i class="bi bi-geo-alt-fill" aria-hidden="true"></i></div>
+                            <div class="info-card-body">
+                                <h3>Naša adresa</h3>
+                                <p>Bulevar Oslobodjenja 10, 21000 Novi Sad</p>
+                                <a href="https://maps.google.com/?q=Kneza+Milosa+15+Beograd" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;margin-top:6px;display:inline-flex;align-items:center;gap:4px;font-size:13px;"><i class="bi bi-map" aria-hidden="true"></i> Otvori na mapi</a>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-icon"><i class="bi bi-telephone-fill" aria-hidden="true"></i></div>
+                            <div class="info-card-body">
+                                <h3>Telefon</h3>
+                                <a href="tel:+381111234567">+381 11 123 4567</a>
+                                <a href="tel:+381641234567">+381 64 123 4567</a>
+                                <a href="https://wa.me/381641234567" target="_blank" rel="noopener noreferrer" style="color:#25D366;font-weight:600;margin-top:4px;display:inline-flex;align-items:center;gap:4px;"><i class="bi bi-whatsapp" aria-hidden="true"></i> WhatsApp dostupan</a>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-icon"><i class="bi bi-envelope-fill" aria-hidden="true"></i></div>
+                            <div class="info-card-body">
+                                <h3>Email</h3>
+                                <a href="mailto:info@provizija.rs">info@provizija.rs</a>
+                                <a href="mailto:prodaja@provizija.rs">prodaja@provizija.rs</a>
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-card-icon"><i class="bi bi-clock-fill" aria-hidden="true"></i></div>
+                            <div class="info-card-body">
+                                <h3>Radno vreme</h3>
+                                <p>Pon – Pet: 09:00 – 20:00</p>
+                                <p>Subota: 10:00 – 16:00</p>
+                                <p>Nedeljom po dogovoru</p>
+                                <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(39,201,100,.1);padding:6px 12px;border-radius:8px;margin-top:6px;">
+                                    <span style="width:7px;height:7px;background:#27c964;border-radius:50%;display:inline-block;" aria-hidden="true"></span>
+                                    <span style="font-size:12px;font-weight:700;color:#27c964;">Trenutno otvoreno</span>
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAP -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="section-tag text-center">Kako do nas</div>
+                    <h2 class="section-title text-center" style="margin-bottom:28px;">Naša Lokacija</h2>
+                    <div class="map-container">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2808.274858055366!2d19.8306364!3d45.26245439999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x475b1050588249a3%3A0xaaf5e91c3e16d8a9!2sBulevar%20oslobo%C4%91enja%2010%2C%20Novi%20Sad%2021000!5e0!3m2!1sen!2srs!4v1772808072323!5m2!1sen!2srs" 
+                        width="600" 
+                        height="450" 
+                        style="border:0;" 
+                        allowfullscreen="" 
+                        loading="lazy" 
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4"><h3 class="footer-brand">ProVizija</h3><p class="footer-text">Vodimo vas kroz svaki korak ka vašem novom domu. Sa preko 15 godina iskustva na tržištu nekretnina.</p></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Istraži</h4><ul class="footer-links"><li><a href="nekretnine.html">Stanovi</a></li><li><a href="nekretnine.html">Kuće</a></li><li><a href="nekretnine.html">Poslovni prostor</a></li></ul></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Kompanija</h4><ul class="footer-links"><li><a href="o-nama.html">O Nama</a></li><li><a href="agenti.html">Naš Tim</a></li><li><a href="kontakt.html">Kontakt</a></li><li><a href="oglasite-nekretninu.html">Oglasite</a></li></ul></div>
+                <div class="col-lg-4 col-md-4"><h4 class="footer-title">Kontakt</h4><ul class="footer-links"><li><a href="tel:+381111234567">+381 11 123 4567</a></li><li><a href="mailto:info@provizija.rs">info@provizija.rs</a></li><li>Bulevar Oslobodjenja 10, Novi Sad</li></ul></div>
+            </div>
+            <div class="row mt-4"><div class="col-12"><div class="footer-bottom text-center"><p>&copy; 2025 ProVizija Nekretnine. Sva prava zadržana.</p></div></div></div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

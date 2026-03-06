@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProVizija Nekretnine – Agencija za Nekretnine Novi Sad | Kupovina, Prodaja, Iznajmljivanje</title>
+    <meta name="description" content="ProVizija – vodeća agencija za nekretnine u Novom Sadu. Više od 500 nekretnina, stručan tim i 15 godina iskustva. Pronađite stan, kuću ili poslovni prostor.">
+    <meta name="keywords" content="agencija za nekretnine, Novi Sad, stanovi, kuće, kupovina, prodaja, iznajmljivanje, ProVizija">
+    <meta property="og:title" content="ProVizija Nekretnine – Novi Sad">
+    <meta property="og:description" content="Više od 500 nekretnina. Vaš novi početak počinje ovde.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://provizija.rs/">
+    <link rel="canonical" href="https://provizija.rs/">
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img src="images/logo-dark.png" alt="ProVizija Nekretnine Logo" class="navbar-logo" width="120" height="45">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Otvori navigaciju">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-center">
+                    <li class="nav-item"><a class="nav-link" href="nekretnine.html">Nekretnine</a></li>
+                    <li class="nav-item"><a class="nav-link" href="agenti.html">Agenti</a></li>
+                    <li class="nav-item"><a class="nav-link" href="o-nama.html">O Nama</a></li>
+                    <li class="nav-item"><a class="nav-link" href="oglasite-nekretninu.html">Oglasite</a></li>
+                    <li class="nav-item"><a class="nav-link btn-contact" href="kontakt.html">Kontaktirajte Nas</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" id="hero" aria-label="Hero sekcija">
+        <div class="hero-bg-pattern"></div>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <h1 class="hero-title">Pronađite Savršen<br>Dom ili Investiciju</h1>
+                    <p class="hero-subtitle">Više od 10.000 vrhunskih nekretnina. Vaš novi početak počinje ovde.</p>
+                    <div class="search-container">
+                        <ul class="nav nav-tabs search-tabs" id="searchTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="buy-tab" data-bs-toggle="tab" data-bs-target="#buy" type="button" role="tab">Kupovina</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="rent-tab" data-bs-toggle="tab" data-bs-target="#rent" type="button" role="tab">Iznajmljivanje</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="sell-tab" data-bs-toggle="tab" data-bs-target="#sell" type="button" role="tab">Prodaja</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="searchTabContent">
+                            <div class="tab-pane fade show active" id="buy" role="tabpanel">
+                                <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina">
+                                    <div class="row g-3">
+                                        <div class="col-lg-5">
+                                            <label for="location" class="form-label">Lokacija</label>
+                                            <input type="text" class="form-control" id="location" name="lokacija" placeholder="Grad, opština ili adresa" autocomplete="address-level2">
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <label for="property-type" class="form-label">Tip</label>
+                                            <select class="form-select" id="property-type" name="tip">
+                                                <option value="">Sve</option>
+                                                <option>Stan</option>
+                                                <option>Kuća</option>
+                                                <option>Apartman</option>
+                                                <option>Zemljište</option>
+                                                <option>Poslovni prostor</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <label for="price-range" class="form-label">Cena</label>
+                                            <select class="form-select" id="price-range" name="cena">
+                                                <option value="">Sve</option>
+                                                <option>Do 50.000 €</option>
+                                                <option>50.000 – 100.000 €</option>
+                                                <option>100.000 – 200.000 €</option>
+                                                <option>200.000 – 500.000 €</option>
+                                                <option>Preko 500.000 €</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-lg-1 d-flex align-items-end">
+                                            <button type="submit" class="btn btn-search w-100" aria-label="Pretraži"><i class="bi bi-search"></i></button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FEATURED PROPERTIES ===== -->
+    <section class="featured-section py-5" id="nekretnine" aria-label="Istaknute nekretnine">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <div class="section-tag">Istaknuto</div>
+                    <h2 class="section-title">Vrhunske Nekretnine</h2>
+                    <p class="section-description">Ručno odabrane nekretnine sa izuzetnim karakteristikama i lokacijama</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <!-- Card 1 -->
+                <div class="col-lg-4 col-md-6">
+                    <article class="property-card">
+                        <a href="nekretnina-detalj.html" aria-label="Pogledaj: Luksuzni stan, Dedinje">
+                            <div class="property-image">
+                                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=75" alt="Luksuzni četvorosoban stan sa terasom, Dedinje, Beograd" loading="lazy" width="600" height="280">
+                                <span class="property-badge">Prodaja</span>
+                                <div class="property-price">285.000 €</div>
+                            </div>
+                        </a>
+                        <div class="property-details">
+                            <div class="property-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> Dedinje, Beograd</div>
+                            <h3 class="property-title"><a href="nekretnina-detalj.html" style="text-decoration:none;color:inherit;">Luksuzni Četvorosoban Stan sa Terasom</a></h3>
+                            <div class="property-features">
+                                <div class="feature"><i class="bi bi-grid-3x3" aria-hidden="true"></i> 120 m²</div>
+                                <div class="feature"><i class="bi bi-door-open" aria-hidden="true"></i> 4 sobe</div>
+                                <div class="feature"><i class="bi bi-water" aria-hidden="true"></i> 2 kupat.</div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <!-- Card 2 -->
+                <div class="col-lg-4 col-md-6">
+                    <article class="property-card">
+                        <a href="nekretnina-detalj.html" aria-label="Pogledaj: Moderna kuća, Zemun">
+                            <div class="property-image">
+                                <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&q=75" alt="Moderna porodična kuća sa bazenom, Zemun, Beograd" loading="lazy" width="600" height="280">
+                                <span class="property-badge">Prodaja</span>
+                                <div class="property-price">540.000 €</div>
+                            </div>
+                        </a>
+                        <div class="property-details">
+                            <div class="property-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> Zemun, Beograd</div>
+                            <h3 class="property-title"><a href="nekretnina-detalj.html" style="text-decoration:none;color:inherit;">Moderna Porodična Kuća sa Bazenom</a></h3>
+                            <div class="property-features">
+                                <div class="feature"><i class="bi bi-grid-3x3" aria-hidden="true"></i> 280 m²</div>
+                                <div class="feature"><i class="bi bi-door-open" aria-hidden="true"></i> 5 soba</div>
+                                <div class="feature"><i class="bi bi-water" aria-hidden="true"></i> 3 kupat.</div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <!-- Card 3 -->
+                <div class="col-lg-4 col-md-6">
+                    <article class="property-card">
+                        <a href="nekretnina-detalj.html" aria-label="Pogledaj: Trosoban stan, Vračar">
+                            <div class="property-image">
+                                <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=75" alt="Renoviran trosoban stan, Vračar, Beograd" loading="lazy" width="600" height="280">
+                                <span class="property-badge badge-rent">Iznajmljivanje</span>
+                                <div class="property-price">900 €/mes.</div>
+                            </div>
+                        </a>
+                        <div class="property-details">
+                            <div class="property-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> Vračar, Beograd</div>
+                            <h3 class="property-title"><a href="nekretnina-detalj.html" style="text-decoration:none;color:inherit;">Renoviran Trosoban Stan u Srcu Vračara</a></h3>
+                            <div class="property-features">
+                                <div class="feature"><i class="bi bi-grid-3x3" aria-hidden="true"></i> 78 m²</div>
+                                <div class="feature"><i class="bi bi-door-open" aria-hidden="true"></i> 3 sobe</div>
+                                <div class="feature"><i class="bi bi-water" aria-hidden="true"></i> 1 kupat.</div>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <a href="nekretnine.html" class="btn" style="padding:14px 40px;font-weight:700;background:var(--accent);color:var(--white);border-radius:8px;font-size:15px;transition:background .3s,box-shadow .3s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--accent-dark)';this.style.boxShadow='0 8px 20px rgba(201,162,39,.35)';" onmouseout="this.style.background='var(--accent)';this.style.boxShadow='none';">Pogledaj sve nekretnine <i class="bi bi-arrow-right ms-2"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== STATS ===== -->
+    <section class="stats-section py-5" aria-label="Statistike agencije">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-6 col-lg-3"><div class="stat-item"><div class="stat-number" data-target="10000">0+</div><div class="stat-label">Zadovoljnih klijenata</div></div></div>
+                <div class="col-6 col-lg-3"><div class="stat-item"><div class="stat-number" data-target="850">0</div><div class="stat-label">Prodatih nekretnina godišnje</div></div></div>
+                <div class="col-6 col-lg-3"><div class="stat-item"><div class="stat-number" data-target="15">0+</div><div class="stat-label">Godina iskustva</div></div></div>
+                <div class="col-6 col-lg-3"><div class="stat-item"><div class="stat-number" data-target="98">0%</div><div class="stat-label">Zadovoljnih klijenata</div></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <section class="how-it-works-section py-5" aria-label="Kako funkcionišemo">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <div class="section-tag">Proces</div>
+                    <h2 class="section-title">Kako Funkcionišemo</h2>
+                    <p class="section-description">Jednostavan i transparentan proces od prvog kontakta do ključeva</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-3 col-md-6"><div class="step-card"><div class="step-number">01</div><div class="step-icon"><i class="bi bi-chat-dots" aria-hidden="true"></i></div><h3 class="step-title">Konsultacija</h3><p class="step-description">Razgovaramo o vašim potrebama, budžetu i željama. Besplatna procena vaše nekretnine.</p></div></div>
+                <div class="col-lg-3 col-md-6"><div class="step-card"><div class="step-number">02</div><div class="step-icon"><i class="bi bi-search" aria-hidden="true"></i></div><h3 class="step-title">Pretraga</h3><p class="step-description">Biramo najbolje opcije iz naše baze i organizujemo razgledanja koja odgovaraju vašem rasporedu.</p></div></div>
+                <div class="col-lg-3 col-md-6"><div class="step-card"><div class="step-number">03</div><div class="step-icon"><i class="bi bi-file-text" aria-hidden="true"></i></div><h3 class="step-title">Dokumentacija</h3><p class="step-description">Brinemo se o svim pravnim aspektima, ugovorima i proveri dokumentacije.</p></div></div>
+                <div class="col-lg-3 col-md-6"><div class="step-card"><div class="step-number">04</div><div class="step-icon"><i class="bi bi-key" aria-hidden="true"></i></div><h3 class="step-title">Preuzimanje Ključeva</h3><p class="step-description">Završavamo transakciju i predajemo vam ključeve vašeg novog doma ili investicije.</p></div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TEAM (3 agenta) ===== -->
+    <section class="team-section py-5" aria-label="Naš tim">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center mb-5">
+                    <div class="section-tag">Tim</div>
+                    <h2 class="section-title">Upoznajte Naš Tim</h2>
+                    <p class="section-description">Stručnjaci sa strašću za nekretnine i posvećenošću vašem uspehu</p>
+                </div>
+            </div>
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-4 col-md-6">
+                    <article class="team-card">
+                        <div class="team-photo"><img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=75" alt="Marko Petrović, direktor i osnivač ProVizija agencije" loading="lazy" width="400" height="320"></div>
+                        <div class="team-info">
+                            <div class="team-name">Marko Petrović</div>
+                            <div class="team-role">Direktor i Osnivač</div>
+                            <p class="team-bio">15 godina iskustva u luksuznim nekretninama. Specijalizovan za ekskluzivne vile i penthouse-e.</p>
+                            <div class="team-contact">
+                                <a href="mailto:marko@provizija.rs" aria-label="Email Marku"><i class="bi bi-envelope"></i></a>
+                                <a href="tel:+381111234567" aria-label="Pozovi Marka"><i class="bi bi-telephone"></i></a>
+                                <a href="agent-detalj.html" aria-label="Profil Marka Petrovića"><i class="bi bi-person"></i></a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <article class="team-card">
+                        <div class="team-photo"><img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&q=75" alt="Ana Jovanović, senior agent ProVizija" loading="lazy" width="400" height="320"></div>
+                        <div class="team-info">
+                            <div class="team-name">Ana Jovanović</div>
+                            <div class="team-role">Senior Agent</div>
+                            <p class="team-bio">Stručnjak za stambene nekretnine u centru grada. Preko 200 uspešnih transakcija.</p>
+                            <div class="team-contact">
+                                <a href="mailto:ana@provizija.rs" aria-label="Email Ani"><i class="bi bi-envelope"></i></a>
+                                <a href="tel:+381111234568" aria-label="Pozovi Anu"><i class="bi bi-telephone"></i></a>
+                                <a href="agent-detalj.html" aria-label="Profil Ane Jovanović"><i class="bi bi-person"></i></a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <article class="team-card">
+                        <div class="team-photo"><img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=75" alt="Stefan Nikolić, agent za poslovne prostore ProVizija" loading="lazy" width="400" height="320"></div>
+                        <div class="team-info">
+                            <div class="team-name">Stefan Nikolić</div>
+                            <div class="team-role">Agent za Poslovne Prostore</div>
+                            <p class="team-bio">Fokusiran na komercijalne nekretnine i investicione prilike. MBA u oblasti nekretnina.</p>
+                            <div class="team-contact">
+                                <a href="mailto:stefan@provizija.rs" aria-label="Email Stefanu"><i class="bi bi-envelope"></i></a>
+                                <a href="tel:+381111234569" aria-label="Pozovi Stefana"><i class="bi bi-telephone"></i></a>
+                                <a href="agent-detalj.html" aria-label="Profil Stefana Nikolića"><i class="bi bi-person"></i></a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FAQ ===== -->
+    <section class="faq-section py-5" aria-label="Najčešća pitanja">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="text-center mb-5">
+                        <div class="section-tag">FAQ</div>
+                        <h2 class="section-title">Najčešća Pitanja</h2>
+                        <p class="section-description">Odgovori na pitanja koja nam klijenti najčešće postavljaju</p>
+                    </div>
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h3 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">Kolika je provizija agencije?</button></h3>
+                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion"><div class="accordion-body">Naša standardna provizija je 2% za kupovinu i 3% za prodaju nekretnine. Za ekskluzivne nekretnine i veće transakcije, provizija može biti dogovorena individualno. Sve troškove transparentno prikazujemo pre potpisivanja ugovora.</div></div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">Koliko dugo traje proces kupovine?</button></h3>
+                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Od pronalaženja idealne nekretnine do preuzimanja ključeva obično prođe 30-60 dana. Mi ubrzavamo proces kroz efikasnu koordinaciju svih strana.</div></div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">Da li pomažete oko kredita?</button></h3>
+                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Da, sarađujemo sa svim većim bankama i možemo vam pomoći da pronađete najpovoljniju kreditnu opciju. Naši savetnici će vam objasniti sve uslove i pomoći u pripremi potrebne dokumentacije.</div></div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">Šta je uključeno u vašu uslugu?</button></h3>
+                            <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Nudimo kompletnu uslugu: procenu nekretnine, profesionalnu fotografiju, marketing, organizaciju razgledanja, proveru svih dokumenata, pravnu pomoć, pregovaranje o ceni i podršku nakon prodaje.</div></div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">Koliko brzo mogu prodati nekretninu?</button></h3>
+                            <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Prosečno vreme prodaje je 2-3 meseca, ali zavisi od vrste nekretnine, lokacije i cene. Dobro pozicionirane nekretnine po tržišnoj ceni mogu se prodati za nekoliko nedelja.</div></div>
+                        </div>
+                        <div class="accordion-item">
+                            <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq6">Da li radite sa stranim klijentima?</button></h3>
+                            <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Apsolutno! Imamo iskustva sa međunarodnim klijentima i pružamo usluge na engleskom jeziku. Pomažemo oko svih aspekata kupovine, uključujući pravne zahteve za strane državljane.</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CTA ===== -->
+    <section class="cta-section py-5" aria-label="Poziv na akciju">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 mx-auto text-center">
+                    <h2 class="cta-title">Spremni da Pronađete Savršenu Nekretninu?</h2>
+                    <p class="cta-description">Naš tim stručnjaka je tu da vam pomogne u svakom koraku. Zakažite besplatnu konsultaciju već danas.</p>
+                    <div class="cta-buttons">
+                        <a href="kontakt.html" class="btn btn-primary-cta"><i class="bi bi-envelope" aria-hidden="true"></i> Pošaljite Upit</a>
+                    </div>
+                    <div class="cta-features">
+                        <div class="cta-feature"><i class="bi bi-check-circle" aria-hidden="true"></i> Besplatna procena</div>
+                        <div class="cta-feature"><i class="bi bi-check-circle" aria-hidden="true"></i> Bez skrivenih troškova</div>
+                        <div class="cta-feature"><i class="bi bi-check-circle" aria-hidden="true"></i> Stručna podrška 24/7</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer py-5">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <h3 class="footer-brand">ProVizija</h3>
+                    <p class="footer-text">Vodimo vas kroz svaki korak ka vašem novom domu. Sa preko 15 godina iskustva na tržištu nekretnina, nudimo profesionalnu uslugu i pristup vrhunskim nekretninama.</p>
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <h4 class="footer-title">Istraži</h4>
+                    <ul class="footer-links">
+                        <li><a href="nekretnine.html">Stanovi</a></li>
+                        <li><a href="nekretnine.html">Kuće</a></li>
+                        <li><a href="nekretnine.html">Poslovni prostor</a></li>
+                        <li><a href="nekretnine.html">Zemljište</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-4">
+                    <h4 class="footer-title">Kompanija</h4>
+                    <ul class="footer-links">
+                        <li><a href="o-nama.html">O Nama</a></li>
+                        <li><a href="agenti.html">Naš Tim</a></li>
+                        <li><a href="kontakt.html">Kontakt</a></li>
+                        <li><a href="oglasite-nekretninu.html">Oglasite</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-4">
+                    <h4 class="footer-title">Kontakt</h4>
+                    <ul class="footer-links">
+                        <li><a href="tel:+381111234567">+381 11 123 4567</a></li>
+                        <li><a href="mailto:info@provizija.rs">info@provizija.rs</a></li>
+                        <li>Bulevar Oslobodjenja 10, Novi Sad</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="footer-bottom text-center">
+                        <p>&copy; 2025 ProVizija Nekretnine. Sva prava zadržana.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
