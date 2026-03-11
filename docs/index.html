@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProVizija Nekretnine – Agencija za Nekretnine Novi Sad | Kupovina, Prodaja, Iznajmljivanje</title>
-    <meta name="description" content="ProVizija – vodeća agencija za nekretnine u Novom Sadu. Više od 500 nekretnina, stručan tim i 15 godina iskustva. Pronađite stan, kuću ili poslovni prostor.">
+    <meta name="description" content="ProVizija – vodeća agencija za nekretnine u Novom Sadu. Više od 10.000 nekretnina, stručan tim i 15 godina iskustva. Pronađite stan, kuću ili poslovni prostor.">
     <meta name="keywords" content="agencija za nekretnine, Novi Sad, stanovi, kuće, kupovina, prodaja, iznajmljivanje, ProVizija">
     <meta property="og:title" content="ProVizija Nekretnine – Novi Sad">
-    <meta property="og:description" content="Više od 500 nekretnina. Vaš novi početak počinje ovde.">
+    <meta property="og:description" content="Više od 10.000 nekretnina u Novom Sadu. Vaš novi početak počinje ovde.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://provizija.rs/">
     <link rel="canonical" href="https://provizija.rs/">
-    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -47,59 +46,95 @@
         <div class="hero-bg-pattern"></div>
         <div class="container">
             <div class="row">
-                <div class="col-lg-12">
+                <div class="col-12 col-lg-10 mx-auto">
                     <h1 class="hero-title">Pronađite Savršen<br>Dom ili Investiciju</h1>
-                    <p class="hero-subtitle">Više od 10.000 vrhunskih nekretnina. Vaš novi početak počinje ovde.</p>
+                    <p class="hero-subtitle">Više od 10.000 vrhunskih nekretnina u Novom Sadu. Vaš novi početak počinje ovde.</p>
+
+                    <!-- ===== SEARCH WIDGET (vanilla JS, no BS tabs) ===== -->
                     <div class="search-container">
-                        <ul class="nav nav-tabs search-tabs" id="searchTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="buy-tab" data-bs-toggle="tab" data-bs-target="#buy" type="button" role="tab">Kupovina</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="rent-tab" data-bs-toggle="tab" data-bs-target="#rent" type="button" role="tab">Iznajmljivanje</button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="sell-tab" data-bs-toggle="tab" data-bs-target="#sell" type="button" role="tab">Prodaja</button>
-                            </li>
-                        </ul>
-                        <div class="tab-content" id="searchTabContent">
-                            <div class="tab-pane fade show active" id="buy" role="tabpanel">
-                                <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina">
-                                    <div class="row g-3">
-                                        <div class="col-lg-5">
-                                            <label for="location" class="form-label">Lokacija</label>
-                                            <input type="text" class="form-control" id="location" name="lokacija" placeholder="Grad, opština ili adresa" autocomplete="address-level2">
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <label for="property-type" class="form-label">Tip</label>
-                                            <select class="form-select" id="property-type" name="tip">
-                                                <option value="">Sve</option>
-                                                <option>Stan</option>
-                                                <option>Kuća</option>
-                                                <option>Apartman</option>
-                                                <option>Zemljište</option>
-                                                <option>Poslovni prostor</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <label for="price-range" class="form-label">Cena</label>
-                                            <select class="form-select" id="price-range" name="cena">
-                                                <option value="">Sve</option>
-                                                <option>Do 50.000 €</option>
-                                                <option>50.000 – 100.000 €</option>
-                                                <option>100.000 – 200.000 €</option>
-                                                <option>200.000 – 500.000 €</option>
-                                                <option>Preko 500.000 €</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-lg-1 d-flex align-items-end">
-                                            <button type="submit" class="btn btn-search w-100" aria-label="Pretraži"><i class="bi bi-search"></i></button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
+
+                        <!-- Tab buttons -->
+                        <div class="search-tabs" role="tablist">
+                            <button class="nav-link active" data-tab="kupovina" role="tab" aria-selected="true" type="button">Kupovina</button>
+                            <button class="nav-link" data-tab="iznajmljivanje" role="tab" aria-selected="false" type="button">Iznajmljivanje</button>
                         </div>
-                    </div>
+
+                        <!-- Kupovina form -->
+                        <div class="search-tab-content" id="tab-kupovina">
+                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za kupovinu">
+                                <input type="hidden" name="tip_oglasa" value="kupovina">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-5">
+                                        <label for="kup-lokacija" class="form-label">Lokacija</label>
+                                        <input type="text" class="form-control" id="kup-lokacija" name="lokacija" placeholder="Kvart ili adresa u Novom Sadu" autocomplete="off">
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="kup-tip" class="form-label">Tip</label>
+                                        <select class="form-select" id="kup-tip" name="tip">
+                                            <option value="">Sve</option>
+                                            <option>Stan</option>
+                                            <option>Kuća</option>
+                                            <option>Apartman</option>
+                                            <option>Zemljište</option>
+                                            <option>Poslovni prostor</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="kup-cena" class="form-label">Cena</label>
+                                        <select class="form-select" id="kup-cena" name="cena">
+                                            <option value="">Sve</option>
+                                            <option>Do 50.000 €</option>
+                                            <option>50.000 – 100.000 €</option>
+                                            <option>100.000 – 200.000 €</option>
+                                            <option>200.000 – 500.000 €</option>
+                                            <option>Preko 500.000 €</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-1 d-flex align-items-end">
+                                        <button type="submit" class="btn-search w-100" aria-label="Pretraži"><i class="bi bi-search"></i></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Iznajmljivanje form -->
+                        <div class="search-tab-content" id="tab-iznajmljivanje" style="display:none;">
+                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za iznajmljivanje">
+                                <input type="hidden" name="tip_oglasa" value="iznajmljivanje">
+                                <div class="row g-3">
+                                    <div class="col-12 col-md-5">
+                                        <label for="izn-lokacija" class="form-label">Lokacija</label>
+                                        <input type="text" class="form-control" id="izn-lokacija" name="lokacija" placeholder="Kvart ili adresa u Novom Sadu" autocomplete="off">
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="izn-tip" class="form-label">Tip</label>
+                                        <select class="form-select" id="izn-tip" name="tip">
+                                            <option value="">Sve</option>
+                                            <option>Stan</option>
+                                            <option>Kuća</option>
+                                            <option>Apartman</option>
+                                            <option>Poslovni prostor</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-3">
+                                        <label for="izn-cena" class="form-label">Cena / mes.</label>
+                                        <select class="form-select" id="izn-cena" name="cena">
+                                            <option value="">Sve</option>
+                                            <option>Do 300 €</option>
+                                            <option>300 – 600 €</option>
+                                            <option>600 – 1.000 €</option>
+                                            <option>1.000 – 2.000 €</option>
+                                            <option>Preko 2.000 €</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12 col-md-1 d-flex align-items-end">
+                                        <button type="submit" class="btn-search w-100" aria-label="Pretraži"><i class="bi bi-search"></i></button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div><!-- /.search-container -->
                 </div>
             </div>
         </div>
@@ -119,15 +154,15 @@
                 <!-- Card 1 -->
                 <div class="col-lg-4 col-md-6">
                     <article class="property-card">
-                        <a href="nekretnina-detalj.html" aria-label="Pogledaj: Luksuzni stan, Dedinje">
+                        <a href="nekretnina-detalj.html" aria-label="Pogledaj: Luksuzni stan, Grbavica">
                             <div class="property-image">
-                                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=75" alt="Luksuzni četvorosoban stan sa terasom, Dedinje, Beograd" loading="lazy" width="600" height="280">
+                                <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=75" alt="Luksuzni četvorosoban stan sa terasom, Grbavica, Novi Sad" loading="lazy" width="600" height="280">
                                 <span class="property-badge">Prodaja</span>
                                 <div class="property-price">285.000 €</div>
                             </div>
                         </a>
                         <div class="property-details">
-                            <div class="property-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> Dedinje, Beograd</div>
+                            <div class="property-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> Grbavica, Novi Sad</div>
                             <h3 class="property-title"><a href="nekretnina-detalj.html" style="text-decoration:none;color:inherit;">Luksuzni Četvorosoban Stan sa Terasom</a></h3>
                             <div class="property-features">
                                 <div class="feature"><i class="bi bi-grid-3x3" aria-hidden="true"></i> 120 m²</div>
@@ -140,15 +175,15 @@
                 <!-- Card 2 -->
                 <div class="col-lg-4 col-md-6">
                     <article class="property-card">
-                        <a href="nekretnina-detalj.html" aria-label="Pogledaj: Moderna kuća, Zemun">
+                        <a href="nekretnina-detalj.html" aria-label="Pogledaj: Moderna kuća, Liman">
                             <div class="property-image">
-                                <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&q=75" alt="Moderna porodična kuća sa bazenom, Zemun, Beograd" loading="lazy" width="600" height="280">
+                                <img src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=600&q=75" alt="Moderna porodična kuća sa bazenom, Liman, Novi Sad" loading="lazy" width="600" height="280">
                                 <span class="property-badge">Prodaja</span>
                                 <div class="property-price">540.000 €</div>
                             </div>
                         </a>
                         <div class="property-details">
-                            <div class="property-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> Zemun, Beograd</div>
+                            <div class="property-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> Liman, Novi Sad</div>
                             <h3 class="property-title"><a href="nekretnina-detalj.html" style="text-decoration:none;color:inherit;">Moderna Porodična Kuća sa Bazenom</a></h3>
                             <div class="property-features">
                                 <div class="feature"><i class="bi bi-grid-3x3" aria-hidden="true"></i> 280 m²</div>
@@ -161,16 +196,16 @@
                 <!-- Card 3 -->
                 <div class="col-lg-4 col-md-6">
                     <article class="property-card">
-                        <a href="nekretnina-detalj.html" aria-label="Pogledaj: Trosoban stan, Vračar">
+                        <a href="nekretnina-detalj.html" aria-label="Pogledaj: Trosoban stan, Petrovaradin">
                             <div class="property-image">
-                                <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=75" alt="Renoviran trosoban stan, Vračar, Beograd" loading="lazy" width="600" height="280">
+                                <img src="https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&q=75" alt="Renoviran trosoban stan, Petrovaradin, Novi Sad" loading="lazy" width="600" height="280">
                                 <span class="property-badge badge-rent">Iznajmljivanje</span>
                                 <div class="property-price">900 €/mes.</div>
                             </div>
                         </a>
                         <div class="property-details">
-                            <div class="property-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> Vračar, Beograd</div>
-                            <h3 class="property-title"><a href="nekretnina-detalj.html" style="text-decoration:none;color:inherit;">Renoviran Trosoban Stan u Srcu Vračara</a></h3>
+                            <div class="property-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> Petrovaradin, Novi Sad</div>
+                            <h3 class="property-title"><a href="nekretnina-detalj.html" style="text-decoration:none;color:inherit;">Renoviran Trosoban Stan u Petrovaradinu</a></h3>
                             <div class="property-features">
                                 <div class="feature"><i class="bi bi-grid-3x3" aria-hidden="true"></i> 78 m²</div>
                                 <div class="feature"><i class="bi bi-door-open" aria-hidden="true"></i> 3 sobe</div>
@@ -236,7 +271,7 @@
                             <div class="team-role">Direktor i Osnivač</div>
                             <p class="team-bio">15 godina iskustva u luksuznim nekretninama. Specijalizovan za ekskluzivne vile i penthouse-e.</p>
                             <div class="team-contact">
-                                <a href="mailto:marko@provizija.rs" aria-label="Email Marku"><i class="bi bi-envelope"></i></a>
+                                <a href="/cdn-cgi/l/email-protection#711c10031a1e3101031e07180b181b105f0302" aria-label="Email Marku"><i class="bi bi-envelope"></i></a>
                                 <a href="tel:+381111234567" aria-label="Pozovi Marka"><i class="bi bi-telephone"></i></a>
                                 <a href="agent-detalj.html" aria-label="Profil Marka Petrovića"><i class="bi bi-person"></i></a>
                             </div>
@@ -251,7 +286,7 @@
                             <div class="team-role">Senior Agent</div>
                             <p class="team-bio">Stručnjak za stambene nekretnine u centru grada. Preko 200 uspešnih transakcija.</p>
                             <div class="team-contact">
-                                <a href="mailto:ana@provizija.rs" aria-label="Email Ani"><i class="bi bi-envelope"></i></a>
+                                <a href="/cdn-cgi/l/email-protection#5839363918282a372e3122313239762a2b" aria-label="Email Ani"><i class="bi bi-envelope"></i></a>
                                 <a href="tel:+381111234568" aria-label="Pozovi Anu"><i class="bi bi-telephone"></i></a>
                                 <a href="agent-detalj.html" aria-label="Profil Ane Jovanović"><i class="bi bi-person"></i></a>
                             </div>
@@ -266,7 +301,7 @@
                             <div class="team-role">Agent za Poslovne Prostore</div>
                             <p class="team-bio">Fokusiran na komercijalne nekretnine i investicione prilike. MBA u oblasti nekretnina.</p>
                             <div class="team-contact">
-                                <a href="mailto:stefan@provizija.rs" aria-label="Email Stefanu"><i class="bi bi-envelope"></i></a>
+                                <a href="/cdn-cgi/l/email-protection#f6858293909798b6868499809f8c9f9c97d88485" aria-label="Email Stefanu"><i class="bi bi-envelope"></i></a>
                                 <a href="tel:+381111234569" aria-label="Pozovi Stefana"><i class="bi bi-telephone"></i></a>
                                 <a href="agent-detalj.html" aria-label="Profil Stefana Nikolića"><i class="bi bi-person"></i></a>
                             </div>
@@ -368,8 +403,8 @@
                     <h4 class="footer-title">Kontakt</h4>
                     <ul class="footer-links">
                         <li><a href="tel:+381111234567">+381 11 123 4567</a></li>
-                        <li><a href="mailto:info@provizija.rs">info@provizija.rs</a></li>
-                        <li>Bulevar Oslobodjenja 10, Novi Sad</li>
+                        <li><a href="/cdn-cgi/l/email-protection#076e69616847777568716e7d6e6d66297574"><span class="__cf_email__" data-cfemail="254c4b434a6555574a534c5f4c4f440b5756">[email&#160;protected]</span></a></li>
+                        <li>Bulevar Oslobođenja 10, Novi Sad</li>
                     </ul>
                 </div>
             </div>
@@ -377,7 +412,7 @@
                 <div class="col-12">
                     <div class="footer-bottom text-center">
                         <p>&copy; 2025 ProVizija Nekretnine. Sva prava zadržana.</p>
-                    </div>
+                               </div>
                 </div>
             </div>
         </div>
@@ -385,5 +420,29 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/script.js"></script>
+    <script>
+    // ---- Search tab switcher (vanilla JS, no Bootstrap tabs) ----
+    (function() {
+        var tabs  = document.querySelectorAll('.search-tabs [data-tab]');
+        var panes = document.querySelectorAll('.search-tab-content');
+
+        tabs.forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                var target = this.dataset.tab;
+
+                tabs.forEach(function(t) {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                });
+                this.classList.add('active');
+                this.setAttribute('aria-selected', 'true');
+
+                panes.forEach(function(pane) {
+                    pane.style.display = (pane.id === 'tab-' + target) ? 'block' : 'none';
+                });
+            });
+        });
+    })();
+    </script>
 </body>
 </html>
