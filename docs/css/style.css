@@ -113,8 +113,9 @@ body {
     display: flex;
     align-items: center;
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    overflow: hidden;
+    overflow: visible;
     padding-top: 100px;
+    z-index: 1;
 }
 
 .hero::before {
@@ -139,6 +140,7 @@ body {
     opacity: 0.03;
     background-image: 
         repeating-linear-gradient(45deg, transparent, transparent 35px, var(--white) 35px, var(--white) 70px);
+    pointer-events: none;
 }
 
 .hero-title {
@@ -180,6 +182,8 @@ body {
     padding: 2.5rem;
     box-shadow: 0 20px 60px var(--shadow-lg);
     animation: fadeInUp 0.8s ease 0.4s backwards;
+    position: relative;
+    z-index: 10;
 }
 
 .search-tabs {
@@ -383,6 +387,16 @@ body {
     font-weight: 800;
     color: var(--primary);
     font-family: 'Playfair Display', serif;
+}
+
+/* Price moved below title – desktop same style, mobile shown inline */
+.property-price-inline {
+    display: none; /* hidden on desktop – price stays on image */
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--accent);
+    font-family: 'Playfair Display', serif;
+    margin-bottom: 8px;
 }
 
 .property-details {
@@ -1399,6 +1413,9 @@ textarea.field-input { resize: none; }
     .oglasite-benefits-wrap { position: static; margin-top: 32px; }
     .filter-section { position: static; }
 
+    /* Agent detail – sidebar on top on tablet */
+    .agent-detail-sidebar-col { order: -1; }
+
     /* Search container slightly smaller padding */
     .search-container { padding: 1.75rem; }
     .search-tabs .nav-link { padding: 0.65rem 1.25rem; font-size: 0.9rem; }
@@ -1424,13 +1441,58 @@ textarea.field-input { resize: none; }
     .search-form .row > [class*="col"] { width: 100% !important; flex: 0 0 100% !important; max-width: 100% !important; margin-bottom: 0.75rem; }
     .btn-search { padding: 0.75rem; height: auto; }
 
-    /* --- Property cards --- */
-    .property-card { margin-bottom: 0; }
-    .property-image img { height: 200px !important; }
+    /* --- Property cards – price below title/location --- */
+    .property-image { height: 200px; }
+    .property-image img { height: 200px; object-fit: cover; object-position: center; }
+    .property-price { display: none; } /* hide overlay price on mobile */
+    .property-price-inline { display: block; } /* show inline price below title */
     .property-details { padding: 14px; }
-    .property-title { font-size: 15px; }
-    .property-features { gap: 8px; }
-    .feature { font-size: 12px; }
+    .property-location { font-size: 0.8rem; margin-bottom: 3px; }
+    .property-title { font-size: 0.95rem; margin-bottom: 8px; }
+    .property-features { gap: 6px; flex-wrap: wrap; }
+    .feature { font-size: 11px; }
+
+    /* --- Team cards (agent kartice) – manje, slika fiksirana --- */
+    .team-card { margin-bottom: 0; }
+    .team-photo {
+        height: 200px;
+        overflow: hidden;
+    }
+    .team-photo img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        object-position: center top;
+        transform: none !important;
+    }
+    .team-card:hover .team-photo img { transform: none !important; }
+    .team-info { padding: 14px 16px; }
+    .team-name { font-size: 1rem; margin-bottom: 3px; }
+    .team-role { font-size: 0.8rem; margin-bottom: 10px; }
+    .team-stats { gap: 8px; }
+    .team-stat { padding: 6px 10px; font-size: 0.75rem; }
+
+    /* --- Step cards – fix number/icon overlap --- */
+    .step-card {
+        padding: 1.5rem 1.25rem 1.25rem;
+        margin-top: 12px;
+    }
+    .step-number {
+        position: static;
+        display: inline-block;
+        font-size: 1.6rem;
+        opacity: 0.4;
+        margin-bottom: 4px;
+        line-height: 1;
+    }
+    .step-icon {
+        width: 46px;
+        height: 46px;
+        font-size: 1.4rem;
+        margin-bottom: 10px;
+    }
+    .step-title { font-size: 1.1rem; margin-bottom: 6px; }
+    .step-description { font-size: 0.85rem; }
 
     /* --- Section titles --- */
     .section-title { font-size: 1.75rem; }
@@ -1438,15 +1500,12 @@ textarea.field-input { resize: none; }
     .page-hero-title { font-size: 30px; letter-spacing: -0.5px; }
     .page-hero-subtitle { font-size: 15px; }
 
-    /* --- Team cards --- */
-    .team-card { margin-bottom: 0; }
-    .team-photo img { height: 220px !important; }
-
     /* --- Stats --- */
     .stat-number { font-size: 2.4rem !important; }
 
-    /* --- Steps --- */
-    .step-card { padding: 24px 20px; }
+    /* --- Agent detail – info card on top on mobile --- */
+    .agent-detail-sidebar-col { order: -1; }
+    .agent-detail-card { margin-bottom: 24px; }
 
     /* --- Detail page --- */
     .detail-title { font-size: 22px; }
@@ -1465,9 +1524,6 @@ textarea.field-input { resize: none; }
     .kontakt-form-card { padding: 20px; }
     .oglasite-form-card { padding: 20px; }
     .agent-contact-phones { flex-direction: column; }
-
-    /* --- Agent --- */
-    .about-values { grid-template-columns: 1fr; }
 
     /* --- CTA --- */
     .cta-title { font-size: 1.75rem; }
