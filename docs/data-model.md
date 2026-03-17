@@ -132,6 +132,7 @@ This is an input model only. It should not be exposed directly outside the XML i
 - `property_floors`
 - `property_construction_year`
 - `structure`
+- `bath`
 
 ### Description and media fields
 
@@ -210,6 +211,7 @@ It represents a valid property record that has passed mapping and validation and
 - `surface: number`
 - `landSurface: number | null`
 - `roomStructure: number | null`
+- `bathrooms: number | null`
 - `floorRaw: string | null`
 - `totalFloors: number | null`
 - `constructionYear: number | null`
@@ -543,6 +545,7 @@ A property may still be accepted if it is missing:
 - images,
 - land surface,
 - room structure,
+- bathrooms,
 - floor,
 - total floors,
 - construction year,

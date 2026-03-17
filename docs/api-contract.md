@@ -415,6 +415,7 @@ If the slug does not match the ID:
     "address": "Liman 2",
     "area": 52,
     "rooms": 2,
+    "bathrooms": 1,
     "floor": 3,
     "heating": "Centralno",
     "furnished": null,
@@ -475,6 +476,7 @@ If the slug does not match the ID:
 - `address`
 - `area`
 - `rooms`
+- `bathrooms`
 - `floor`
 - `heating`
 - `furnished`
@@ -508,6 +510,7 @@ The following may be `null` or omitted if not available or not reliably mapped f
 - `address`
 - `area`
 - `rooms`
+- `bathrooms`
 - `floor`
 - `heating`
 - `furnished`
