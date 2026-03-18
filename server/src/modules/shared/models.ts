@@ -107,3 +107,20 @@ export interface NormalizedDataset {
   properties: Property[];
   agents: Agent[];
 }
+
+// ---------------------------------------------------------------------------
+// Sync status
+//
+// Tracks the outcome of the latest sync attempt and the latest successful
+// sync. Read by the status endpoint (Phase 7) for observability.
+// ---------------------------------------------------------------------------
+
+export interface SyncStatus {
+  status: "ok" | "error" | "pending";
+  lastSuccessfulSyncAt: string | null;
+  lastAttemptAt: string | null;
+  loadedPropertiesCount: number;
+  loadedAgentsCount: number;
+  invalidPropertiesCount: number;
+  lastError: string | null;
+}

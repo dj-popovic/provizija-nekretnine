@@ -10,3 +10,11 @@ export {
   toArray,
   nowIso,
 } from "./utils.js";
+export {
+  replaceDataset,
+  getDataset,
+  getProperties,
+  getAgents,
+  isLoaded,
+} from "./cache.js";
+export { writeBackup, readBackup } from "./backup.js";
