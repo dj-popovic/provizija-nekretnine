@@ -7,6 +7,7 @@
 
 import type { Property } from "../shared/models.js";
 import { getProperties, getAgents } from "../shared/cache.js";
+import { getEnrichment } from "../agents/enrichment.js";
 import type { PropertyListingQuery, SortOption } from "./query.js";
 
 // ---------------------------------------------------------------------------
@@ -272,15 +273,17 @@ function buildAgentSummary(agentId: string): AgentSummary | null {
   const agent = agents.find((a) => a.id === agentId);
   if (!agent) return null;
 
+  const enrichment = getEnrichment(agent.id);
+
   return {
     agentId: agent.id,
     slug: agent.slug,
     fullName: agent.name,
     phone: agent.phone,
     email: agent.email,
-    photo: agent.imageUrl,
-    shortBio: agent.bio,
-    stats: null, // local enrichment — not yet implemented (Task 9.2)
+    photo: enrichment?.imageUrl ?? agent.imageUrl,
+    shortBio: enrichment?.bio ?? agent.bio,
+    stats: enrichment?.stats ?? null,
   };
 }
 

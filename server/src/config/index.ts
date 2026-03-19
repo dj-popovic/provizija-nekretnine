@@ -45,12 +45,10 @@ export const config = {
   // CORS (placeholder — wired up in Phase 12)
   corsOrigin: optional("CORS_ORIGIN", "*"),
 
-  // Email (placeholder — wired up in Phase 11)
-  emailFrom: optional("EMAIL_FROM", ""),
-  emailSmtpHost: optional("EMAIL_SMTP_HOST", ""),
-  emailSmtpPort: optionalInt("EMAIL_SMTP_PORT", 587),
-  emailSmtpUser: optional("EMAIL_SMTP_USER", ""),
-  emailSmtpPass: optional("EMAIL_SMTP_PASS", ""),
+  // Email (Resend)
+  resendApiKey: optional("RESEND_API_KEY", ""),
+  emailFrom: optional("EMAIL_FROM", "onboarding@resend.dev"),
+  agencyEmail: optional("AGENCY_EMAIL", "pro.vizijanekretnine@gmail.com"),
 
   // Development
   manualRefreshEnabled: optional("MANUAL_REFRESH_ENABLED", "false") === "true",
