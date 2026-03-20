@@ -976,6 +976,7 @@ None.
   "agentId": "15",
   "fullName": "Relja Opacic",
   "phone": "+38160111222",
+  "email": "relja@example.com",
   "message": "Zelim da vas kontaktiram u vezi sa nekretninama koje vodite."
 }
 ```
@@ -985,6 +986,7 @@ None.
 - `agentId`
 - `fullName`
 - `phone`
+- `email`
 - `message`
 
 ### Success response

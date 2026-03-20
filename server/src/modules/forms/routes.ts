@@ -8,16 +8,30 @@
 // ---------------------------------------------------------------------------
 
 import type { FastifyInstance } from "fastify";
+import { config } from "../../config/index.js";
+import { isHoneypotFilled, honeypotResponse } from "./honeypot.js";
 import { handleContactForm } from "./contact.js";
 import { handlePropertyInquiryForm } from "./property-inquiry.js";
 import { handleAgentInquiryForm } from "./agent-inquiry.js";
 import { handleAdvertisePropertyForm } from "./advertise-property.js";
 
+const formsRateLimit = {
+  config: {
+    rateLimit: {
+      max: config.rateLimitFormsMax,
+      timeWindow: config.rateLimitFormsWindowMs,
+    },
+  },
+};
+
 export async function formsRoutes(app: FastifyInstance): Promise<void> {
   // -----------------------------------------------------------------------
   // POST /api/contact
   // -----------------------------------------------------------------------
-  app.post("/api/contact", async (request, reply) => {
+  app.post("/api/contact", formsRateLimit, async (request, reply) => {
+    if (isHoneypotFilled(request.body)) {
+      return reply.status(honeypotResponse.status).send(honeypotResponse.response);
+    }
     const { status, response } = await handleContactForm(request.body);
     return reply.status(status).send(response);
   });
@@ -25,7 +39,10 @@ export async function formsRoutes(app: FastifyInstance): Promise<void> {
   // -----------------------------------------------------------------------
   // POST /api/inquiries/property
   // -----------------------------------------------------------------------
-  app.post("/api/inquiries/property", async (request, reply) => {
+  app.post("/api/inquiries/property", formsRateLimit, async (request, reply) => {
+    if (isHoneypotFilled(request.body)) {
+      return reply.status(honeypotResponse.status).send(honeypotResponse.response);
+    }
     const { status, response } = await handlePropertyInquiryForm(request.body);
     return reply.status(status).send(response);
   });
@@ -33,7 +50,10 @@ export async function formsRoutes(app: FastifyInstance): Promise<void> {
   // -----------------------------------------------------------------------
   // POST /api/inquiries/agent
   // -----------------------------------------------------------------------
-  app.post("/api/inquiries/agent", async (request, reply) => {
+  app.post("/api/inquiries/agent", formsRateLimit, async (request, reply) => {
+    if (isHoneypotFilled(request.body)) {
+      return reply.status(honeypotResponse.status).send(honeypotResponse.response);
+    }
     const { status, response } = await handleAgentInquiryForm(request.body);
     return reply.status(status).send(response);
   });
@@ -41,7 +61,10 @@ export async function formsRoutes(app: FastifyInstance): Promise<void> {
   // -----------------------------------------------------------------------
   // POST /api/advertise-property
   // -----------------------------------------------------------------------
-  app.post("/api/advertise-property", async (request, reply) => {
+  app.post("/api/advertise-property", formsRateLimit, async (request, reply) => {
+    if (isHoneypotFilled(request.body)) {
+      return reply.status(honeypotResponse.status).send(honeypotResponse.response);
+    }
     const { status, response } = await handleAdvertisePropertyForm(request.body);
     return reply.status(status).send(response);
   });

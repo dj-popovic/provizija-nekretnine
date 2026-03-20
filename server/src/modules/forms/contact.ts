@@ -46,12 +46,18 @@ export function validateContactPayload(body: unknown): {
   const message = typeof b.message === "string" ? b.message.trim() : "";
 
   if (!firstName) errors.push({ field: "firstName", message: "First name is required." });
+  else if (firstName.length > 100) errors.push({ field: "firstName", message: "First name is too long." });
   if (!lastName) errors.push({ field: "lastName", message: "Last name is required." });
+  else if (lastName.length > 100) errors.push({ field: "lastName", message: "Last name is too long." });
   if (!phone) errors.push({ field: "phone", message: "Phone is required." });
+  else if (phone.length > 50) errors.push({ field: "phone", message: "Phone is too long." });
   if (!email) errors.push({ field: "email", message: "Email is required." });
-  if (email && !email.includes("@")) errors.push({ field: "email", message: "Email is not valid." });
+  else if (email.length > 254) errors.push({ field: "email", message: "Email is too long." });
+  else if (!email.includes("@")) errors.push({ field: "email", message: "Email is not valid." });
   if (!subject) errors.push({ field: "subject", message: "Subject is required." });
+  else if (subject.length > 200) errors.push({ field: "subject", message: "Subject is too long." });
   if (!message) errors.push({ field: "message", message: "Message is required." });
+  else if (message.length > 5000) errors.push({ field: "message", message: "Message is too long." });
 
   if (errors.length > 0) return { data: null, errors };
 

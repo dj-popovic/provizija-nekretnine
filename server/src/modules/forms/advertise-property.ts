@@ -76,17 +76,28 @@ export function validateAdvertisePropertyPayload(body: unknown): {
 
   // Required field checks
   if (!transactionType) errors.push({ field: "transactionType", message: "Transaction type is required." });
+  else if (transactionType.length > 100) errors.push({ field: "transactionType", message: "Transaction type is too long." });
   if (!propertyType) errors.push({ field: "propertyType", message: "Property type is required." });
+  else if (propertyType.length > 100) errors.push({ field: "propertyType", message: "Property type is too long." });
   if (!city) errors.push({ field: "city", message: "City is required." });
+  else if (city.length > 200) errors.push({ field: "city", message: "City is too long." });
   if (isNaN(area) || area <= 0) errors.push({ field: "area", message: "Area is required and must be a positive number." });
   if (isNaN(rooms) || rooms <= 0) errors.push({ field: "rooms", message: "Rooms is required and must be a positive number." });
   if (isNaN(expectedPrice) || expectedPrice <= 0) errors.push({ field: "expectedPrice", message: "Expected price is required and must be a positive number." });
   if (!priceType) errors.push({ field: "priceType", message: "Price type is required." });
+  else if (priceType.length > 100) errors.push({ field: "priceType", message: "Price type is too long." });
   if (!description) errors.push({ field: "description", message: "Description is required." });
+  else if (description.length > 5000) errors.push({ field: "description", message: "Description is too long." });
   if (!fullName) errors.push({ field: "fullName", message: "Full name is required." });
+  else if (fullName.length > 200) errors.push({ field: "fullName", message: "Full name is too long." });
   if (!phone) errors.push({ field: "phone", message: "Phone is required." });
+  else if (phone.length > 50) errors.push({ field: "phone", message: "Phone is too long." });
   if (!email) errors.push({ field: "email", message: "Email is required." });
-  if (email && !email.includes("@")) errors.push({ field: "email", message: "Email is not valid." });
+  else if (email.length > 254) errors.push({ field: "email", message: "Email is too long." });
+  else if (!email.includes("@")) errors.push({ field: "email", message: "Email is not valid." });
+  if (district && district.length > 200) errors.push({ field: "district", message: "District is too long." });
+  if (address && address.length > 300) errors.push({ field: "address", message: "Address is too long." });
+  if (heating && heating.length > 100) errors.push({ field: "heating", message: "Heating is too long." });
 
   if (errors.length > 0) return { data: null, errors };
 

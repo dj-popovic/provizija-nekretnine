@@ -3,45 +3,55 @@
 ## Project context
 
 This repository is a real-estate website monorepo with `client/` and `server/`.
-The active work area is the backend only.
-Treat `server/` as the default workspace unless the user explicitly asks for frontend work.
-Do not modify `client/` by default.
+Both directories are active work areas.
 
-This backend is an MVP public REST API for a real-estate website.
-Its main responsibilities are:
+- `server/` — Node.js + TypeScript + Fastify backend (MVP complete, Phases 1–12).
+- `client/` — vanilla HTML + CSS + JavaScript frontend.
+
+The backend MVP is fully implemented. Its responsibilities:
 - serve property, agent, home, health, and status data,
 - ingest property data from a RELPER XML feed,
 - handle public inquiry/contact forms,
-- send emails for those forms.
+- send emails for those forms via Resend.
 
-The backend uses Node.js + TypeScript + Fastify.
-
-The site is Serbian-language only. Content arrives in Serbian from the XML feed. No i18n or multilingual support is needed for MVP.
+Phase 12 hardening is in place (rate limiting, honeypot, CORS, custom error handlers, input length limits).
 
 Prefer simple, practical, implementation-ready solutions over speculative future-proofing.
+
+## Current work phase
+
+The backend MVP is done. The next goals are:
+1. **Frontend-backend integration** — connect the client to the backend API.
+2. **Multilingual support** — the site needs to work in multiple languages.
+
+### Multilingual scope
+
+Translation covers:
+- UI chrome: navigation, buttons, headings, form labels, placeholders, messages.
+- Property card/detail field labels: "Cena", "Kvadratura", "Grejanje", "Parking", "Spratnost", "Sobe", etc.
+- Property titles.
+- Enumerable property values: property types, transaction types, heating types, furnished status, feature/highlight names (e.g. "Terasa", "Lift", "Centralno").
+- Static page content.
+
+**Not translated** (stay in Serbian regardless of language):
+- property descriptions (free text from XML),
+- city and district names (proper nouns),
+- agent names (proper nouns).
 
 ## How to use project documents
 
 Do not read all project documents for every task.
 Read this file first, identify the task type, then open only the minimum relevant document set.
 
-Use the documents like this:
 - `docs/project-spec.md` — MVP scope, supported pages, business intent, backend responsibilities.
 - `docs/architecture.md` — system design, repo structure, runtime flow, sync pipeline, cache/fallback behavior, module boundaries.
 - `docs/data-model.md` — internal models, normalization, validation, acceptance rules, identity handling.
 - `docs/api-contract.md` — endpoints, request/response shapes, wrappers, status codes, error shape, route/query rules.
-- `docs/backlog.md` — implementation order, task boundaries, dependencies, done criteria, verification.
-
-Examples:
-- endpoint or response work -> `docs/api-contract.md` (+ `docs/data-model.md` if needed)
-- sync/runtime/caching work -> `docs/architecture.md` (+ `docs/data-model.md` if needed)
-- scope or feature inclusion question -> `docs/project-spec.md`
-- deciding what to build next -> `docs/backlog.md`
+- `docs/backlog.md` — MVP implementation order (all phases 1–12 complete, historical reference).
 
 ## Scope guardrails
 
-Stay inside the current MVP.
-Do not silently add scope, abstractions, or systems “just in case”.
+Do not silently add scope, abstractions, or systems "just in case".
 
 Unless the user asks for them, treat the following as out of scope:
 - auth,
@@ -51,12 +61,10 @@ Unless the user asks for them, treat the following as out of scope:
 - local lead storage,
 - queue-based email delivery,
 - major async worker architecture beyond the planned refresh job,
-- new public endpoints outside the documented MVP,
 - filter facets / available-filters endpoints,
-- free-text search,
-- multilingual support.
+- free-text search.
 
-If a non-MVP addition seems useful:
+If an out-of-scope addition seems useful:
 1. mark it as outside current scope,
 2. explain why it may help,
 3. ask before adding it.
@@ -88,8 +96,9 @@ If you find older wording in project docs that conflicts with these invariants, 
 
 When working on public API behavior, treat `docs/api-contract.md` as the authority.
 Keep public responses, status codes, route behavior, and error shape aligned with the documented contract.
+If frontend integration or i18n requires API changes, update the contract to match.
 
-When working on forms, keep the MVP implementation simple and backend-owned.
+When working on forms, keep the implementation simple and backend-owned.
 Follow the documented request/response behavior and keep email handling aligned with the project rules for the forms module.
 
 ## Code organization
@@ -98,16 +107,16 @@ The backend is one service with a feature-based structure under `server/src/`.
 Prefer work that fits the planned modules and keeps layering light.
 Do not introduce deep enterprise layering, microservices, or unnecessary abstraction for the current project size.
 
+The frontend is vanilla HTML/CSS/JS under `client/`.
+
 ## Change policy
 
 Ask before making changes that alter scope or core project decisions, especially if they would:
-- add new public endpoints or new backend responsibilities,
 - change route identity rules,
 - change response wrappers or error shape,
 - introduce a new primary database or system of record,
 - add auth, admin, CMS, queues, CRM, or local lead storage,
-- change XML-first ingestion, sync strategy, or property/agent identity rules,
-- broaden work into frontend changes.
+- change XML-first ingestion, sync strategy, or property/agent identity rules.
 
 If project documents conflict, do not silently choose a new direction.
 Prefer the latest explicit user-confirmed decision and keep implementation conservative until the conflict is resolved.
@@ -122,7 +131,7 @@ Optimize for the user's working style:
 - low-ambiguity,
 - restrained about scope expansion.
 
-When proposing something new, explain what it is, why it helps, and whether it is required for MVP or only optional.
+When proposing something new, explain what it is, why it helps, and whether it is required or only optional.
 
 ## Relationship to `.claude/rules/`
 

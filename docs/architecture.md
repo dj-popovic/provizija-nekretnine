@@ -105,9 +105,9 @@ The architecture depends on the following external systems:
    - accessed through HTTP GET,
    - used as the primary source of truth for listing data.
 
-2. **Email delivery provider**
+2. **Email delivery provider (Resend)**
    - used to send inquiry and contact emails,
-   - exact provider will be chosen later.
+   - uses the Resend API for transactional email delivery.
 
 3. **Frontend application**
    - consumes the backend API,

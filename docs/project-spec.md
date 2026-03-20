@@ -259,6 +259,7 @@ The single agent page includes a form that sends an inquiry directly to that spe
 Minimum fields:
 - full name,
 - phone,
+- email,
 - message.
 
 ### 9.3 Property detail inquiry
@@ -339,10 +340,14 @@ This document is based on the following working assumptions:
 
 2. **Agent mapping** — decided: `id_agent` is the canonical internal agent identifier (integer). The XML feed provides `id_agent`, `agent_email`, `agent_phone`, and `agent_name` per property. Agents are derived by collecting and deduplicating across property records. A small local enrichment layer provides presentation-only fields (photo, bio).
 
-### Still open
+### Resolved since initial writing
 
 3. Email delivery:
-   - exact service/provider and email formatting approach.
+   - uses Resend as the transactional email provider,
+   - email composition uses simple HTML tables,
+   - sending happens synchronously inside the request-response flow.
+
+### Still open
 
 4. Additional client requirements:
    - labels such as “new”, “discounted”, or “featured”,
