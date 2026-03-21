@@ -1,6 +1,9 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import Fastify, { type FastifyInstance, type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import rateLimit from "@fastify/rate-limit";
+import fastifyStatic from "@fastify/static";
 import { config } from "../config/index.js";
 import { runSync } from "../modules/xml-sync/index.js";
 import { healthRoutes } from "../modules/health/routes.js";
@@ -26,7 +29,14 @@ export function buildApp(): FastifyInstance {
     timeWindow: config.rateLimitWindowMs,
   });
 
-  // Routes
+  // Serve frontend static files from client/
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  void app.register(fastifyStatic, {
+    root: path.resolve(__dirname, "..", "..", "..", "client"),
+    prefix: "/",
+  });
+
+  // API routes
   void app.register(healthRoutes);
   void app.register(statusRoutes);
   void app.register(propertiesRoutes);

@@ -20,9 +20,25 @@ Prefer simple, practical, implementation-ready solutions over speculative future
 
 ## Current work phase
 
-The backend MVP is done. The next goals are:
-1. **Frontend-backend integration** — connect the client to the backend API.
-2. **Multilingual support** — the site needs to work in multiple languages.
+The backend MVP is done. Active work is now **frontend-backend integration**.
+
+### Frontend integration plan
+
+Full plan: `.claude/plans/expressive-stargazing-mitten.md`
+
+Key decisions:
+- **Same-origin serving**: backend serves `client/` via `@fastify/static`. API calls use relative paths.
+- **Vanilla JS, no framework**: new files under `client/js/` sharing a `window.PV` namespace.
+- **JS file structure**: `api.js` (fetch wrapper), `renderers.js` (shared HTML generators), `page-*.js` (one per page), `forms.js` (all POST handlers). `script.js` stays untouched.
+- **Detail page URLs**: query params (`?id=slug-id` for properties, `?slug=agent-slug` for agents).
+- **Loading strategy**: spinner immediately, never show hardcoded placeholder data.
+- **Subnav tabs**: Prodaja (sale) + Iznajmljivanje (rent). "Kupovina" removed.
+- **Value mappings**: Serbian UI values ↔ English API enum values (prodaja→sale, stan→apartment, etc.)
+
+Implementation order: Phase 0 (static serving) → A (api.js + renderers.js) → B1-B5 (one page at a time) → C1-C3 (forms one at a time) → D (polish). Verify after each phase.
+
+### Next goal after integration
+- **Multilingual support** — Serbian, English, Russian.
 
 ### Multilingual scope
 
