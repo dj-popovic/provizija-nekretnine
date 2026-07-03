@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: provizija-nekretnine
+    runtime: node
+    plan: free
+    branch: main
+    # Backend lives in server/; it also serves the client/ frontend via @fastify/static.
+    rootDir: server
+    # --include=dev is required: typescript/tsx are devDependencies and NODE_ENV=production
+    # would otherwise make npm skip them, breaking the `tsc` build.
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Secrets — set these in the Render dashboard, not in this file.
+      - key: XML_FEED_URL
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      # Non-secret defaults.
+      - key: EMAIL_FROM
+        value: onboarding@resend.dev
+      - key: AGENCY_EMAIL
+        value: opacicrelja@gmail.com
