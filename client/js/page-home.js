@@ -85,6 +85,7 @@ window.PV = window.PV || {};
             'Stan': 'apartment',
             'Kuća': 'house',
             'Apartman': 'apartment',
+            'Plac': 'plot',
             'Zemljište': 'land',
             'Poslovni prostor': 'commercial',
           };

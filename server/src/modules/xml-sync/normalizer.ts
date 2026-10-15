@@ -5,6 +5,7 @@ import {
   parseNonNegativeInt,
 } from "../shared/utils.js";
 import type { RawXmlListing } from "./raw-listing.js";
+import { LAND_TYPE_KEYS } from "../shared/models.js";
 import type { Property, PropertyImage } from "../shared/models.js";
 
 // ---------------------------------------------------------------------------
@@ -26,10 +27,12 @@ function mapTransactionType(value: unknown): "sale" | "rent" | null {
 // Property type mapping
 // ---------------------------------------------------------------------------
 
+// "Plac" (building plot) and "Poljoprivredno zemljište" (farmland) are kept
+// as separate keys so they can be filtered separately.
 const PROPERTY_TYPE: Record<string, { key: string; label: string }> = {
   Stan: { key: "apartment", label: "Stan" },
   Kuća: { key: "house", label: "Kuća" },
-  Plac: { key: "land", label: "Plac" },
+  Plac: { key: "plot", label: "Plac" },
   "Poljoprivredno zemljište": {
     key: "land",
     label: "Poljoprivredno zemljište",
@@ -62,7 +65,61 @@ function mapFurnished(
 ): { key: string; label: string } | null {
   const label = normalizeString(value);
   if (!label) return null;
-  return FURNISHED[label] ?? { key: "unknown", label };
+  // Unknown values pass through as their own key so they still display
+  return FURNISHED[label] ?? { key: label, label };
+}
+
+// ---------------------------------------------------------------------------
+// Heating mapping
+//
+// Stable keys for translation. Unknown values pass through unchanged so they
+// still display (in Serbian) until a key is added here.
+// ---------------------------------------------------------------------------
+
+const HEATING: Record<string, string> = {
+  Centralno: "central",
+  Gas: "gas",
+  Podno: "underfloor",
+  "Čvrsta goriva": "solid_fuel",
+  "Norveški radijatori": "norwegian_radiators",
+  TA: "storage_heater",
+};
+
+function mapHeating(values: string[]): string[] {
+  return values.map((v) => HEATING[v] ?? v);
+}
+
+// ---------------------------------------------------------------------------
+// Floor normalization
+//
+// XML floor is a number ("5") or an abbreviation ("pr" = prizemlje).
+// ---------------------------------------------------------------------------
+
+const FLOOR: Record<string, string> = {
+  pr: "ground",
+};
+
+function normalizeFloor(raw: string | null): string | null {
+  if (!raw) return null;
+  return FLOOR[raw.toLowerCase()] ?? raw;
+}
+
+// ---------------------------------------------------------------------------
+// Title / property code ("šifra")
+//
+// Agents type the code into property_name by hand, in a few formats:
+//   "ŠIFRA NEKRETNINE: 100009 SREMSKA KAMENICA, ..."
+//   "ŠIFRA OGLASA: 100021, NOVI SAD, ..."
+//   "ŠIFRA NEKRETNINE: 592 , IZDAJEMO ..."
+// Some titles have no code at all. The code is split off so the title is clean.
+// ---------------------------------------------------------------------------
+
+const CODE_PREFIX = /^\s*[ŠS]IFRA\s+(?:NEKRETNINE|OGLASA)\s*:\s*(\d+)\s*[,.:;\-–]?\s*/i;
+
+function splitCodeFromTitle(name: string): { code: string | null; title: string } {
+  const match = name.match(CODE_PREFIX);
+  if (!match) return { code: null, title: name };
+  return { code: match[1], title: name.slice(match[0].length).trim() };
 }
 
 // ---------------------------------------------------------------------------
@@ -152,7 +209,7 @@ function parseConstructionYear(value: unknown): number | null {
  * - missing property_name / title (nothing to display)
  * - missing city (location is required)
  * - price is absent or zero (cannot be presented without a price)
- * - surface is absent or zero, with no landSurface fallback for land types
+ * - surface is absent or zero (land types: both surface and land_surface absent)
  * - missing id_agent (agent assignment is required per project rules)
  *
  * Invalid records are handled upstream by the validator (Task 4.3), which
@@ -168,8 +225,8 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
   if (!transactionType) return null;
 
   // --- Required: title ---
-  const title = normalizeString(raw.property_name);
-  if (!title) return null;
+  const rawTitle = normalizeString(raw.property_name);
+  if (!rawTitle) return null;
 
   // --- Required: city ---
   const city = normalizeString(raw.property_city);
@@ -189,19 +246,21 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
   const address = buildAddress(street, streetNumber, city);
   const locationLabel = buildLocationLabel(city, hood);
 
+  // --- Title / code ---
+  // If the title is nothing but the code, fall back to "<type>, <location>".
+  const { code, title: cleanTitle } = splitCodeFromTitle(rawTitle);
+  const title = cleanTitle || `${propertyTypeLabel}, ${locationLabel}`;
+
   // --- Numeric fields ---
-  const rawSurface = parsePositiveNumber(raw.property_surface);
+  // surface is the building area in m², landSurface is the plot area in ares.
+  // Land types (plot, farmland) come with property_surface = 0 and only a
+  // land surface, so their surface stays null. The two are never mixed —
+  // copying ares into surface would show them as m².
+  const surface = parsePositiveNumber(raw.property_surface) ?? null;
   const landSurface = parsePositiveNumber(raw.property_land_surface) ?? null;
 
-  // For land types, use landSurface as a fallback when property_surface is 0
-  // or absent. This handles a known data pattern where land listings carry
-  // surface = 0 but have a valid land_surface value.
-  let surface: number;
-  if (rawSurface !== undefined) {
-    surface = rawSurface;
-  } else if (propertyTypeKey === "land" && landSurface !== null) {
-    surface = landSurface;
-  } else {
+  const isLandType = LAND_TYPE_KEYS.has(propertyTypeKey);
+  if (isLandType ? surface === null && landSurface === null : surface === null) {
     return null;
   }
 
@@ -211,6 +270,7 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
   const roomStructure = parsePositiveNumber(raw.structure) ?? null;
   const bathrooms = parseBathrooms(raw.bath);
   const floorRaw = normalizeString(raw.property_floor) ?? null;
+  const floor = normalizeFloor(floorRaw);
   const totalFloors = parseNonNegativeInt(raw.property_floors) ?? null;
   const constructionYear = parseConstructionYear(raw.property_construction_year);
 
@@ -247,6 +307,7 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
   return {
     id,
     slug,
+    code,
     transactionType,
     propertyTypeKey,
     propertyTypeLabel,
@@ -266,11 +327,13 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
     roomStructure,
     bathrooms,
     floorRaw,
+    floor,
     totalFloors,
     constructionYear,
     furnishedKey: furnished?.key ?? null,
     furnishedLabel: furnished?.label ?? null,
     heating,
+    heatingKeys: mapHeating(heating),
     equipment,
     otherFeatures,
     hasTerrace,

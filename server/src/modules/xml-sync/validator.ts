@@ -99,7 +99,7 @@ function findRejectionReason(raw: RawXmlListing): string {
     return `invalid or missing price: ${String(raw.property_price)}`;
   }
 
-  // Surface check mirrors the normalizer's land-type fallback logic
+  // Surface check mirrors the normalizer: land types may have only a land surface
   if (parsePositiveNumber(raw.property_surface) === undefined) {
     const landSurface = parsePositiveNumber(raw.property_land_surface);
     const propertyType = normalizeString(raw.property_type);

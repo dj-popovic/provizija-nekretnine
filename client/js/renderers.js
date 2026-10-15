@@ -18,16 +18,52 @@ window.PV = window.PV || {};
         stan: 'apartment',
         kuca: 'house',
         poslovni: 'commercial',
+        plac: 'plot',
         zemljiste: 'land',
       },
       toUi: {
         apartment: 'Stan',
         house: 'Kuća',
         commercial: 'Poslovni prostor',
+        plot: 'Plac',
         land: 'Zemljište',
+        garage: 'Garaža',
+        office: 'Kancelarija',
+        cottage: 'Vikendica',
       },
     },
+    // Spec value keys from the API → Serbian UI text.
+    // Unknown keys are shown as-is (the API passes unmapped XML values through).
+    furnished: {
+      toUi: { furnished: 'Namešteno', semi_furnished: 'Polunamešteno', empty: 'Prazno' },
+    },
+    heating: {
+      toUi: {
+        central: 'Centralno',
+        gas: 'Gas',
+        underfloor: 'Podno',
+        solid_fuel: 'Čvrsta goriva',
+        norwegian_radiators: 'Norveški radijatori',
+        storage_heater: 'TA peć',
+      },
+    },
+    registration: {
+      toUi: { registered: 'Da', in_progress: 'U fazi knjiženja', unregisterable: 'Ne', not_registered: 'Ne' },
+    },
+    floor: {
+      toUi: { ground: 'Prizemlje' },
+    },
   };
+
+  // --- Area formatters (area is m², landArea is ares) ---
+
+  function formatArea(area) {
+    return area + ' m²';
+  }
+
+  function formatLandArea(landArea) {
+    return landArea + ' ar';
+  }
 
   // --- Price formatter ---
 
@@ -73,7 +109,9 @@ window.PV = window.PV || {};
 
     var features = '';
     if (item.area != null) {
-      features += '<div class="feature"><i class="bi bi-grid-3x3" aria-hidden="true"></i> ' + esc(item.area) + ' m\u00B2</div>';
+      features += '<div class="feature"><i class="bi bi-grid-3x3" aria-hidden="true"></i> ' + esc(formatArea(item.area)) + '</div>';
+    } else if (item.landArea != null) {
+      features += '<div class="feature"><i class="bi bi-grid-3x3" aria-hidden="true"></i> ' + esc(formatLandArea(item.landArea)) + '</div>';
     }
     if (item.rooms != null) {
       features += '<div class="feature"><i class="bi bi-door-open" aria-hidden="true"></i> ' + esc(item.rooms) + ' sobe</div>';
@@ -200,6 +238,8 @@ window.PV = window.PV || {};
     emptyState: emptyState,
     errorState: errorState,
     formatPrice: formatPrice,
+    formatArea: formatArea,
+    formatLandArea: formatLandArea,
     propertyHref: propertyHref,
     agentHref: agentHref,
     esc: esc,

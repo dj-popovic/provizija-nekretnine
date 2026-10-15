@@ -45,40 +45,57 @@ window.PV = window.PV || {};
 
   // --- Build specs panel ---
 
+  // Map an API key to UI text; unknown keys are shown as-is
+  function ui(map, key) {
+    return map.toUi[key] || key;
+  }
+
+  function formatFloor(floor) {
+    return ui(maps.floor, floor);
+  }
+
+  // Row order agreed with the client. The API sends null (or [] for heating)
+  // for anything that doesn't apply to the property type, so those rows are skipped.
   function buildSpecs(p) {
+    var s = p.specs || {};
     var rows = '';
 
-    if (p.propertyType) {
-      rows += specRow('Tip', maps.propertyType.toUi[p.propertyType] || p.propertyType);
+    if (s.propertyType) {
+      rows += specRow('Tip', maps.propertyType.toUi[s.propertyType] || p.propertyType);
     }
-    if (p.area != null) {
-      rows += specRow('Površina', p.area + ' m\u00B2');
+    if (s.area != null) {
+      rows += specRow('Površina', PV.render.formatArea(s.area));
     }
-    if (p.rooms != null) {
-      rows += specRow('Sobe', p.rooms);
+    if (s.landArea != null) {
+      // Plot / farmland have only the land area, so it is just "Površina"
+      rows += specRow(s.area != null ? 'Površina placa' : 'Površina', PV.render.formatLandArea(s.landArea));
     }
-    if (p.bathrooms != null) {
-      rows += specRow('Kupatila', p.bathrooms);
+    if (s.location) {
+      rows += specRow('Lokacija', s.location);
     }
-    if (p.floor != null) {
-      rows += specRow('Sprat', p.floor);
+    if (s.rooms != null) {
+      rows += specRow('Sobe', s.rooms);
     }
-    if (p.heating) {
-      rows += specRow('Grejanje', p.heating);
+    if (s.bathrooms != null) {
+      rows += specRow('Kupatila', s.bathrooms);
     }
-    if (p.furnished != null) {
-      rows += specRow('Nameštenost', p.furnished);
+    if (s.floor != null) {
+      rows += specRow('Sprat', formatFloor(s.floor));
     }
-    if (p.elevator != null) {
-      rows += specRow('Lift', p.elevator ? 'Da' : 'Ne');
+    if (s.totalFloors != null) {
+      rows += specRow('Ukupno spratova', s.totalFloors);
     }
-    if (p.registrationStatus) {
-      var regMap = {
-        registered: 'Uknjiženo',
-        unregisterable: 'Neuknjiživo',
-        in_progress: 'U procesu',
-      };
-      rows += specRow('Uknjižba', regMap[p.registrationStatus] || p.registrationStatus);
+    if (s.furnished != null) {
+      rows += specRow('Opremljenost', ui(maps.furnished, s.furnished));
+    }
+    if (s.heating && s.heating.length > 0) {
+      rows += specRow('Grejanje', s.heating.map(function (h) { return ui(maps.heating, h); }).join(', '));
+    }
+    if (s.registration) {
+      rows += specRow('Uknjiženost', ui(maps.registration, s.registration));
+    }
+    if (s.constructionYear != null) {
+      rows += specRow('Godina gradnje', s.constructionYear);
     }
 
     if (!rows) {
@@ -103,18 +120,21 @@ window.PV = window.PV || {};
 
   function buildFeatures(p) {
     var chips = '';
+    var s = p.specs || {};
 
-    if (p.area != null) {
-      chips += featureChip('bi-grid-3x3', p.area + ' m\u00B2');
+    if (s.area != null) {
+      chips += featureChip('bi-grid-3x3', PV.render.formatArea(s.area));
+    } else if (s.landArea != null) {
+      chips += featureChip('bi-grid-3x3', PV.render.formatLandArea(s.landArea));
     }
-    if (p.rooms != null) {
-      chips += featureChip('bi-door-open', p.rooms + ' sobe');
+    if (s.rooms != null) {
+      chips += featureChip('bi-door-open', s.rooms + ' sobe');
     }
-    if (p.bathrooms != null) {
-      chips += featureChip('bi-water', p.bathrooms + ' kupatila');
+    if (s.bathrooms != null) {
+      chips += featureChip('bi-water', s.bathrooms + ' kupatila');
     }
-    if (p.floor != null) {
-      chips += featureChip('bi-building', p.floor + '. sprat');
+    if (s.floor != null) {
+      chips += featureChip('bi-building', s.floor === 'ground' ? formatFloor(s.floor) : s.floor + '. sprat');
     }
 
     // Highlights
@@ -214,7 +234,8 @@ window.PV = window.PV || {};
     html += '<nav aria-label="Breadcrumb" class="mb-4"><ol class="breadcrumb" style="font-size:13px;background:none;padding:0;margin:0;">';
     html += '<li class="breadcrumb-item"><a href="index.html" style="color:var(--accent);text-decoration:none;">Početna</a></li>';
     html += '<li class="breadcrumb-item"><a href="nekretnine.html" style="color:var(--accent);text-decoration:none;">Nekretnine</a></li>';
-    html += '<li class="breadcrumb-item active" aria-current="page" style="color:var(--text-light);">' + esc(p.title) + '</li>';
+    var crumb = p.code ? 'Šifra nekretnine: ' + p.code : p.title;
+    html += '<li class="breadcrumb-item active" aria-current="page" style="color:var(--text-light);">' + esc(crumb) + '</li>';
     html += '</ol></nav>';
 
     // Badge + ID
@@ -237,7 +258,7 @@ window.PV = window.PV || {};
     html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:12px;">';
     html += '<div>';
     html += '<h1 class="detail-title" style="margin-bottom:6px;">' + esc(p.title) + '</h1>';
-    html += '<div class="detail-location"><i class="bi bi-geo-alt-fill" style="color:var(--accent);" aria-hidden="true"></i> ' + esc(p.location || '') + (p.address ? ', ' + esc(p.address) : '') + '</div>';
+    html += '<div class="detail-location"><i class="bi bi-geo-alt-fill" style="color:var(--accent);" aria-hidden="true"></i> ' + esc(p.location || '') + '</div>';
     html += '</div>';
     html += '<div class="detail-price-tag" style="margin-bottom:0;white-space:nowrap;">' + formatPrice(p.price, p.transactionType) + '</div>';
     html += '</div>';

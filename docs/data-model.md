@@ -182,6 +182,12 @@ It represents a valid property record that has passed mapping and validation and
   - generated from `property_name`
   - used in public URLs together with `id`
   - serves SEO and canonical routing purposes
+  - generated from the **cleaned** title (code prefix removed)
+
+- `code: string | null`
+  - agency property code ("šifra"), parsed from the `ŠIFRA NEKRETNINE: <code>` / `ŠIFRA OGLASA: <code>` prefix that agents type into `property_name`
+  - `null` when the title has no such prefix
+  - display-only; never used for identity or lookup
 
 ### Classification
 
@@ -192,6 +198,8 @@ It represents a valid property record that has passed mapping and validation and
 ### Core display data
 
 - `title: string`
+  - `property_name` with the code prefix removed
+  - if nothing remains after removing the code, falls back to `"<propertyTypeLabel>, <locationLabel>"`
 - `description: string | null`
 
 ### Location
@@ -208,19 +216,23 @@ It represents a valid property record that has passed mapping and validation and
 ### Numeric and structural data
 
 - `price: number`
-- `surface: number`
-- `landSurface: number | null`
+- `surface: number | null` — building area in **m²**; `null` for land types (`plot`, `land`), which come with `property_surface = 0`
+- `landSurface: number | null` — plot area in **ares** (XML `property_land_surface`)
 - `roomStructure: number | null`
 - `bathrooms: number | null`
 - `floorRaw: string | null`
+- `floor: string | null` — normalized floor: `"pr"` → `"ground"`, numbers kept as-is (`"5"`), unknown values passed through
 - `totalFloors: number | null`
 - `constructionYear: number | null`
 
+`surface` and `landSurface` are never mixed. Ares must not be copied into `surface`, because `surface` is displayed as m².
+
 ### Furnishing and feature data
 
-- `furnishedKey: string | null`
+- `furnishedKey: string | null` — unknown XML values pass through as their own key
 - `furnishedLabel: string | null`
-- `heating: string[]`
+- `heating: string[]` — raw XML labels
+- `heatingKeys: string[]` — stable keys for translation (`Centralno` → `central`, `Gas` → `gas`, `Podno` → `underfloor`, `Čvrsta goriva` → `solid_fuel`, `Norveški radijatori` → `norwegian_radiators`, `TA` → `storage_heater`); unknown values pass through unchanged
 - `equipment: string[]`
 - `otherFeatures: string[]`
 
@@ -468,7 +480,8 @@ Examples:
 
 - apartment
 - house
-- land
+- plot — XML `Plac` (building plot, no house)
+- land — XML `Poljoprivredno zemljište` (farmland)
 - commercial
 - office
 - garage
@@ -526,7 +539,7 @@ A property record is accepted into the normalized runtime read model only if it 
 - `title`
 - `city`
 - `price`
-- `surface`
+- `surface` — for land types (`plot`, `land`) either `surface` or `land_surface` is enough
 - `id_agent`
 
 If any of these is missing, the property is rejected and not loaded into the public read model.

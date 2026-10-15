@@ -12,6 +12,7 @@ import { writeFile, readFile, rename, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { DATASET_SCHEMA_VERSION } from "./models.js";
 import type { NormalizedDataset } from "./models.js";
 import { logger } from "./logger.js";
 
@@ -47,7 +48,7 @@ export async function writeBackup(dataset: NormalizedDataset): Promise<void> {
       await mkdir(DATA_DIR, { recursive: true });
     }
 
-    const json = JSON.stringify(dataset);
+    const json = JSON.stringify({ schemaVersion: DATASET_SCHEMA_VERSION, ...dataset });
     await writeFile(TEMP_FILE, json, "utf-8");
     await rename(TEMP_FILE, CACHE_FILE);
 
@@ -77,7 +78,7 @@ export async function readBackup(): Promise<NormalizedDataset | null> {
     }
 
     const raw = await readFile(CACHE_FILE, "utf-8");
-    const parsed = JSON.parse(raw) as NormalizedDataset;
+    const parsed = JSON.parse(raw) as NormalizedDataset & { schemaVersion?: number };
 
     // Basic structural check
     if (!Array.isArray(parsed.properties) || !Array.isArray(parsed.agents)) {
@@ -85,11 +86,20 @@ export async function readBackup(): Promise<NormalizedDataset | null> {
       return null;
     }
 
+    // A snapshot written by an older model shape would be missing fields
+    if (parsed.schemaVersion !== DATASET_SCHEMA_VERSION) {
+      log.warn(
+        { found: parsed.schemaVersion ?? null, expected: DATASET_SCHEMA_VERSION },
+        "Backup file has an outdated schema version — ignoring",
+      );
+      return null;
+    }
+
     log.info(
       { properties: parsed.properties.length, agents: parsed.agents.length },
       "Backup loaded from disk",
     );
-    return parsed;
+    return { properties: parsed.properties, agents: parsed.agents };
   } catch (err) {
     log.warn({ err }, "Failed to read backup file — starting with empty cache");
     return null;

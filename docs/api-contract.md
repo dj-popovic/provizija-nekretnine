@@ -275,6 +275,7 @@ None.
         }
       ],
       "area": 52,
+      "landArea": null,
       "rooms": 2,
       "highlights": ["Terasa", "Lift", "Parking"]
     }
@@ -301,12 +302,17 @@ None.
 - `location`
 - `price`
 - `images`
-- `area`
+- `area` — building area in m²; `null` for plots / farmland
+- `landArea` — plot area in **ares**; `null` for apartments or when not provided
 - `rooms`
 
 Optional / when available:
 
 - `highlights`
+
+Note: `propertyType` in list items is currently the Serbian label (e.g. `"Stan"`), not the key shown in the examples. It switches to the stable key during the i18n migration.
+
+Area rule: `area` (m²) and `landArea` (ares) are never mixed. A plot shows only `landArea`. A house can have both.
 
 ### Image shape
 
@@ -396,9 +402,10 @@ If the slug does not match the ID:
     "id": "123",
     "slug": "moderan-dvosoban-stan-liman-2",
     "url": "/nekretnine/moderan-dvosoban-stan-liman-2-123",
+    "code": "100123",
     "title": "Moderan dvosoban stan",
     "transactionType": "sale",
-    "propertyType": "apartment",
+    "propertyType": "Stan",
     "price": 154500,
     "images": [
       {
@@ -412,7 +419,20 @@ If the slug does not match the ID:
     ],
     "description": "Opis nekretnine...",
     "location": "Novi Sad, Liman 2",
-    "address": "Liman 2",
+    "specs": {
+      "propertyType": "apartment",
+      "area": 52,
+      "landArea": null,
+      "location": "Novi Sad, Liman 2",
+      "rooms": 2,
+      "bathrooms": 1,
+      "floor": "3",
+      "totalFloors": 5,
+      "furnished": "semi_furnished",
+      "heating": ["central"],
+      "registration": "registered",
+      "constructionYear": 2010
+    },
     "area": 52,
     "rooms": 2,
     "bathrooms": 1,
@@ -451,6 +471,7 @@ If the slug does not match the ID:
           }
         ],
         "area": 67,
+        "landArea": null,
         "rooms": 3,
         "highlights": ["Terasa", "Lift"]
       }
@@ -466,6 +487,7 @@ If the slug does not match the ID:
 - `id`
 - `slug`
 - `url`
+- `code`
 - `title`
 - `transactionType`
 - `propertyType`
@@ -473,7 +495,7 @@ If the slug does not match the ID:
 - `images`
 - `description`
 - `location`
-- `address`
+- `specs`
 - `area`
 - `rooms`
 - `bathrooms`
@@ -506,8 +528,8 @@ These fields should be treated as guaranteed core detail fields:
 The following may be `null` or omitted if not available or not reliably mapped from XML:
 
 - `images`
+- `code`
 - `description`
-- `address`
 - `area`
 - `rooms`
 - `bathrooms`
@@ -520,13 +542,38 @@ The following may be `null` or omitted if not available or not reliably mapped f
 - `agent`
 - `relatedProperties`
 
+### Specs object (specification panel)
+
+`specs` holds everything the specification panel needs. Enumerable values are **stable English keys** that the frontend translates (sr / en / ru). Unknown XML values that have no key yet are passed through unchanged (Serbian text).
+
+| Field | Type | Notes |
+|---|---|---|
+| `propertyType` | string | key: `apartment`, `house`, `plot`, `land`, `commercial`, `office`, `garage`, `cottage`, `other` |
+| `area` | number \| null | m². `null` for plots / farmland |
+| `landArea` | number \| null | **ares**. Always `null` for apartments |
+| `location` | string | `"City, Hood"`; never a street or number |
+| `rooms` | number \| null | may be fractional (`2.5`) |
+| `bathrooms` | number \| null | |
+| `floor` | string \| null | `"ground"` (prizemlje) or a floor number as string. Apartments only |
+| `totalFloors` | number \| null | Apartments only |
+| `furnished` | string \| null | key: `furnished`, `semi_furnished`, `empty` |
+| `heating` | string[] | keys: `central`, `gas`, `underfloor`, `solid_fuel`, `norwegian_radiators`, `storage_heater` |
+| `registration` | string | `registered`, `in_progress`, `unregisterable`, `not_registered`. **Never null:** a missing value means `not_registered` |
+| `constructionYear` | number \| null | |
+
+Type rules applied by the backend: `floor` / `totalFloors` only for apartments. Plots and farmland (`plot`, `land`) have only `propertyType`, `landArea`, `location` and `registration`; the other fields are `null` or `[]`. A `null` / empty field means the frontend skips that row.
+
+The flat fields `area`, `rooms`, `bathrooms`, `floor`, `heating`, `furnished`, `elevator`, `registrationStatus` are kept for backward compatibility during the i18n migration and will be removed once the frontend reads only `specs`.
+
+### Property code ("šifra")
+
+`code` is the agency property code, parsed from the `ŠIFRA NEKRETNINE: <code>` / `ŠIFRA OGLASA: <code>` prefix of the XML `property_name`. The prefix is removed from `title`. `code` is `null` when the XML title has no code. `code` is a display value only; `id` stays the identity.
+
 ### Address rule
 
-The API should not require a full public address by default.
+The public API does **not** expose the street, street number or flat number. The only public location is `location` (`"City, Hood"`).
 
-`PropertyDetail` should return only the level of address/location detail intended for public display on the site.
-
-The backend may internally preserve a richer address if available, but the public contract should expose a selective public address level.
+The backend keeps the street fields internally, but no public response includes them.
 
 ### Missing-data behavior
 
@@ -552,7 +599,8 @@ In those cases:
 - Image `alt` text is derived from the property title.
 - `url` is a canonical relative frontend path generated by the backend using pattern `/nekretnine/:slug-:id`.
 - `highlights` are derived from `<other>` XML elements (curated subset, TBD during implementation).
-- `registrationStatus` is a three-state string derived from `<other>` XML values: `"registered"`, `"unregisterable"`, `"in_progress"`, or `null`.
+- `registrationStatus` (legacy flat field) is a three-state string derived from `<other>` XML values: `"registered"`, `"unregisterable"`, `"in_progress"`, or `null`. `specs.registration` maps `null` to `"not_registered"`.
+- `propertyType` (flat field) is the Serbian label (legacy). `specs.propertyType` is the stable key.
 
 ---
 

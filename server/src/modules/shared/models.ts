@@ -15,17 +15,24 @@ export interface PropertyImage {
   order: number;
 }
 
+// Property types that are plain land (no building): measured in ares only,
+// no rooms / bathrooms / floors / heating / furnishing.
+export const LAND_TYPE_KEYS: ReadonlySet<string> = new Set(["plot", "land"]);
+
 export interface Property {
   // Identity
   id: string;
   slug: string;
+
+  // Agency property code ("šifra"), parsed out of the XML property_name prefix
+  code: string | null;
 
   // Classification
   transactionType: "sale" | "rent";
   propertyTypeKey: string;
   propertyTypeLabel: string;
 
-  // Core display
+  // Core display — title has the "ŠIFRA ...: <code>" prefix removed
   title: string;
   description: string | null;
 
@@ -41,11 +48,12 @@ export interface Property {
 
   // Numeric / structural
   price: number;
-  surface: number;
-  landSurface: number | null;
+  surface: number | null; // m² — null for land types without a building surface
+  landSurface: number | null; // ares
   roomStructure: number | null;
   bathrooms: number | null;
   floorRaw: string | null;
+  floor: string | null; // normalized: "ground" for prizemlje, otherwise the raw value ("5")
   totalFloors: number | null;
   constructionYear: number | null;
 
@@ -53,6 +61,7 @@ export interface Property {
   furnishedKey: string | null;
   furnishedLabel: string | null;
   heating: string[];
+  heatingKeys: string[]; // stable keys ("central", "gas"…); unknown values pass through as-is
   equipment: string[];
   otherFeatures: string[];
 
@@ -107,6 +116,10 @@ export interface NormalizedDataset {
   properties: Property[];
   agents: Agent[];
 }
+
+// Bump whenever the Property / Agent shape changes, so an old JSON snapshot
+// on disk is ignored at startup instead of being served with missing fields.
+export const DATASET_SCHEMA_VERSION = 2;
 
 // ---------------------------------------------------------------------------
 // Sync status

@@ -8,6 +8,7 @@ import {
   sortProperties,
   buildHighlights,
   toListItem,
+  buildSpecs,
 } from "../service.js";
 import type { PropertyListingQuery } from "../query.js";
 
@@ -79,6 +80,13 @@ describe("matchesFilters", () => {
     expect(matchesFilters(property, makeQuery({ areaMin: 50, areaMax: 100 }))).toBe(true);
     expect(matchesFilters(property, makeQuery({ areaMin: 80 }))).toBe(false);
     expect(matchesFilters(property, makeQuery({ areaMax: 50 }))).toBe(false);
+  });
+
+  it("excludes land without a building surface from the m² area filter", () => {
+    const plot = makeProperty({ propertyTypeKey: "plot", surface: null, landSurface: 21.06 });
+    expect(matchesFilters(plot, makeQuery())).toBe(true);
+    expect(matchesFilters(plot, makeQuery({ areaMax: 100 }))).toBe(false);
+    expect(matchesFilters(plot, makeQuery({ areaMin: 10 }))).toBe(false);
   });
 
   it("combines multiple filters", () => {
@@ -182,9 +190,83 @@ describe("toListItem", () => {
     expect(item.location).toBe("Beograd, Vračar");
     expect(item.price).toBe(150000);
     expect(item.area).toBe(75);
+    expect(item.landArea).toBeNull();
     expect(item.rooms).toBe(3);
     expect(item.images.length).toBe(2);
     expect(item.images[0].alt).toBe("Trosoban stan na Vračaru");
+  });
+
+  it("exposes plots in ares (landArea), never as m² (area)", () => {
+    const item = toListItem(
+      makeProperty({ propertyTypeKey: "plot", surface: null, landSurface: 21.06 }),
+    );
+    expect(item.area).toBeNull();
+    expect(item.landArea).toBe(21.06);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Specification panel
+// ---------------------------------------------------------------------------
+
+describe("buildSpecs", () => {
+  it("apartment: floor + total floors, no land area", () => {
+    const specs = buildSpecs(makeProperty({ floor: "ground", landSurface: 5 }));
+    expect(specs).toEqual({
+      propertyType: "apartment",
+      area: 75,
+      landArea: null,
+      location: "Beograd, Vračar",
+      rooms: 3,
+      bathrooms: 1,
+      floor: "ground",
+      totalFloors: 5,
+      furnished: "furnished",
+      heating: ["central"],
+      registration: "registered",
+      constructionYear: 2005,
+    });
+  });
+
+  it("house: area in m² + land area in ares, no floor rows", () => {
+    const specs = buildSpecs(
+      makeProperty({ propertyTypeKey: "house", surface: 322, landSurface: 60.21, floor: "1", totalFloors: 1 }),
+    );
+    expect(specs.area).toBe(322);
+    expect(specs.landArea).toBe(60.21);
+    expect(specs.floor).toBeNull();
+    expect(specs.totalFloors).toBeNull();
+  });
+
+  it("plot: only type, land area, location and registration", () => {
+    const specs = buildSpecs(
+      makeProperty({
+        propertyTypeKey: "plot",
+        surface: null,
+        landSurface: 21.06,
+        heatingKeys: ["gas"], // real feed quirk: a plot with heating
+        registrationStatus: null,
+      }),
+    );
+    expect(specs).toEqual({
+      propertyType: "plot",
+      area: null,
+      landArea: 21.06,
+      location: "Beograd, Vračar",
+      rooms: null,
+      bathrooms: null,
+      floor: null,
+      totalFloors: null,
+      furnished: null,
+      heating: [],
+      registration: "not_registered",
+      constructionYear: null,
+    });
+  });
+
+  it("treats missing registration as not registered", () => {
+    expect(buildSpecs(makeProperty({ registrationStatus: null })).registration).toBe("not_registered");
+    expect(buildSpecs(makeProperty({ registrationStatus: "in_progress" })).registration).toBe("in_progress");
   });
 });
 
@@ -301,6 +383,14 @@ describe("getPropertyDetail", () => {
     expect(detail).not.toBeNull();
     expect(detail!.id).toBe("100");
     expect(detail!.url).toBe("/nekretnine/trosoban-stan-na-vracaru-100");
+    expect(detail!.code).toBe("100100");
+    expect(detail!.specs.propertyType).toBe("apartment");
+  });
+
+  it("does not expose the street address", () => {
+    const detail = getPropertyDetail("100")!;
+    expect(detail).not.toHaveProperty("address");
+    expect(JSON.stringify(detail)).not.toContain("Krunska");
   });
 
   it("returns null for a non-existent property", () => {

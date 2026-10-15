@@ -147,6 +147,8 @@ When the backend starts:
 
 This allows the site to remain usable even if the XML provider is temporarily unavailable.
 
+The backup file carries a `schemaVersion` (`DATASET_SCHEMA_VERSION` in `shared/models.ts`). A backup with a different version, written by an older model shape, is ignored at startup instead of being served with missing fields. Bump the version whenever the `Property` / `Agent` model changes.
+
 ---
 
 ## 6. Data Strategy

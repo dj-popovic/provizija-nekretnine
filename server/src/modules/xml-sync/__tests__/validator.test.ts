@@ -150,7 +150,8 @@ describe("validateAndNormalize", () => {
     ]);
 
     expect(result.properties).toHaveLength(1);
-    expect(result.properties[0].surface).toBe(800);
+    expect(result.properties[0].surface).toBeNull();
+    expect(result.properties[0].landSurface).toBe(800);
   });
 
   it("rejects land type with surface=0 and no land_surface", () => {

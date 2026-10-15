@@ -98,7 +98,7 @@ describe("normalizeProperty", () => {
     const cases: [unknown, string][] = [
       ["Stan", "apartment"],
       ["Kuća", "house"],
-      ["Plac", "land"],
+      ["Plac", "plot"],
       ["Poljoprivredno zemljište", "land"],
       ["Garaža", "garage"],
       ["Poslovni prostor", "commercial"],
@@ -108,8 +108,8 @@ describe("normalizeProperty", () => {
     for (const [xmlType, expectedKey] of cases) {
       const raw = makeRawListing({
         property_type: xmlType,
-        // land types need land_surface as fallback when surface is 0
-        ...(expectedKey === "land"
+        // land types come with surface 0 and only a land surface
+        ...(expectedKey === "plot" || expectedKey === "land"
           ? { property_surface: "0", property_land_surface: "500" }
           : {}),
       });
@@ -134,16 +134,29 @@ describe("normalizeProperty", () => {
     expect(p!.surface).toBe(100);
   });
 
-  it("falls back to land_surface for land types when surface is 0", () => {
+  it("keeps land types in ares only — never copies ares into surface (m²)", () => {
     const p = normalizeProperty(
       makeRawListing({
         property_type: "Plac",
         property_surface: "0",
-        property_land_surface: "1200",
+        property_land_surface: "21.06",
       }),
     );
-    expect(p!.surface).toBe(1200);
-    expect(p!.landSurface).toBe(1200);
+    expect(p).not.toBeNull();
+    expect(p!.surface).toBeNull();
+    expect(p!.landSurface).toBe(21.06);
+  });
+
+  it("keeps house surface (m²) and plot surface (ares) separate", () => {
+    const p = normalizeProperty(
+      makeRawListing({
+        property_type: "Kuća",
+        property_surface: "322",
+        property_land_surface: "60.21",
+      }),
+    );
+    expect(p!.surface).toBe(322);
+    expect(p!.landSurface).toBe(60.21);
   });
 
   it("rejects non-land type with surface 0 and no fallback", () => {
@@ -198,6 +211,12 @@ describe("normalizeProperty", () => {
       const p = normalizeProperty(makeRawListing({ furnished: xmlValue }));
       expect(p!.furnishedKey).toBe(expectedKey);
     }
+  });
+
+  it("passes unknown furnishing values through as their own key", () => {
+    const p = normalizeProperty(makeRawListing({ furnished: "Delimično" }));
+    expect(p!.furnishedKey).toBe("Delimično");
+    expect(p!.furnishedLabel).toBe("Delimično");
   });
 
   it("returns null furnishing for missing value", () => {
@@ -305,6 +324,61 @@ describe("normalizeProperty", () => {
       makeRawListing({ property_name: "Kuća sa đakuzijem na Čukarici" }),
     );
     expect(p!.slug).toBe("kuca-sa-djakuzijem-na-cukarici");
+  });
+
+  // -----------------------------------------------------------------------
+  // Title / property code ("šifra") — formats seen in the real feed
+  // -----------------------------------------------------------------------
+
+  it("splits the code off the title in all known formats", () => {
+    const cases: [string, string, string][] = [
+      ["ŠIFRA NEKRETNINE: 100009 SREMSKA KAMENICA, LEDINCI, KUĆA 322 m2", "100009", "SREMSKA KAMENICA, LEDINCI, KUĆA 322 m2"],
+      ["ŠIFRA NEKRETNINE: 100043, BANOŠTOR, GRAĐEVINSKA PARCELA", "100043", "BANOŠTOR, GRAĐEVINSKA PARCELA"],
+      ["ŠIFRA OGLASA: 100021, NOVI SAD, NOVA DETELINARA", "100021", "NOVI SAD, NOVA DETELINARA"],
+      ["ŠIFRA NEKRETNINE: 592 , IZDAJEMO LUX DVOIPOSOBAN STAN", "592", "IZDAJEMO LUX DVOIPOSOBAN STAN"],
+    ];
+    for (const [name, code, title] of cases) {
+      const p = normalizeProperty(makeRawListing({ property_name: name }));
+      expect(p!.code).toBe(code);
+      expect(p!.title).toBe(title);
+    }
+  });
+
+  it("keeps the title as-is and code null when there is no code prefix", () => {
+    const p = normalizeProperty(makeRawListing({ property_name: "Prodaja, Stan, Novi Sad, Centar" }));
+    expect(p!.code).toBeNull();
+    expect(p!.title).toBe("Prodaja, Stan, Novi Sad, Centar");
+  });
+
+  it("falls back to '<type>, <location>' when the title is only the code", () => {
+    const p = normalizeProperty(makeRawListing({ property_name: "ŠIFRA NEKRETNINE: 100025," }));
+    expect(p!.code).toBe("100025");
+    expect(p!.title).toBe("Stan, Beograd, Vračar");
+  });
+
+  it("builds the slug from the cleaned title", () => {
+    const p = normalizeProperty(
+      makeRawListing({ property_name: "ŠIFRA NEKRETNINE: 100043, BANOŠTOR, GRAĐEVINSKA PARCELA" }),
+    );
+    expect(p!.slug).toBe("banostor-gradjevinska-parcela");
+  });
+
+  // -----------------------------------------------------------------------
+  // Floor and heating keys
+  // -----------------------------------------------------------------------
+
+  it("normalizes floor 'pr' to 'ground' and keeps numbers", () => {
+    expect(normalizeProperty(makeRawListing({ property_floor: "pr" }))!.floor).toBe("ground");
+    expect(normalizeProperty(makeRawListing({ property_floor: "5" }))!.floor).toBe("5");
+    expect(normalizeProperty(makeRawListing({ property_floor: undefined }))!.floor).toBeNull();
+  });
+
+  it("maps heating values to keys and passes unknown ones through", () => {
+    const p = normalizeProperty(
+      makeRawListing({ heating: ["Centralno", "Podno", "TA", "Toplotna pumpa"] }),
+    );
+    expect(p!.heatingKeys).toEqual(["central", "underfloor", "storage_heater", "Toplotna pumpa"]);
+    expect(p!.heating).toEqual(["Centralno", "Podno", "TA", "Toplotna pumpa"]);
   });
 
   // -----------------------------------------------------------------------

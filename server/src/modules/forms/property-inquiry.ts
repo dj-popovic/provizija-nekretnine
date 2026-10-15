@@ -82,6 +82,7 @@ function formatPrice(price: number): string {
 }
 
 interface PropertyContext {
+  code: string | null;
   title: string;
   location: string;
   price: number;
@@ -92,12 +93,21 @@ function composePropertyInquiryEmail(
   data: PropertyInquiryPayload,
   property: PropertyContext,
 ): { subject: string; html: string } {
-  const subject = `Upit za nekretninu: ${property.title}`;
+  const codePrefix = property.code ? `${property.code} – ` : "";
+  const subject = `Upit za nekretninu: ${codePrefix}${property.title}`;
+
+  const codeRow = property.code
+    ? `<tr>
+        <td style="padding: 8px 12px; font-weight: bold; border-bottom: 1px solid #eee;">Šifra</td>
+        <td style="padding: 8px 12px; border-bottom: 1px solid #eee;">${escapeHtml(property.code)}</td>
+      </tr>`
+    : "";
 
   const html = `
     <h2>Novi upit za nekretninu</h2>
     <h3 style="font-family: sans-serif; color: #333;">Detalji nekretnine</h3>
     <table style="border-collapse: collapse; width: 100%; max-width: 600px; font-family: sans-serif;">
+      ${codeRow}
       <tr>
         <td style="padding: 8px 12px; font-weight: bold; border-bottom: 1px solid #eee;">Nekretnina</td>
         <td style="padding: 8px 12px; border-bottom: 1px solid #eee;">${escapeHtml(property.title)}</td>
@@ -185,6 +195,7 @@ export async function handlePropertyInquiryForm(body: unknown): Promise<{
 
   const propertyUrl = `/nekretnine/${property.slug}-${property.id}`;
   const email = composePropertyInquiryEmail(data, {
+    code: property.code,
     title: property.title,
     location: property.locationLabel,
     price: property.price,

@@ -77,7 +77,7 @@ Unless the user asks for them, treat the following as out of scope:
 - local lead storage,
 - queue-based email delivery,
 - major async worker architecture beyond the planned refresh job,
-- filter facets / available-filters endpoints,
+- generic filter facets / counts (exception, in scope: list of available cities + districts for location dropdowns, built from the runtime dataset),
 - free-text search.
 
 If an out-of-scope addition seems useful:

@@ -5,6 +5,7 @@
 // and shapes public API response models.
 // ---------------------------------------------------------------------------
 
+import { LAND_TYPE_KEYS } from "../shared/models.js";
 import type { Property } from "../shared/models.js";
 import { getProperties, getAgents } from "../shared/cache.js";
 import { getEnrichment } from "../agents/enrichment.js";
@@ -29,7 +30,8 @@ export interface PropertyListItem {
   location: string;
   price: number;
   images: ApiImage[];
-  area: number;
+  area: number | null; // m²
+  landArea: number | null; // ares
   rooms: number | null;
   highlights: string[];
 }
@@ -105,6 +107,14 @@ function buildHighlights(property: Property): string[] {
 }
 
 // ---------------------------------------------------------------------------
+// Land area — apartments never show a plot area
+// ---------------------------------------------------------------------------
+
+function publicLandArea(property: Property): number | null {
+  return property.propertyTypeKey === "apartment" ? null : property.landSurface;
+}
+
+// ---------------------------------------------------------------------------
 // PropertyListItem shaping
 // ---------------------------------------------------------------------------
 
@@ -120,6 +130,7 @@ function toListItem(property: Property): PropertyListItem {
     price: property.price,
     images: mapImages(property),
     area: property.surface,
+    landArea: publicLandArea(property),
     rooms: property.roomStructure,
     highlights: buildHighlights(property),
   };
@@ -158,11 +169,15 @@ function matchesFilters(property: Property, query: PropertyListingQuery): boolea
     return false;
   }
 
-  if (query.areaMin !== undefined && property.surface < query.areaMin) {
-    return false;
-  }
-  if (query.areaMax !== undefined && property.surface > query.areaMax) {
-    return false;
+  // Area filter is in m²; land types without a building surface never match it
+  if (query.areaMin !== undefined || query.areaMax !== undefined) {
+    if (property.surface === null) return false;
+    if (query.areaMin !== undefined && property.surface < query.areaMin) {
+      return false;
+    }
+    if (query.areaMax !== undefined && property.surface > query.areaMax) {
+      return false;
+    }
   }
 
   return true;
@@ -239,10 +254,29 @@ export interface AgentSummary {
   stats: { label: string } | null;
 }
 
+// Main specification panel. Values are stable keys / numbers so the frontend
+// can translate them. Fields that don't apply to the property type are null
+// (or [] for heating) — the frontend simply skips those rows.
+export interface PropertySpecs {
+  propertyType: string; // key: apartment, house, plot, land, …
+  area: number | null; // m²
+  landArea: number | null; // ares
+  location: string; // "City, Hood" — never street / number
+  rooms: number | null;
+  bathrooms: number | null;
+  floor: string | null; // "ground" or a floor number — apartments only
+  totalFloors: number | null; // apartments only
+  furnished: string | null; // key: furnished, semi_furnished, empty
+  heating: string[]; // keys: central, gas, underfloor, …
+  registration: "registered" | "in_progress" | "unregisterable" | "not_registered";
+  constructionYear: number | null;
+}
+
 export interface PropertyDetail {
   id: string;
   slug: string;
   url: string;
+  code: string | null;
   title: string;
   transactionType: string;
   propertyType: string;
@@ -250,8 +284,8 @@ export interface PropertyDetail {
   images: ApiImage[];
   description: string | null;
   location: string;
-  address: string;
-  area: number;
+  specs: PropertySpecs;
+  area: number | null;
   rooms: number | null;
   bathrooms: number | null;
   floor: string | null;
@@ -312,6 +346,35 @@ function getRelatedProperties(property: Property): PropertyListItem[] {
   return candidates.slice(0, RELATED_LIMIT).map(toListItem);
 }
 
+// ---------------------------------------------------------------------------
+// Specification panel
+//
+// Type rules (agreed with the client):
+// - floor + totalFloors only for apartments
+// - land types (plot, farmland): only type, land area, location, registration
+// - missing registration means "not registered"
+// ---------------------------------------------------------------------------
+
+function buildSpecs(property: Property): PropertySpecs {
+  const isApartment = property.propertyTypeKey === "apartment";
+  const isLand = LAND_TYPE_KEYS.has(property.propertyTypeKey);
+
+  return {
+    propertyType: property.propertyTypeKey,
+    area: property.surface,
+    landArea: publicLandArea(property),
+    location: property.locationLabel,
+    rooms: isLand ? null : property.roomStructure,
+    bathrooms: isLand ? null : property.bathrooms,
+    floor: isApartment ? property.floor : null,
+    totalFloors: isApartment ? property.totalFloors : null,
+    furnished: isLand ? null : property.furnishedKey,
+    heating: isLand ? [] : property.heatingKeys,
+    registration: property.registrationStatus ?? "not_registered",
+    constructionYear: isLand ? null : property.constructionYear,
+  };
+}
+
 /**
  * Look up a single property by ID and return the full detail projection.
  * Returns null if the property is not found in the cache.
@@ -325,6 +388,7 @@ export function getPropertyDetail(propertyId: string): PropertyDetail | null {
     id: property.id,
     slug: property.slug,
     url: buildPropertyUrl(property.slug, property.id),
+    code: property.code,
     title: property.title,
     transactionType: property.transactionType,
     propertyType: property.propertyTypeLabel,
@@ -332,7 +396,7 @@ export function getPropertyDetail(propertyId: string): PropertyDetail | null {
     images: mapImages(property),
     description: property.description,
     location: property.locationLabel,
-    address: property.address,
+    specs: buildSpecs(property),
     area: property.surface,
     rooms: property.roomStructure,
     bathrooms: property.bathrooms,
@@ -351,4 +415,4 @@ export function getPropertyDetail(propertyId: string): PropertyDetail | null {
 // Exports for tests and downstream modules
 // ---------------------------------------------------------------------------
 
-export { buildPropertyUrl, mapImages, buildHighlights, toListItem, matchesFilters, sortProperties, buildAgentSummary, getRelatedProperties };
+export { buildPropertyUrl, mapImages, buildHighlights, toListItem, matchesFilters, sortProperties, buildAgentSummary, getRelatedProperties, buildSpecs };
