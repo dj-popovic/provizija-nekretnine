@@ -216,6 +216,7 @@ It represents a valid property record that has passed mapping and validation and
 ### Numeric and structural data
 
 - `price: number`
+- `priceOnRequest: boolean` — `true` when the XML price is the symbolic **1 €** that agents use for "cena na upit". The internal `price` stays 1; the public API exposes `price: null`.
 - `surface: number | null` — building area in **m²**; `null` for land types (`plot`, `land`), which come with `property_surface = 0`
 - `landSurface: number | null` — plot area in **ares** (XML `property_land_surface`)
 - `roomStructure: number | null`
@@ -236,6 +237,8 @@ It represents a valid property record that has passed mapping and validation and
 - `equipment: string[]`
 - `otherFeatures: string[]`
 
+- `featureKeys: string[]` — feature-chip keys mapped from `otherFeatures` (case-insensitive), e.g. `Lift` → `elevator`, `Gradska` → `city_water`, `Garažno mesto` → `garage_space`. Values that aren't features (registration, "Nije prizemlje", "Stara gradnja"…) are dropped. Unmapped `<other>` values are logged once per sync, so new RELPER checkboxes or unexpected spellings show up in the logs. Display order and type rules live in the API layer (see `features` in `api-contract.md`).
+
 ### Derived boolean flags
 
 These are optional normalized helper fields derived from XML feature lists where possible:
@@ -243,7 +246,7 @@ These are optional normalized helper fields derived from XML feature lists where
 - `hasTerrace: boolean`
 - `hasElevator: boolean`
 - `hasParking: boolean`
-- `hasGarage: boolean`
+- `hasGarage: boolean` — from `Garažno mesto` (the value RELPER actually sends) or `Garaža`
 - `isNewConstruction: boolean`
 
 ### Registration status

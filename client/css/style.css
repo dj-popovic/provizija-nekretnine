@@ -1861,8 +1861,47 @@ p, li,
 .detail-commission { margin-top: 2px; font-size: 14px; font-weight: 500; color: var(--text-light); }
 .detail-commission strong { color: var(--accent-dark); font-weight: 700; }
 
-.detail-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; padding-top: 16px; }
-.detail-chip { background: var(--bg-light); padding: 9px 16px; border-radius: 8px; }
+/* Feature chips: always one row; scrolls (auto + manual) when it doesn't fit.
+   Layout: [ viewport (scrolling chips) ][ sale/rent chip, pinned right ] */
+.detail-chips { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding-top: 16px; }
+.detail-chips-viewport { position: relative; flex: 1 1 auto; min-width: 0; }
+.detail-chips-track {
+    display: flex; flex-wrap: nowrap; gap: 10px;
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    outline: none;
+}
+.detail-chips-track::-webkit-scrollbar { display: none; }
+.detail-chips-track:focus-visible { box-shadow: 0 0 0 2px var(--accent); border-radius: 8px; }
+.detail-chips.is-overflowing .detail-chips-track {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+}
+.detail-chip { flex: 0 0 auto; white-space: nowrap; background: var(--bg-light); padding: 11px 18px; border-radius: 8px; }
+/* Scoped so it wins over the generic .detail-feature sizes declared further down */
+.detail-chips .detail-feature { font-size: 15px; }
+.detail-chips .detail-feature i { font-size: 19px; }
+
+/* Sale / rent chip — same height as the feature chips */
+.detail-chip--deal { margin-left: auto; padding: 7px 12px; background: rgba(201,162,39,.12); }
+.detail-chip--deal.is-rent { background: rgba(15,23,42,.08); }
+.detail-chip--deal .property-badge { position: static; display: inline-block; font-size: 12px; padding: .45rem .95rem; }
+
+.detail-chips-arrow {
+    position: absolute; top: 50%; transform: translateY(-50%); z-index: 2;
+    display: none; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border: none; border-radius: 50%;
+    background: var(--white); color: var(--primary); box-shadow: 0 2px 10px rgba(0,0,0,.15);
+    opacity: 0; transition: opacity .2s ease; cursor: pointer;
+}
+.detail-chips-arrow--prev { left: -6px; }
+.detail-chips-arrow--next { right: -6px; }
+.detail-chips-arrow:disabled { opacity: 0 !important; pointer-events: none; }
+/* Arrows only for mouse users, only when the row overflows, shown on hover / keyboard focus */
+@media (hover: hover) {
+    .detail-chips.is-overflowing .detail-chips-arrow { display: flex; }
+    .detail-chips.is-overflowing:hover .detail-chips-arrow,
+    .detail-chips.is-overflowing:focus-within .detail-chips-arrow { opacity: 1; }
+}
 
 .detail-features-bar {
     display: flex; flex-direction: column; gap: 10px;

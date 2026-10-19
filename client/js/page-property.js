@@ -115,9 +115,6 @@ window.PV = window.PV || {};
     return ui(maps.floor, floor);
   }
 
-  var formatRooms = PV.render.formatRooms;
-  var formatBathrooms = PV.render.formatBathrooms;
-
   // Row order agreed with the client. The API sends null (or [] for heating)
   // for anything that doesn't apply to the property type, so those rows are skipped.
   function buildSpecs(p) {
@@ -180,49 +177,167 @@ window.PV = window.PV || {};
     return '<div class="spec-row"><span class="spec-label">' + esc(label) + '</span><span class="spec-value">' + esc(value) + '</span></div>';
   }
 
-  // --- Build feature chips ---
+  // --- Build feature chips (kvadratići) ---
+  // Only "extras" here — area, rooms, bathrooms and floor are already in the spec panel.
+  // Always one row: if it doesn't fit, the row scrolls (see setupFeatureStrip).
 
   function buildFeatures(p) {
-    var chips = '';
-    var s = p.specs || {};
+    var keys = p.features || [];
+    var dealText = maps.transactionType.toUi[p.transactionType] || '';
+    if (keys.length === 0 && !dealText) return '';
 
-    if (s.area != null) {
-      chips += featureChip('bi-grid-3x3', PV.render.formatArea(s.area));
-    } else if (s.landArea != null) {
-      chips += featureChip('bi-grid-3x3', PV.render.formatLandArea(s.landArea));
-    }
-    if (s.rooms != null) {
-      chips += featureChip('bi-door-open', formatRooms(s.rooms));
-    }
-    if (s.bathrooms != null) {
-      chips += featureChip('bi-water', formatBathrooms(s.bathrooms));
-    }
-    if (s.floor != null) {
-      chips += featureChip('bi-building', PV.render.formatFloor(s.floor));
-    }
+    var chips = keys.map(function (key) {
+      return featureChip(maps.feature.icon[key] || 'bi-check-circle', ui(maps.feature, key));
+    }).join('');
 
-    // Highlights
-    var highlights = p.highlights || [];
-    var iconMap = {
-      'Parking': 'bi-car-front',
-      'Terasa': 'bi-sun',
-      'Lift': 'bi-arrow-up-circle',
-      'Garaža': 'bi-car-front',
-      'Klima': 'bi-snow',
-      'Centralno': 'bi-thermometer-half',
-      'Podrum': 'bi-box',
-    };
-    for (var i = 0; i < highlights.length; i++) {
-      var icon = iconMap[highlights[i]] || 'bi-check-circle';
-      chips += featureChip(icon, highlights[i]);
-    }
+    // Sale / rent chip — pinned at the right end; feature chips scroll "behind" it
+    var isRent = p.transactionType === 'rent';
+    var deal = dealText
+      ? '<div class="detail-chip detail-chip--deal' + (isRent ? ' is-rent' : '') + '">' +
+          '<span class="property-badge' + (isRent ? ' badge-rent' : '') + '">' + esc(dealText) + '</span>' +
+        '</div>'
+      : '';
 
-    // The transaction type is already shown as the badge above the gallery
-    return chips;
+    return (
+      '<div class="detail-chips" id="featureStrip">' +
+        '<div class="detail-chips-viewport">' +
+          '<button type="button" class="detail-chips-arrow detail-chips-arrow--prev" aria-label="Prethodne karakteristike" aria-controls="featureTrack"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>' +
+          '<div class="detail-chips-track" id="featureTrack" role="region" aria-label="Karakteristike nekretnine" tabindex="0">' + chips + '</div>' +
+          '<button type="button" class="detail-chips-arrow detail-chips-arrow--next" aria-label="Sledeće karakteristike" aria-controls="featureTrack"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>' +
+        '</div>' +
+        deal +
+      '</div>'
+    );
   }
 
   function featureChip(icon, text) {
     return '<div class="detail-feature detail-chip"><i class="bi ' + icon + '" aria-hidden="true"></i> ' + esc(text) + '</div>';
+  }
+
+  // --- Feature strip: one row; auto-scrolls only when the chips don't fit ---
+  //
+  // - Fits → stays still.
+  // - Overflows → glides slowly back and forth, pausing briefly at each end.
+  // - Hover / touch / focus / wheel → stops; arrows (desktop) and manual
+  //   scrolling take over. Resumes after a few idle seconds.
+  // - prefers-reduced-motion → no auto-scroll, manual scrolling only.
+
+  var STRIP_SPEED = 30;        // px per second
+  var STRIP_END_HOLD = 1500;   // ms to rest at each end
+  var STRIP_RESUME_DELAY = 3000;
+
+  function setupFeatureStrip() {
+    var strip = document.getElementById('featureStrip');
+    if (!strip) return;
+
+    var track = strip.querySelector('.detail-chips-track');
+    var prevBtn = strip.querySelector('.detail-chips-arrow--prev');
+    var nextBtn = strip.querySelector('.detail-chips-arrow--next');
+    var autoScroll = !PV.render.prefersReducedMotion();
+
+    var pos = 0;              // float position; scrollLeft rounds
+    var direction = 1;
+    var holdUntil = 0;
+    var lastTime = 0;
+    var hovering = false;
+    var interacting = false;
+    var visible = true;
+    var resumeTimer = null;
+    var rafId = null;
+
+    function maxScroll() {
+      return track.scrollWidth - track.clientWidth;
+    }
+
+    function updateArrows() {
+      prevBtn.disabled = track.scrollLeft <= 1;
+      nextBtn.disabled = track.scrollLeft >= maxScroll() - 1;
+    }
+
+    function running() {
+      return autoScroll && visible && !hovering && !interacting && strip.classList.contains('is-overflowing');
+    }
+
+    function frame(time) {
+      rafId = null;
+      if (!running()) return;
+
+      var dt = lastTime ? Math.min(time - lastTime, 100) : 0;
+      lastTime = time;
+
+      if (time >= holdUntil) {
+        var max = maxScroll();
+        pos += direction * STRIP_SPEED * dt / 1000;
+        if (pos >= max) { pos = max; direction = -1; holdUntil = time + STRIP_END_HOLD; }
+        if (pos <= 0) { pos = 0; direction = 1; holdUntil = time + STRIP_END_HOLD; }
+        track.scrollLeft = pos;
+      }
+      rafId = requestAnimationFrame(frame);
+    }
+
+    function start() {
+      if (rafId || !running()) return;
+      pos = track.scrollLeft; // continue from wherever the user left it
+      lastTime = 0;
+      rafId = requestAnimationFrame(frame);
+    }
+
+    function stop() {
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = null;
+    }
+
+    // User took over: stop now, resume after a few idle seconds
+    function pauseForUser() {
+      interacting = true;
+      stop();
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(function () {
+        interacting = false;
+        start();
+      }, STRIP_RESUME_DELAY);
+    }
+
+    function measure() {
+      strip.classList.toggle('is-overflowing', maxScroll() > 1);
+      updateArrows();
+      if (running()) start(); else stop();
+    }
+
+    prevBtn.addEventListener('click', function () {
+      pauseForUser();
+      track.scrollBy({ left: -track.clientWidth * 0.7, behavior: autoScroll ? 'smooth' : 'auto' });
+    });
+    nextBtn.addEventListener('click', function () {
+      pauseForUser();
+      track.scrollBy({ left: track.clientWidth * 0.7, behavior: autoScroll ? 'smooth' : 'auto' });
+    });
+
+    strip.addEventListener('mouseenter', function () { hovering = true; stop(); });
+    strip.addEventListener('mouseleave', function () { hovering = false; start(); });
+    track.addEventListener('touchstart', pauseForUser, { passive: true });
+    track.addEventListener('wheel', pauseForUser, { passive: true });
+    track.addEventListener('focusin', pauseForUser);
+    track.addEventListener('keydown', pauseForUser);
+    track.addEventListener('scroll', updateArrows, { passive: true });
+
+    // Don't animate while the strip is off-screen
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        if (visible) start(); else stop();
+      }).observe(strip);
+    }
+
+    var resizeRaf = null;
+    window.addEventListener('resize', function () {
+      if (resizeRaf) return;
+      resizeRaf = requestAnimationFrame(function () { resizeRaf = null; measure(); });
+    });
+
+    measure();
+    // Chip widths change once the web fonts finish loading
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(measure);
   }
 
   // --- Build agent card ---
@@ -313,7 +428,7 @@ window.PV = window.PV || {};
 
     // Badge + ID
     html += '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">';
-    html += '<span class="property-badge" style="position:static;">' + esc(badgeText) + '</span>';
+    html += '<span class="property-badge' + (p.transactionType === 'rent' ? ' badge-rent' : '') + '" style="position:static;">' + esc(badgeText) + '</span>';
     html += '<span style="font-size:12px;color:var(--text-light);font-weight:600;">ID: ' + esc(p.id) + '</span>';
     html += '</div>';
 
@@ -336,10 +451,8 @@ window.PV = window.PV || {};
     html += buildPrice(p);
     html += '</div>';
 
-    // Feature chips
-    html += '<div class="detail-chips">';
+    // Feature chips (one row, see setupFeatureStrip)
     html += buildFeatures(p);
-    html += '</div>';
 
     html += '</div></div></div>';
 
@@ -583,6 +696,7 @@ window.PV = window.PV || {};
 
       setupGallery(p.images);
       setupReadMore();
+      setupFeatureStrip();
 
     } catch (err) {
       if (err.status === 404) {

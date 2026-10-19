@@ -1,7 +1,7 @@
 import { logger } from "../shared/logger.js";
 import { normalizeString, parsePositiveNumber } from "../shared/utils.js";
 import type { RawXmlListing } from "./raw-listing.js";
-import { normalizeProperty } from "./normalizer.js";
+import { normalizeProperty, isKnownOtherValue } from "./normalizer.js";
 import type { Property } from "../shared/models.js";
 
 // ---------------------------------------------------------------------------
@@ -66,7 +66,31 @@ export function validateAndNormalize(
     "xml-sync: property validation complete",
   );
 
+  logUnknownOtherValues(properties);
+
   return { properties, rejectedCount };
+}
+
+// ---------------------------------------------------------------------------
+// Unknown <other> values
+//
+// New RELPER checkboxes (or unexpected spellings, e.g. of "Pet friendly")
+// would silently never show as feature chips. Log them once per sync.
+// ---------------------------------------------------------------------------
+
+function logUnknownOtherValues(properties: Property[]): void {
+  const unknown = new Set<string>();
+  for (const p of properties) {
+    for (const value of p.otherFeatures) {
+      if (!isKnownOtherValue(value)) unknown.add(value);
+    }
+  }
+  if (unknown.size > 0) {
+    logger.info(
+      { values: [...unknown] },
+      "xml-sync: unmapped <other> values (not shown as feature chips)",
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------

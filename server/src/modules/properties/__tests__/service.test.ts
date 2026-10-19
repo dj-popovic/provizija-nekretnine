@@ -9,8 +9,12 @@ import {
   buildHighlights,
   toListItem,
   buildSpecs,
+  buildFeatureList,
+  FEATURE_PRIORITY,
 } from "../service.js";
+import { FEATURE_KEYS } from "../../xml-sync/normalizer.js";
 import type { PropertyListingQuery } from "../query.js";
+import type { Property } from "../../shared/models.js";
 
 // ---------------------------------------------------------------------------
 // Helper: build a default query with overrides
@@ -271,6 +275,60 @@ describe("buildSpecs", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Feature chips (kvadratići)
+// ---------------------------------------------------------------------------
+
+describe("buildFeatureList", () => {
+  it("has a priority slot for every key the normalizer can produce", () => {
+    for (const key of FEATURE_KEYS) {
+      expect(FEATURE_PRIORITY).toContain(key);
+    }
+  });
+
+  it("orders features most interesting first, regardless of XML order", () => {
+    const p = makeProperty({
+      featureKeys: ["storage", "elevator", "terrace", "penthouse", "move_in_ready", "luxury"],
+    });
+    expect(buildFeatureList(p)).toEqual([
+      "penthouse", "luxury", "elevator", "terrace", "storage", "move_in_ready",
+    ]);
+  });
+
+  it("apartment: no infrastructure or permit chips", () => {
+    const p = makeProperty({
+      featureKeys: ["elevator", "city_water", "city_sewage", "paved_road", "building_permit"],
+    });
+    expect(buildFeatureList(p)).toEqual(["elevator"]);
+  });
+
+  it("house: infrastructure chips, no elevator", () => {
+    const p = makeProperty({
+      propertyTypeKey: "house",
+      featureKeys: ["pool", "terrace", "elevator", "paved_road", "city_water", "city_sewage"],
+    });
+    expect(buildFeatureList(p)).toEqual(["pool", "terrace", "paved_road", "city_water", "city_sewage"]);
+  });
+
+  it("plot: infrastructure and permit chips", () => {
+    const p = makeProperty({
+      propertyTypeKey: "plot",
+      featureKeys: ["building_permit", "paved_road", "location_permit"],
+    });
+    expect(buildFeatureList(p)).toEqual(["paved_road", "building_permit", "location_permit"]);
+  });
+
+  it("caps at 12 chips", () => {
+    const p = makeProperty({ featureKeys: [...FEATURE_PRIORITY] });
+    expect(buildFeatureList(p).length).toBe(12);
+  });
+
+  it("is included in the detail response", () => {
+    replaceDataset(makeDataset([makeProperty()]));
+    expect(getPropertyDetail("100")!.features).toEqual(["elevator", "terrace"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Listing service (integration with cache)
 // ---------------------------------------------------------------------------
 
@@ -404,7 +462,7 @@ describe("getPropertyDetail", () => {
     expect(detail!.agent!.fullName).toBe("Marko Petrović");
   });
 
-  it("includes related properties (same city + transactionType, excludes self)", () => {
+  it("includes related properties (same transactionType, excludes self)", () => {
     const detail = getPropertyDetail("100");
     expect(detail!.relatedProperties.length).toBe(1);
     expect(detail!.relatedProperties[0].id).toBe("101");
@@ -417,7 +475,108 @@ describe("getPropertyDetail", () => {
 
   it("returns empty related when no matches exist", () => {
     const detail = getPropertyDetail("102");
-    // 102 is rent in Novi Sad — no other rent properties in Novi Sad
+    // 102 is the only rent property
     expect(detail!.relatedProperties.length).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Related properties ("Slične nekretnine")
+// ---------------------------------------------------------------------------
+
+describe("related properties", () => {
+  const apt = (id: string, price: number, extra: Partial<Property> = {}) =>
+    makeProperty({ id, price, slug: `stan-${id}`, ...extra });
+  const house = (id: string, price: number) =>
+    makeProperty({ id, price, slug: `kuca-${id}`, propertyTypeKey: "house" });
+
+  function relatedIds(id: string): string[] {
+    return getPropertyDetail(id)!.relatedProperties.map((r) => r.id);
+  }
+
+  it("picks the 6 closest in price and shows the most similar first", () => {
+    replaceDataset(makeDataset([
+      apt("1", 189000), // viewed
+      apt("2", 190000), apt("3", 185000), apt("4", 192000), apt("5", 170000),
+      apt("6", 208000), apt("7", 99000), apt("8", 590000), apt("9", 172000),
+    ]));
+    // 190k (0.5%), 192k (1.6%), 185k (2.1%), 172k (9%), then 208k / 170k
+    // (both 10.05% — newer listing first); 99k and 590k left out
+    expect(relatedIds("1")).toEqual(["2", "4", "3", "9", "6", "5"]);
+  });
+
+  it("is never city-restricted", () => {
+    replaceDataset(makeDataset([
+      apt("1", 100000, { city: "Novi Sad" }),
+      apt("2", 101000, { city: "Beočin" }),
+    ]));
+    expect(relatedIds("1")).toEqual(["2"]);
+  });
+
+  it("prefers the same type, then fills with other types by price", () => {
+    replaceDataset(makeDataset([
+      apt("1", 150000),
+      apt("2", 400000), // same type but far in price — still before other types
+      house("3", 151000), house("4", 149000), house("5", 300000),
+      house("6", 152000), house("7", 148000), house("8", 900000),
+    ]));
+    const ids = relatedIds("1");
+    expect(ids).toHaveLength(6);
+    expect(ids).toContain("2");
+    expect(ids).not.toContain("8"); // farthest house is the one left out
+  });
+
+  it("never mixes sale and rent", () => {
+    replaceDataset(makeDataset([
+      apt("1", 150000),
+      apt("2", 600, { transactionType: "rent" }),
+      apt("3", 160000),
+    ]));
+    expect(relatedIds("1")).toEqual(["3"]);
+  });
+
+  it("does not suggest 'cena na upit' properties", () => {
+    replaceDataset(makeDataset([
+      apt("1", 150000),
+      apt("2", 1, { priceOnRequest: true }),
+      apt("3", 160000),
+    ]));
+    expect(relatedIds("1")).toEqual(["3"]);
+  });
+
+  it("gives a 'cena na upit' property same-type suggestions only", () => {
+    replaceDataset(makeDataset([
+      makeProperty({ id: "1", slug: "kuca-1", propertyTypeKey: "house", price: 1, priceOnRequest: true }),
+      house("2", 300000), house("3", 200000),
+      apt("4", 1000), apt("5", 2000),
+    ]));
+    expect(relatedIds("1")).toEqual(["3", "2"]);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// "Cena na upit" (price on request)
+// ---------------------------------------------------------------------------
+
+describe("price on request", () => {
+  const onRequest = makeProperty({ id: "9", price: 1, priceOnRequest: true });
+
+  it("exposes price as null in list and detail", () => {
+    replaceDataset(makeDataset([onRequest]));
+    expect(toListItem(onRequest).price).toBeNull();
+    expect(getPropertyDetail("9")!.price).toBeNull();
+  });
+
+  it("is excluded by any price filter", () => {
+    expect(matchesFilters(onRequest, makeQuery())).toBe(true);
+    expect(matchesFilters(onRequest, makeQuery({ priceMax: 100000 }))).toBe(false);
+    expect(matchesFilters(onRequest, makeQuery({ priceMin: 0 }))).toBe(false);
+  });
+
+  it("goes last in both price sorts", () => {
+    const cheap = makeProperty({ id: "1", price: 50000 });
+    const pricey = makeProperty({ id: "2", price: 500000 });
+    expect(sortProperties([onRequest, pricey, cheap], "priceAsc").map((p) => p.id)).toEqual(["1", "2", "9"]);
+    expect(sortProperties([onRequest, cheap, pricey], "priceDesc").map((p) => p.id)).toEqual(["2", "1", "9"]);
   });
 });

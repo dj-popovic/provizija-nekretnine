@@ -48,6 +48,7 @@ export interface Property {
 
   // Numeric / structural
   price: number;
+  priceOnRequest: boolean; // agents enter 1 € for "cena na upit"; the public API then sends price: null
   surface: number | null; // m² — null for land types without a building surface
   landSurface: number | null; // ares
   roomStructure: number | null;
@@ -64,6 +65,7 @@ export interface Property {
   heatingKeys: string[]; // stable keys ("central", "gas"…); unknown values pass through as-is
   equipment: string[];
   otherFeatures: string[];
+  featureKeys: string[]; // feature-chip keys mapped from otherFeatures ("elevator", "pool"…); unmapped values dropped
 
   // Derived boolean flags
   hasTerrace: boolean;
@@ -119,7 +121,7 @@ export interface NormalizedDataset {
 
 // Bump whenever the Property / Agent shape changes, so an old JSON snapshot
 // on disk is ignored at startup instead of being served with missing fields.
-export const DATASET_SCHEMA_VERSION = 2;
+export const DATASET_SCHEMA_VERSION = 4;
 
 // ---------------------------------------------------------------------------
 // Sync status

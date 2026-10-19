@@ -56,6 +56,61 @@ window.PV = window.PV || {};
     floor: {
       toUi: { ground: 'Prizemlje' },
     },
+    // Feature chips (kvadratići) — keys arrive from the API already in display order
+    feature: {
+      toUi: {
+        penthouse: 'Penthouse',
+        villa: 'Vila',
+        duplex: 'Duplex',
+        luxury: 'Lux',
+        pool: 'Bazen',
+        pet_friendly: 'Pet friendly',
+        new_build: 'Novogradnja',
+        under_construction: 'U izgradnji',
+        salon: 'Salonski',
+        elevator: 'Lift',
+        terrace: 'Terasa',
+        garage_space: 'Garažno mesto',
+        parking: 'Parking',
+        basement: 'Podrum',
+        storage: 'Ostava',
+        paved_road: 'Asfaltni put',
+        city_water: 'Gradska voda',
+        city_sewage: 'Gradska kanalizacija',
+        building_permit: 'Građevinska dozvola',
+        location_permit: 'Lokacijska dozvola',
+        occupancy_permit: 'Upotrebna dozvola',
+        renovated: 'Renovirano',
+        move_in_ready: 'Odmah useljivo',
+        mortgage_eligible: 'Može na kredit',
+      },
+      icon: {
+        penthouse: 'bi-building-up',
+        villa: 'bi-house-heart',
+        duplex: 'bi-layers',
+        luxury: 'bi-gem',
+        pool: 'bi-water',
+        pet_friendly: 'bi-heart',
+        new_build: 'bi-stars',
+        under_construction: 'bi-cone-striped',
+        salon: 'bi-house-door',
+        elevator: 'bi-arrow-up-circle',
+        terrace: 'bi-sun',
+        garage_space: 'bi-car-front',
+        parking: 'bi-p-square',
+        basement: 'bi-box-seam',
+        storage: 'bi-archive',
+        paved_road: 'bi-signpost-split',
+        city_water: 'bi-droplet',
+        city_sewage: 'bi-moisture',
+        building_permit: 'bi-file-earmark-check',
+        location_permit: 'bi-file-earmark-check',
+        occupancy_permit: 'bi-file-earmark-check',
+        renovated: 'bi-tools',
+        move_in_ready: 'bi-key',
+        mortgage_eligible: 'bi-bank',
+      },
+    },
   };
 
   // --- Serbian plural forms: 1 soba, 2–4 sobe, 5+ soba (11–14 take the last form) ---
@@ -129,11 +184,13 @@ window.PV = window.PV || {};
 
   // --- Escape HTML to prevent XSS ---
 
+  // Escapes quotes too — esc() output is used inside HTML attributes
+  // (src="…", alt="…", aria-label="…"), not only in element text.
+  var ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
   function esc(str) {
     if (str == null) return '';
-    var div = document.createElement('div');
-    div.appendChild(document.createTextNode(String(str)));
-    return div.innerHTML;
+    return String(str).replace(/[&<>"']/g, function (ch) { return ESC_MAP[ch]; });
   }
 
   // --- Agent photo, or initials while the feed has no photo for the agent ---

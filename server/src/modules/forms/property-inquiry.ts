@@ -77,7 +77,8 @@ function escapeHtml(str: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function formatPrice(price: number): string {
+function formatPrice(price: number | null): string {
+  if (price === null) return "Cena na upit";
   return price.toLocaleString("sr-RS") + " €";
 }
 
@@ -85,7 +86,7 @@ interface PropertyContext {
   code: string | null;
   title: string;
   location: string;
-  price: number;
+  price: number | null; // null = "cena na upit"
   url: string;
 }
 
@@ -198,7 +199,7 @@ export async function handlePropertyInquiryForm(body: unknown): Promise<{
     code: property.code,
     title: property.title,
     location: property.locationLabel,
-    price: property.price,
+    price: property.priceOnRequest ? null : property.price,
     url: propertyUrl,
   });
 

@@ -90,6 +90,74 @@ function mapHeating(values: string[]): string[] {
 }
 
 // ---------------------------------------------------------------------------
+// Feature mapping (kvadratići)
+//
+// XML <other> values → stable feature keys. Matched case-insensitively:
+// "Pet friendly" / "U izgradnji" exist in RELPER but haven't appeared in the
+// feed yet, so their exact spelling is unconfirmed.
+// ---------------------------------------------------------------------------
+
+const FEATURES: Record<string, string> = {
+  penthouse: "penthouse",
+  vila: "villa",
+  duplex: "duplex",
+  lux: "luxury",
+  bazen: "pool",
+  "pet friendly": "pet_friendly",
+  novogradnja: "new_build",
+  "u izgradnji": "under_construction",
+  salonski: "salon",
+  lift: "elevator",
+  terasa: "terrace",
+  "garažno mesto": "garage_space",
+  garaža: "garage_space",
+  parking: "parking",
+  podrum: "basement",
+  ostava: "storage",
+  "asfaltni put": "paved_road",
+  gradska: "city_water", // RELPER's water checkbox — the value is just "Gradska"
+  "gradska kanalizacija": "city_sewage",
+  građevinska: "building_permit",
+  lokacijska: "location_permit",
+  upotrebna: "occupancy_permit",
+  renoviran: "renovated",
+  "odmah useljiv": "move_in_ready",
+  "može na kredit": "mortgage_eligible",
+};
+
+// <other> values that are known but deliberately not feature chips
+// (shown in the spec panel, or not a selling point)
+const IGNORED_OTHER = new Set([
+  "uknjižen",
+  "neuknjiživ",
+  "u fazi knjiženja",
+  "nije prizemlje",
+  "nije poslednji sprat",
+  "topla voda",
+  "izvorno stanje",
+  "za adaptaciju",
+  "stara gradnja",
+]);
+
+/** All feature keys the normalizer can produce. */
+export const FEATURE_KEYS: ReadonlySet<string> = new Set(Object.values(FEATURES));
+
+/** True if an <other> value is either mapped to a feature or deliberately ignored. */
+export function isKnownOtherValue(value: string): boolean {
+  const lower = value.toLowerCase();
+  return lower in FEATURES || IGNORED_OTHER.has(lower);
+}
+
+function mapFeatures(values: string[]): string[] {
+  const keys = new Set<string>();
+  for (const v of values) {
+    const key = FEATURES[v.toLowerCase()];
+    if (key) keys.add(key);
+  }
+  return [...keys];
+}
+
+// ---------------------------------------------------------------------------
 // Floor normalization
 //
 // XML floor is a number ("5") or an abbreviation ("pr" = prizemlje).
@@ -183,6 +251,14 @@ function buildLocationLabel(city: string, hood: string | null): string {
 function buildImages(urls: string[]): PropertyImage[] {
   return urls.map((url, index) => ({ url, order: index }));
 }
+
+// ---------------------------------------------------------------------------
+// Price on request
+//
+// RELPER requires a price, so agents enter a symbolic 1 € for "cena na upit".
+// ---------------------------------------------------------------------------
+
+const PRICE_ON_REQUEST_VALUE = 1;
 
 // ---------------------------------------------------------------------------
 // Construction year helper
@@ -284,7 +360,9 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
   const hasTerrace = hasFeature(otherFeatures, "Terasa");
   const hasElevator = hasFeature(otherFeatures, "Lift");
   const hasParking = hasFeature(otherFeatures, "Parking");
-  const hasGarage = hasFeature(otherFeatures, "Garaža");
+  // RELPER sends "Garažno mesto"; "Garaža" kept in case it ever appears
+  const hasGarage =
+    hasFeature(otherFeatures, "Garažno mesto") || hasFeature(otherFeatures, "Garaža");
   const isNewConstruction = hasFeature(otherFeatures, "Novogradnja");
 
   // --- Registration status ---
@@ -322,6 +400,7 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
     address,
     locationLabel,
     price,
+    priceOnRequest: price === PRICE_ON_REQUEST_VALUE,
     surface,
     landSurface,
     roomStructure,
@@ -336,6 +415,7 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
     heatingKeys: mapHeating(heating),
     equipment,
     otherFeatures,
+    featureKeys: mapFeatures(otherFeatures),
     hasTerrace,
     hasElevator,
     hasParking,

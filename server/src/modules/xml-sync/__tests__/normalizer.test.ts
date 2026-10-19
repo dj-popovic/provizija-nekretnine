@@ -242,6 +242,43 @@ describe("normalizeProperty", () => {
     expect(p!.isNewConstruction).toBe(true);
   });
 
+  it("recognizes the garage as RELPER actually sends it ('Garažno mesto')", () => {
+    const p = normalizeProperty(makeRawListing({ otherFeatures: ["Garažno mesto"] }));
+    expect(p!.hasGarage).toBe(true);
+  });
+
+  // -----------------------------------------------------------------------
+  // Feature keys (kvadratići)
+  // -----------------------------------------------------------------------
+
+  it("maps <other> values to feature keys and drops non-feature values", () => {
+    const p = normalizeProperty(
+      makeRawListing({
+        otherFeatures: [
+          "Penthouse", "Lift", "Garažno mesto", "Gradska", "Gradska kanalizacija",
+          "Asfaltni put", "Građevinska", "Može na kredit",
+          "Uknjižen", "Nije prizemlje", "Stara gradnja",
+        ],
+      }),
+    );
+    expect(p!.featureKeys).toEqual([
+      "penthouse", "elevator", "garage_space", "city_water", "city_sewage",
+      "paved_road", "building_permit", "mortgage_eligible",
+    ]);
+  });
+
+  it("matches feature values case-insensitively (unconfirmed RELPER spelling)", () => {
+    const p = normalizeProperty(
+      makeRawListing({ otherFeatures: ["Pet Friendly", "u izgradnji"] }),
+    );
+    expect(p!.featureKeys).toEqual(["pet_friendly", "under_construction"]);
+  });
+
+  it("does not duplicate a key when two XML values map to it", () => {
+    const p = normalizeProperty(makeRawListing({ otherFeatures: ["Garaža", "Garažno mesto"] }));
+    expect(p!.featureKeys).toEqual(["garage_space"]);
+  });
+
   // -----------------------------------------------------------------------
   // Registration status
   // -----------------------------------------------------------------------
@@ -396,6 +433,11 @@ describe("normalizeProperty", () => {
 
   it("rejects missing city", () => {
     expect(normalizeProperty(makeRawListing({ property_city: undefined }))).toBeNull();
+  });
+
+  it("marks the symbolic 1 € price as 'cena na upit'", () => {
+    expect(normalizeProperty(makeRawListing({ property_price: "1" }))!.priceOnRequest).toBe(true);
+    expect(normalizeProperty(makeRawListing({ property_price: "150000" }))!.priceOnRequest).toBe(false);
   });
 
   it("rejects missing price", () => {

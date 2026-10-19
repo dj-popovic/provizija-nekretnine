@@ -100,8 +100,10 @@ The API should document and use these standard status codes where applicable:
 - `201 Created`
 - `400 Bad Request`
 - `404 Not Found`
+- `413 Payload Too Large` — request body over the size limit (`PAYLOAD_TOO_LARGE`)
+- `415 Unsupported Media Type` — POST body is not JSON (`UNSUPPORTED_MEDIA_TYPE`). The API accepts `application/json` only; `text/plain`, urlencoded and multipart bodies (the ones another website can send cross-site without a CORS preflight) are refused before any handler runs.
 - `429 Too Many Requests`
-- `500 Internal Server Error`
+- `500 Internal Server Error` — only for unexpected server failures, never for client mistakes
 
 ---
 
@@ -433,6 +435,7 @@ If the slug does not match the ID:
       "registration": "registered",
       "constructionYear": 2010
     },
+    "features": ["penthouse", "elevator", "terrace", "parking"],
     "area": 52,
     "rooms": 2,
     "bathrooms": 1,
@@ -496,6 +499,7 @@ If the slug does not match the ID:
 - `description`
 - `location`
 - `specs`
+- `features`
 - `area`
 - `rooms`
 - `bathrooms`
@@ -565,6 +569,28 @@ Type rules applied by the backend: `floor` / `totalFloors` only for apartments. 
 
 The flat fields `area`, `rooms`, `bathrooms`, `floor`, `heating`, `furnished`, `elevator`, `registrationStatus` are kept for backward compatibility during the i18n migration and will be removed once the frontend reads only `specs`.
 
+### Features (feature chips / "kvadratići")
+
+`features` is an array of stable keys, **already ordered by display priority** (most interesting first), at most 12. It never repeats spec-panel data (area, rooms, bathrooms, floor, registration). An empty array means no chips.
+
+Priority order and keys:
+
+| Group | Keys (XML `<other>` value) |
+|---|---|
+| Standout | `penthouse` (Penthouse), `villa` (Vila), `duplex` (Duplex), `luxury` (Lux), `pool` (Bazen) |
+| Notable | `pet_friendly` (Pet friendly), `new_build` (Novogradnja), `under_construction` (U izgradnji), `salon` (Salonski) |
+| Amenities | `elevator` (Lift), `terrace` (Terasa), `garage_space` (Garažno mesto), `parking` (Parking), `basement` (Podrum), `storage` (Ostava) |
+| Infrastructure | `paved_road` (Asfaltni put), `city_water` (Gradska), `city_sewage` (Gradska kanalizacija) |
+| Permits | `building_permit` (Građevinska), `location_permit` (Lokacijska), `occupancy_permit` (Upotrebna) |
+| Condition / buying | `renovated` (Renoviran), `move_in_ready` (Odmah useljiv), `mortgage_eligible` (Može na kredit) |
+
+Type rules applied by the backend:
+- infrastructure keys only for `house`, `cottage`, `plot`, `land` (apartments always have them, so they're noise there)
+- permit keys only for `plot`, `land`
+- `elevator` never for `house`, `cottage`, `plot`, `land`
+
+The legacy `highlights` field (Serbian labels) is kept for backward compatibility and will be removed during the i18n migration.
+
 ### Property code ("šifra")
 
 `code` is the agency property code, parsed from the `ŠIFRA NEKRETNINE: <code>` / `ŠIFRA OGLASA: <code>` prefix of the XML `property_name`. The prefix is removed from `title`. `code` is `null` when the XML title has no code. `code` is a display value only; `id` stays the identity.
@@ -587,6 +613,17 @@ In those cases:
 ### Related properties rule
 
 `relatedProperties` should be embedded in the same property detail response, not exposed as a separate MVP endpoint.
+
+Selection ("Slične nekretnine", agreed with the client):
+- up to **6** properties, never the property itself
+- same `transactionType` only (sale with sale, rent with rent); **not** restricted by city
+- same property type first, ranked by **relative price distance** (`|Δprice| / price`); if fewer than 6 of the same type exist, the remaining slots are filled with other types, also by price distance
+- "cena na upit" properties (`price: null`) are never suggested; for a "cena na upit" property, only same-type properties are suggested (newest first), since there's no price to compare
+- the selected properties are returned **most similar first** (same type first, then the closest price first); ties go to the newer listing
+
+### Price on request ("cena na upit")
+
+RELPER requires a price, so agents enter a symbolic **1 €** for "cena na upit". For such properties the API returns `price: null` (in `PropertyListItem`, `PropertyDetail` and related items), and the frontend shows "Cena na upit". They are excluded by any `priceMin` / `priceMax` filter and are sorted last for both `priceAsc` and `priceDesc`.
 
 ### Error responses
 

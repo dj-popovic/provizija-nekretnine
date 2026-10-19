@@ -28,7 +28,7 @@ export interface PropertyListItem {
   transactionType: string;
   propertyType: string;
   location: string;
-  price: number;
+  price: number | null; // null = "cena na upit"
   images: ApiImage[];
   area: number | null; // m²
   landArea: number | null; // ares
@@ -107,6 +107,14 @@ function buildHighlights(property: Property): string[] {
 }
 
 // ---------------------------------------------------------------------------
+// Public price — null for "cena na upit" (the frontend shows that text)
+// ---------------------------------------------------------------------------
+
+function publicPrice(property: Property): number | null {
+  return property.priceOnRequest ? null : property.price;
+}
+
+// ---------------------------------------------------------------------------
 // Land area — apartments never show a plot area
 // ---------------------------------------------------------------------------
 
@@ -127,7 +135,7 @@ function toListItem(property: Property): PropertyListItem {
     transactionType: property.transactionType,
     propertyType: property.propertyTypeLabel,
     location: property.locationLabel,
-    price: property.price,
+    price: publicPrice(property),
     images: mapImages(property),
     area: property.surface,
     landArea: publicLandArea(property),
@@ -162,11 +170,15 @@ function matchesFilters(property: Property, query: PropertyListingQuery): boolea
     return false;
   }
 
-  if (query.priceMin !== undefined && property.price < query.priceMin) {
-    return false;
-  }
-  if (query.priceMax !== undefined && property.price > query.priceMax) {
-    return false;
+  // "Cena na upit" has no real price, so it never matches a price filter
+  if (query.priceMin !== undefined || query.priceMax !== undefined) {
+    if (property.priceOnRequest) return false;
+    if (query.priceMin !== undefined && property.price < query.priceMin) {
+      return false;
+    }
+    if (query.priceMax !== undefined && property.price > query.priceMax) {
+      return false;
+    }
   }
 
   // Area filter is in m²; land types without a building surface never match it
@@ -195,11 +207,12 @@ function sortProperties(properties: Property[], sort: SortOption): Property[] {
       // Newest = highest ID first (XML IDs are sequential)
       sorted.sort((a, b) => Number(b.id) - Number(a.id));
       break;
+    // "Cena na upit" goes last in both price orders
     case "priceAsc":
-      sorted.sort((a, b) => a.price - b.price);
+      sorted.sort((a, b) => Number(a.priceOnRequest) - Number(b.priceOnRequest) || a.price - b.price);
       break;
     case "priceDesc":
-      sorted.sort((a, b) => b.price - a.price);
+      sorted.sort((a, b) => Number(a.priceOnRequest) - Number(b.priceOnRequest) || b.price - a.price);
       break;
   }
 
@@ -272,6 +285,66 @@ export interface PropertySpecs {
   constructionYear: number | null;
 }
 
+// ---------------------------------------------------------------------------
+// Feature chips (kvadratići)
+//
+// Ordered most interesting first; the frontend shows them in one row.
+// ---------------------------------------------------------------------------
+
+const FEATURE_PRIORITY: readonly string[] = [
+  // Rare / standout
+  "penthouse",
+  "villa",
+  "duplex",
+  "luxury",
+  "pool",
+  // Notable
+  "pet_friendly",
+  "new_build",
+  "under_construction",
+  "salon",
+  // Common amenities
+  "elevator",
+  "terrace",
+  "garage_space",
+  "parking",
+  "basement",
+  "storage",
+  // Land / house infrastructure
+  "paved_road",
+  "city_water",
+  "city_sewage",
+  // Permits (plots / farmland)
+  "building_permit",
+  "location_permit",
+  "occupancy_permit",
+  // Condition / buying
+  "renovated",
+  "move_in_ready",
+  "mortgage_eligible",
+];
+
+const MAX_FEATURES = 12;
+
+// Infrastructure only says something for houses and land; apartments always have it
+const INFRASTRUCTURE_FEATURES: ReadonlySet<string> = new Set(["paved_road", "city_water", "city_sewage"]);
+const INFRASTRUCTURE_TYPES: ReadonlySet<string> = new Set(["house", "cottage", "plot", "land"]);
+const PERMIT_FEATURES: ReadonlySet<string> = new Set(["building_permit", "location_permit", "occupancy_permit"]);
+const NO_ELEVATOR_TYPES: ReadonlySet<string> = new Set(["house", "cottage", "plot", "land"]);
+
+function featureApplies(key: string, propertyTypeKey: string): boolean {
+  if (INFRASTRUCTURE_FEATURES.has(key)) return INFRASTRUCTURE_TYPES.has(propertyTypeKey);
+  if (PERMIT_FEATURES.has(key)) return LAND_TYPE_KEYS.has(propertyTypeKey);
+  if (key === "elevator") return !NO_ELEVATOR_TYPES.has(propertyTypeKey);
+  return true;
+}
+
+function buildFeatureList(property: Property): string[] {
+  return FEATURE_PRIORITY.filter(
+    (key) => property.featureKeys.includes(key) && featureApplies(key, property.propertyTypeKey),
+  ).slice(0, MAX_FEATURES);
+}
+
 export interface PropertyDetail {
   id: string;
   slug: string;
@@ -280,11 +353,12 @@ export interface PropertyDetail {
   title: string;
   transactionType: string;
   propertyType: string;
-  price: number;
+  price: number | null; // null = "cena na upit"
   images: ApiImage[];
   description: string | null;
   location: string;
   specs: PropertySpecs;
+  features: string[];
   area: number | null;
   rooms: number | null;
   bathrooms: number | null;
@@ -322,28 +396,50 @@ function buildAgentSummary(agentId: string): AgentSummary | null {
 }
 
 // ---------------------------------------------------------------------------
-// Related properties
+// Related properties ("Slične nekretnine")
 //
-// Deterministic selection: same transactionType + same city, exclude current,
-// newest first (highest ID), capped at RELATED_LIMIT.
+// Similar = closest in price. Agreed with the client:
+// 1. same transaction type only (sale with sale, rent with rent)
+// 2. same property type first, then other types to fill the 6 slots
+// 3. ranked by relative price distance (|Δ| / price) — works the same for
+//    a 500 €/month rent and a 500.000 € villa; the client's original price
+//    bands (±10k…±50k) are roughly ±10%, so they are always picked first
+// 4. "cena na upit" properties are never suggested (no price to compare);
+//    for such a property, only same-type properties are shown
+// The 6 picked are displayed most similar first (closest price first).
 // ---------------------------------------------------------------------------
 
-const RELATED_LIMIT = 4;
+const RELATED_LIMIT = 6;
+
+function newestFirst(a: Property, b: Property): number {
+  return Number(b.id) - Number(a.id);
+}
 
 function getRelatedProperties(property: Property): PropertyListItem[] {
-  const all = getProperties();
-
-  const candidates = all.filter(
+  const candidates = getProperties().filter(
     (p) =>
       p.id !== property.id &&
       p.transactionType === property.transactionType &&
-      p.city.toLowerCase() === property.city.toLowerCase(),
+      !p.priceOnRequest,
   );
 
-  // Newest first (highest ID)
-  candidates.sort((a, b) => Number(b.id) - Number(a.id));
+  let picked: Property[];
 
-  return candidates.slice(0, RELATED_LIMIT).map(toListItem);
+  if (property.priceOnRequest) {
+    picked = candidates
+      .filter((p) => p.propertyTypeKey === property.propertyTypeKey)
+      .sort(newestFirst)
+      .slice(0, RELATED_LIMIT);
+  } else {
+    const otherType = (p: Property) => (p.propertyTypeKey === property.propertyTypeKey ? 0 : 1);
+    const distance = (p: Property) => Math.abs(p.price - property.price) / property.price;
+
+    picked = candidates
+      .sort((a, b) => otherType(a) - otherType(b) || distance(a) - distance(b) || newestFirst(a, b))
+      .slice(0, RELATED_LIMIT);
+  }
+
+  return picked.map(toListItem);
 }
 
 // ---------------------------------------------------------------------------
@@ -392,11 +488,12 @@ export function getPropertyDetail(propertyId: string): PropertyDetail | null {
     title: property.title,
     transactionType: property.transactionType,
     propertyType: property.propertyTypeLabel,
-    price: property.price,
+    price: publicPrice(property),
     images: mapImages(property),
     description: property.description,
     location: property.locationLabel,
     specs: buildSpecs(property),
+    features: buildFeatureList(property),
     area: property.surface,
     rooms: property.roomStructure,
     bathrooms: property.bathrooms,
@@ -415,4 +512,4 @@ export function getPropertyDetail(propertyId: string): PropertyDetail | null {
 // Exports for tests and downstream modules
 // ---------------------------------------------------------------------------
 
-export { buildPropertyUrl, mapImages, buildHighlights, toListItem, matchesFilters, sortProperties, buildAgentSummary, getRelatedProperties, buildSpecs };
+export { buildPropertyUrl, mapImages, buildHighlights, toListItem, matchesFilters, sortProperties, buildAgentSummary, getRelatedProperties, buildSpecs, buildFeatureList, FEATURE_PRIORITY };

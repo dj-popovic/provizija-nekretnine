@@ -31,9 +31,12 @@ const ALWAYS_ARRAY_FIELDS = new Set([
   "image",
 ]);
 
+// parseTagValue is off: every value stays a string. Number-guessing would
+// corrupt values like phones ("0641112233" → 641112233, "+381…" → 381…).
+// Typing is done in the normalizer, which already parses numbers from strings.
 const parser = new XMLParser({
   ignoreAttributes: false,
-  parseTagValue: true,
+  parseTagValue: false,
   trimValues: true,
   isArray: (tagName) => ALWAYS_ARRAY_FIELDS.has(tagName),
 });
