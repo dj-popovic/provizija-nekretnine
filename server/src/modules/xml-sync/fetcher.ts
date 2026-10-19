@@ -22,14 +22,26 @@ export class XmlFetchError extends Error {
 const FETCH_TIMEOUT_MS = 30_000;
 
 /**
+ * The feed URL carries the agency's access key, so only its host is logged.
+ */
+function feedHost(url: string): string {
+  try {
+    return new URL(url).host;
+  } catch {
+    return "(invalid URL)";
+  }
+}
+
+/**
  * Fetches raw XML from the configured feed URL.
  * Returns raw XML string on success.
  * Throws XmlFetchError on network failure, timeout, or non-OK HTTP response.
  */
 export async function fetchXmlFeed(): Promise<string> {
   const url = config.xmlFeedUrl;
+  const host = feedHost(url);
 
-  logger.info({ url }, "xml-sync: fetching XML feed");
+  logger.info({ host }, "xml-sync: fetching XML feed");
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -46,7 +58,7 @@ export async function fetchXmlFeed(): Promise<string> {
       ? `xml-sync: fetch timed out after ${FETCH_TIMEOUT_MS}ms`
       : "xml-sync: network error during XML fetch";
 
-    logger.error({ url, err }, message);
+    logger.error({ host, err }, message);
     throw new XmlFetchError(message, err);
   } finally {
     clearTimeout(timeoutId);
@@ -54,14 +66,14 @@ export async function fetchXmlFeed(): Promise<string> {
 
   if (!response.ok) {
     const message = `xml-sync: XML feed responded with HTTP ${response.status}`;
-    logger.error({ url, status: response.status }, message);
+    logger.error({ host, status: response.status }, message);
     throw new XmlFetchError(message);
   }
 
   const xml = await response.text();
 
   logger.info(
-    { url, byteLength: xml.length },
+    { host, byteLength: xml.length },
     "xml-sync: XML feed fetched successfully",
   );
 

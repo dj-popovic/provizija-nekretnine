@@ -42,16 +42,22 @@ export const config = {
   xmlFeedUrl: required("XML_FEED_URL"),
   xmlRefreshIntervalMs: optionalInt("XML_REFRESH_INTERVAL_MS", 60 * 60 * 1000), // default: 1 hour
 
-  // CORS
-  corsOrigin: optional("CORS_ORIGIN", "*"),
+  // CORS — empty (default) = disabled; the frontend is same-origin
+  corsOrigin: optional("CORS_ORIGIN", ""),
 
   // Email (Resend)
   resendApiKey: optional("RESEND_API_KEY", ""),
   emailFrom: optional("EMAIL_FROM", "onboarding@resend.dev"),
   agencyEmail: optional("AGENCY_EMAIL", "pro.vizijanekretnine@gmail.com"),
 
-  // Rate limiting
-  rateLimitMax: optionalInt("RATE_LIMIT_MAX", 100),             // general: requests per window
+  // Proxy — hosting platforms (Render etc.) put the app behind a proxy. When true,
+  // the client IP is read from X-Forwarded-For so each visitor gets their own
+  // rate-limit bucket. Set to "false" only if the app is exposed directly,
+  // otherwise clients could spoof that header.
+  trustProxy: optional("TRUST_PROXY", "true") === "true",
+
+  // Rate limiting — applies to /api routes only (static site files are never limited)
+  rateLimitMax: optionalInt("RATE_LIMIT_MAX", 300),             // general: API requests per window per IP
   rateLimitWindowMs: optionalInt("RATE_LIMIT_WINDOW_MS", 60_000), // general: window in ms (default 1 min)
   rateLimitFormsMax: optionalInt("RATE_LIMIT_FORMS_MAX", 5),     // forms: requests per window
   rateLimitFormsWindowMs: optionalInt("RATE_LIMIT_FORMS_WINDOW_MS", 60_000),

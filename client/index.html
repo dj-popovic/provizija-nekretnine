@@ -290,29 +290,6 @@
     <script src="js/renderers.js"></script>
     <script src="js/page-home.js"></script>
     <script src="js/script.js"></script>
-    <script>
-    // ---- Search tab switcher (vanilla JS, no Bootstrap tabs) ----
-    (function() {
-        var tabs  = document.querySelectorAll('.search-tabs [data-tab]');
-        var panes = document.querySelectorAll('.search-tab-content');
-
-        tabs.forEach(function(tab) {
-            tab.addEventListener('click', function() {
-                var target = this.dataset.tab;
-
-                tabs.forEach(function(t) {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
-                });
-                this.classList.add('active');
-                this.setAttribute('aria-selected', 'true');
-
-                panes.forEach(function(pane) {
-                    pane.hidden = pane.id !== 'tab-' + target;
-                });
-            });
-        });
-    })();
-    </script>
+    <script src="js/search-tabs.js"></script>
 </body>
 </html>

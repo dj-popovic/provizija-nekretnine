@@ -501,6 +501,18 @@ Main security concerns are:
 - CORS policy,
 - careful logging of user-submitted data.
 
+HTTP hardening (`app/app.ts`):
+- `@fastify/helmet` sends standard security headers: Content-Security-Policy, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy
+- the CSP whitelists exactly what the frontend loads; CDN sources are pinned to package paths (`bootstrap@5.3.2`, `bootstrap-icons@1.11.1`); scripts must be files (no inline `<script>` or `onclick=`); `frame-ancestors 'none'` blocks clickjacking. **A new external resource (font, script, map, image host) must be added to `CSP_DIRECTIVES`, otherwise the browser blocks it.**
+- CORS is off by default (the frontend is same-origin). `CORS_ORIGIN` should only be set if a separate frontend domain ever needs the API, and never to `*` in production.
+- the API accepts JSON bodies only (the `text/plain` parser is removed), so other websites cannot submit forms cross-site; non-JSON gets 415 and oversized bodies get 413 (not 500)
+- the XML feed URL contains an access key and is never logged; only its host is
+
+Rate limiting details:
+- the general limit (`RATE_LIMIT_MAX`, default 300 requests/min per visitor IP) applies to `/api/*` routes only; static site files (HTML, CSS, JS, images) are never limited, because one page view loads ~8 of them
+- form endpoints add a stricter per-route limit (`RATE_LIMIT_FORMS_MAX`, default 5/min)
+- `TRUST_PROXY=true` (default): the app runs behind the hosting proxy, so the visitor IP is taken from `X-Forwarded-For`. Without it, every visitor would share the proxy's IP and one limit bucket. Set it to `false` only if the app is ever exposed directly to the internet.
+
 ### 16.2 Form protection
 The architecture should include:
 - rate limiting,
