@@ -35,19 +35,17 @@ window.PV = window.PV || {};
   // --- Build sidebar card ---
 
   function buildSidebar(agent) {
-    var photo = agent.photo || 'images/placeholder-agent.jpg';
-
     var html =
       '<div class="col-lg-4 agent-detail-sidebar-col">' +
         '<div class="agent-detail-card">' +
-          '<img src="' + esc(photo) + '" alt="' + esc(agent.fullName) + '" class="agent-detail-img" loading="lazy" width="400" height="340">' +
+          PV.render.agentAvatar(agent, 'agent-detail-img') +
           '<div class="agent-detail-info">' +
             '<div class="agent-detail-name">' + esc(agent.fullName) + '</div>' +
             (agent.stats && agent.stats.label ? '<div class="agent-detail-role">' + esc(agent.stats.label) + '</div>' : '') +
             '<div class="agent-contact-btns">';
 
     if (agent.phone) {
-      html += '<a href="tel:' + esc(agent.phone) + '" class="btn-agent-phone"><i class="bi bi-telephone-fill" aria-hidden="true"></i> ' + esc(agent.phone) + '</a>';
+      html += '<a href="tel:' + esc(agent.phone) + '" class="btn-agent-phone"><i class="bi bi-telephone" aria-hidden="true"></i> ' + esc(agent.phone) + '</a>';
     }
     if (agent.email) {
       html += '<a href="mailto:' + esc(agent.email) + '" class="btn-agent-mail"><i class="bi bi-envelope" aria-hidden="true"></i> ' + esc(agent.email) + '</a>';
@@ -104,7 +102,8 @@ window.PV = window.PV || {};
   // --- Build full page ---
 
   function buildPage(agent, properties) {
-    var html = '<div class="row g-5">';
+    // g-5 below lg is wider than the container padding and causes a sideways scroll on phones
+    var html = '<div class="row g-4 g-lg-5">';
 
     // Left column
     html += '<div class="col-lg-8">';
@@ -142,13 +141,23 @@ window.PV = window.PV || {};
     );
   }
 
+  // Without the navy hero the header sits on white, so it switches to its solid look
+  function hideHero() {
+    heroWrap.style.display = 'none';
+    var header = document.getElementById('mainNav');
+    if (header) {
+      header.dataset.header = 'solid';
+      header.classList.add('is-solid');
+    }
+  }
+
   // --- Load ---
 
   async function loadAgent() {
     var slug = getSlug();
 
     if (!slug) {
-      heroWrap.style.display = 'none';
+      hideHero();
       contentWrap.innerHTML = build404();
       return;
     }
@@ -171,7 +180,7 @@ window.PV = window.PV || {};
 
     } catch (err) {
       if (err.status === 404) {
-        heroWrap.style.display = 'none';
+        hideHero();
         contentWrap.innerHTML = build404();
       } else {
         contentWrap.innerHTML = PV.render.errorState(err.message);

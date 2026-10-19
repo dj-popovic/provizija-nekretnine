@@ -23,23 +23,27 @@ window.PV = window.PV || {};
 
   function buildGallery(images) {
     if (!images || images.length === 0) {
-      return '<div class="col-lg-7"><div style="height:420px;border-radius:12px;background:var(--bg-light);display:flex;align-items:center;justify-content:center;"><i class="bi bi-image" style="font-size:4rem;color:#ccc;" aria-hidden="true"></i></div></div>';
+      return '<div class="col-lg-7"><div class="detail-gallery-placeholder"><i class="bi bi-image" aria-hidden="true"></i></div></div>';
     }
 
     var main = images[0];
-    var html = '<div class="col-lg-7">';
-    html += '<img src="' + esc(main.url) + '" alt="' + esc(main.alt) + '" class="detail-gallery-main" loading="eager" width="900" height="420" id="mainPhoto" style="height:420px;border-radius:12px 12px 0 0;width:100%;object-fit:cover;display:block;">';
+    var html = '<div class="col-lg-7"><div class="detail-gallery">';
+    html += '<img src="' + esc(main.url) + '" alt="' + esc(main.alt) + '" class="detail-gallery-main" loading="eager" width="900" height="420" id="mainPhoto">';
 
+    // Every photo gets a thumbnail (the first one too), so the visitor can always go back to it
     if (images.length > 1) {
       html += '<div class="detail-gallery-thumbs">';
-      for (var i = 1; i < images.length; i++) {
+      for (var i = 0; i < images.length; i++) {
         var img = images[i];
-        html += '<img src="' + esc(img.url) + '" alt="' + esc(img.alt) + '" loading="lazy" width="400" height="100" data-full="' + esc(img.url) + '" data-alt="' + esc(img.alt) + '">';
+        html +=
+          '<button type="button" class="gallery-thumb" aria-pressed="' + (i === 0 ? 'true' : 'false') + '" aria-label="Slika ' + (i + 1) + ' od ' + images.length + '" data-full="' + esc(img.url) + '" data-alt="' + esc(img.alt) + '">' +
+            '<img src="' + esc(img.url) + '" alt="" loading="lazy" width="400" height="100">' +
+          '</button>';
       }
       html += '</div>';
     }
 
-    html += '</div>';
+    html += '</div></div>';
     return html;
   }
 
@@ -53,6 +57,9 @@ window.PV = window.PV || {};
   function formatFloor(floor) {
     return ui(maps.floor, floor);
   }
+
+  var formatRooms = PV.render.formatRooms;
+  var formatBathrooms = PV.render.formatBathrooms;
 
   // Row order agreed with the client. The API sends null (or [] for heating)
   // for anything that doesn't apply to the property type, so those rows are skipped.
@@ -74,7 +81,7 @@ window.PV = window.PV || {};
       rows += specRow('Lokacija', s.location);
     }
     if (s.rooms != null) {
-      rows += specRow('Sobe', s.rooms);
+      rows += specRow('Sobe', s.rooms === 0.5 ? 'Garsonjera' : String(s.rooms).replace('.', ','));
     }
     if (s.bathrooms != null) {
       rows += specRow('Kupatila', s.bathrooms);
@@ -104,7 +111,7 @@ window.PV = window.PV || {};
 
     return (
       '<div class="col-lg-5">' +
-        '<div class="detail-specs" style="background:var(--bg-light);border-radius:12px;padding:28px;height:100%;">' +
+        '<div class="detail-specs">' +
           '<h4>Specifikacije</h4>' +
           rows +
         '</div>' +
@@ -128,13 +135,13 @@ window.PV = window.PV || {};
       chips += featureChip('bi-grid-3x3', PV.render.formatLandArea(s.landArea));
     }
     if (s.rooms != null) {
-      chips += featureChip('bi-door-open', s.rooms + ' sobe');
+      chips += featureChip('bi-door-open', formatRooms(s.rooms));
     }
     if (s.bathrooms != null) {
-      chips += featureChip('bi-water', s.bathrooms + ' kupatila');
+      chips += featureChip('bi-water', formatBathrooms(s.bathrooms));
     }
     if (s.floor != null) {
-      chips += featureChip('bi-building', s.floor === 'ground' ? formatFloor(s.floor) : s.floor + '. sprat');
+      chips += featureChip('bi-building', PV.render.formatFloor(s.floor));
     }
 
     // Highlights
@@ -153,17 +160,12 @@ window.PV = window.PV || {};
       chips += featureChip(icon, highlights[i]);
     }
 
-    // Transaction type badge
-    if (p.transactionType) {
-      var badgeText = maps.transactionType.toUi[p.transactionType] || p.transactionType;
-      chips += '<div class="detail-feature" style="background:rgba(201,162,39,.1);padding:9px 16px;border-radius:8px;font-size:14px;color:var(--accent);font-weight:700;"><span class="property-badge" style="position:static;font-size:12px;">' + esc(badgeText) + '</span></div>';
-    }
-
+    // The transaction type is already shown as the badge above the gallery
     return chips;
   }
 
   function featureChip(icon, text) {
-    return '<div class="detail-feature" style="background:var(--bg-light);padding:9px 16px;border-radius:8px;font-size:14px;"><i class="bi ' + icon + '" aria-hidden="true"></i> ' + esc(text) + '</div>';
+    return '<div class="detail-feature detail-chip"><i class="bi ' + icon + '" aria-hidden="true"></i> ' + esc(text) + '</div>';
   }
 
   // --- Build agent card ---
@@ -171,13 +173,12 @@ window.PV = window.PV || {};
   function buildAgent(agent, propertyId) {
     if (!agent) return '';
 
-    var photo = agent.photo || 'images/placeholder-agent.jpg';
     var profileLink = PV.render.agentHref(agent);
 
     var html =
       '<div class="agent-contact-card">' +
         '<div class="agent-contact-card-head">' +
-          '<img src="' + esc(photo) + '" alt="Agent ' + esc(agent.fullName) + '" loading="lazy" width="64" height="64">' +
+          PV.render.agentAvatar(agent, 'agent-contact-avatar') +
           '<div>' +
             '<div class="agent-contact-card-name">' + esc(agent.fullName) + '</div>' +
             (agent.shortBio ? '<div class="agent-contact-card-role">' + esc(agent.shortBio) + '</div>' : '') +
@@ -250,21 +251,21 @@ window.PV = window.PV || {};
     html += buildSpecs(p);
     html += '</div>';
 
-    // Row 2: Title, location, price, features
+    // Row 2: Title, location, price, features — same left edge as the gallery
     html += '<div class="row mb-4"><div class="col-12">';
-    html += '<div style="background:var(--white);border-top:none;border-radius:0 0 12px 12px;padding:28px 32px;">';
+    html += '<div class="detail-summary">';
 
     // Title + price
-    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:12px;">';
+    html += '<div class="detail-summary-head">';
     html += '<div>';
-    html += '<h1 class="detail-title" style="margin-bottom:6px;">' + esc(p.title) + '</h1>';
-    html += '<div class="detail-location"><i class="bi bi-geo-alt-fill" style="color:var(--accent);" aria-hidden="true"></i> ' + esc(p.location || '') + '</div>';
+    html += '<h1 class="detail-title">' + esc(p.title) + '</h1>';
+    html += '<div class="detail-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> ' + esc(p.location || '') + '</div>';
     html += '</div>';
-    html += '<div class="detail-price-tag" style="margin-bottom:0;white-space:nowrap;">' + formatPrice(p.price, p.transactionType) + '</div>';
+    html += '<div class="detail-price-tag">' + formatPrice(p.price, p.transactionType) + '</div>';
     html += '</div>';
 
     // Feature chips
-    html += '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;padding-top:16px;">';
+    html += '<div class="detail-chips">';
     html += buildFeatures(p);
     html += '</div>';
 
@@ -308,16 +309,16 @@ window.PV = window.PV || {};
   // --- Gallery thumbnail swap ---
 
   function setupGallerySwap() {
-    var thumbs = document.querySelectorAll('.detail-gallery-thumbs img');
+    var thumbs = document.querySelectorAll('.gallery-thumb');
     thumbs.forEach(function (thumb) {
       thumb.addEventListener('click', function () {
         var mainPhoto = document.getElementById('mainPhoto');
         if (!mainPhoto) return;
         mainPhoto.src = this.dataset.full;
         mainPhoto.alt = this.dataset.alt;
-        // Reset opacity
-        thumbs.forEach(function (t) { t.style.opacity = '1'; });
-        this.style.opacity = '0.5';
+        // Selected thumbnail is marked with a ring (aria-pressed), not by dimming it
+        thumbs.forEach(function (t) { t.setAttribute('aria-pressed', 'false'); });
+        this.setAttribute('aria-pressed', 'true');
       });
     });
   }

@@ -191,7 +191,7 @@ window.PV = window.PV || {};
   // --- C3: Advertise property form (oglasite-nekretninu.html) ---
 
   // Value mappings for advertise form (Serbian UI → English API)
-  var transactionTypeMap = { 'Prodaja': 'sale', 'Iznajmljivanje': 'rent' };
+  var transactionTypeMap = { 'Prodaja': 'sale', 'Izdavanje': 'rent', 'Iznajmljivanje': 'rent' };
   var propertyTypeMap = {
     'Stan': 'apartment', 'Kuća': 'house', 'Poslovni prostor': 'commercial',
     'Zemljište': 'land', 'Garaža': 'garage', 'Ostalo': 'other',

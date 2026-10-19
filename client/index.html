@@ -21,14 +21,13 @@
 <body>
 
     <!-- ===== NAVBAR ===== -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <nav class="navbar navbar-expand-lg fixed-top site-header" id="mainNav">
         <div class="container">
             <a class="navbar-brand" href="index.html">
-                <img src="images/logo-dark.png" alt="ProVizija Nekretnine Logo" class="navbar-logo" width="120" height="45">
+                <img src="images/pro-vizija-logo-white.svg" alt="ProVizija Nekretnine" class="navbar-logo navbar-logo--light" width="83" height="54">
+                <img src="images/pro-vizija-logo.svg" alt="" class="navbar-logo navbar-logo--dark" width="83" height="54">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Otvori navigaciju">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Otvori navigaciju"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="nekretnine.html">Nekretnine</a></li>
@@ -54,19 +53,19 @@
                     <div class="search-container">
 
                         <!-- Tab buttons -->
-                        <div class="search-tabs" role="tablist">
-                            <button class="nav-link active" data-tab="kupovina" role="tab" aria-selected="true" type="button">Kupovina</button>
-                            <button class="nav-link" data-tab="iznajmljivanje" role="tab" aria-selected="false" type="button">Iznajmljivanje</button>
+                        <div class="search-tabs" role="tablist" aria-label="Tip oglasa">
+                            <button class="nav-link active" id="tab-btn-kupovina" data-tab="kupovina" role="tab" aria-selected="true" aria-controls="tab-kupovina" type="button">Kupovina</button>
+                            <button class="nav-link" id="tab-btn-izdavanje" data-tab="izdavanje" role="tab" aria-selected="false" aria-controls="tab-izdavanje" type="button">Izdavanje</button>
                         </div>
 
                         <!-- Kupovina form -->
-                        <div class="search-tab-content" id="tab-kupovina">
+                        <div class="search-tab-content" id="tab-kupovina" role="tabpanel" aria-labelledby="tab-btn-kupovina">
                             <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za kupovinu">
                                 <input type="hidden" name="tip_oglasa" value="kupovina">
                                 <div class="row g-3">
-                                    <div class="col-12 col-md-5">
+                                    <div class="col-12 col-md-4">
                                         <label for="kup-lokacija" class="form-label">Lokacija</label>
-                                        <input type="text" class="form-control" id="kup-lokacija" name="lokacija" placeholder="Kvart ili adresa u Novom Sadu" autocomplete="off">
+                                        <input type="text" class="form-control" id="kup-lokacija" name="lokacija" list="lokacije" placeholder="Kvart, npr. Liman" autocomplete="off">
                                     </div>
                                     <div class="col-12 col-md-3">
                                         <label for="kup-tip" class="form-label">Tip</label>
@@ -80,36 +79,33 @@
                                             <option>Poslovni prostor</option>
                                         </select>
                                     </div>
-                                    <div class="col-12 col-md-3">
-                                        <label for="kup-cena" class="form-label">Cena</label>
-                                        <select class="form-select" id="kup-cena" name="cena">
-                                            <option value="">Sve</option>
-                                            <option>Do 50.000 €</option>
-                                            <option>50.000 – 100.000 €</option>
-                                            <option>100.000 – 200.000 €</option>
-                                            <option>200.000 – 500.000 €</option>
-                                            <option>Preko 500.000 €</option>
-                                        </select>
+                                    <div class="col-12 col-md-4">
+                                        <label for="kup-cena-od" class="form-label">Cena (€)</label>
+                                        <div class="price-range">
+                                            <input type="number" class="form-control" id="kup-cena-od" name="priceMin" placeholder="Od" min="0" step="1000" inputmode="numeric" aria-label="Cena od (€)">
+                                            <span class="price-range-sep" aria-hidden="true">–</span>
+                                            <input type="number" class="form-control" id="kup-cena-do" name="priceMax" placeholder="Do" min="0" step="1000" inputmode="numeric" aria-label="Cena do (€)">
+                                        </div>
                                     </div>
                                     <div class="col-12 col-md-1 d-flex align-items-end">
-                                        <button type="submit" class="btn-search w-100" aria-label="Pretraži"><i class="bi bi-search"></i></button>
+                                        <button type="submit" class="btn-search w-100" aria-label="Pretraži"><i class="bi bi-search" aria-hidden="true"></i></button>
                                     </div>
                                 </div>
                             </form>
                         </div>
 
-                        <!-- Iznajmljivanje form -->
-                        <div class="search-tab-content" id="tab-iznajmljivanje" style="display:none;">
-                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za iznajmljivanje">
-                                <input type="hidden" name="tip_oglasa" value="iznajmljivanje">
+                        <!-- Izdavanje form -->
+                        <div class="search-tab-content" id="tab-izdavanje" role="tabpanel" aria-labelledby="tab-btn-izdavanje" hidden>
+                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za izdavanje">
+                                <input type="hidden" name="tip_oglasa" value="izdavanje">
                                 <div class="row g-3">
-                                    <div class="col-12 col-md-5">
-                                        <label for="izn-lokacija" class="form-label">Lokacija</label>
-                                        <input type="text" class="form-control" id="izn-lokacija" name="lokacija" placeholder="Kvart ili adresa u Novom Sadu" autocomplete="off">
+                                    <div class="col-12 col-md-4">
+                                        <label for="izd-lokacija" class="form-label">Lokacija</label>
+                                        <input type="text" class="form-control" id="izd-lokacija" name="lokacija" list="lokacije" placeholder="Kvart, npr. Liman" autocomplete="off">
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="izn-tip" class="form-label">Tip</label>
-                                        <select class="form-select" id="izn-tip" name="tip">
+                                        <label for="izd-tip" class="form-label">Tip</label>
+                                        <select class="form-select" id="izd-tip" name="tip">
                                             <option value="">Sve</option>
                                             <option>Stan</option>
                                             <option>Kuća</option>
@@ -117,23 +113,32 @@
                                             <option>Poslovni prostor</option>
                                         </select>
                                     </div>
-                                    <div class="col-12 col-md-3">
-                                        <label for="izn-cena" class="form-label">Cena / mes.</label>
-                                        <select class="form-select" id="izn-cena" name="cena">
-                                            <option value="">Sve</option>
-                                            <option>Do 300 €</option>
-                                            <option>300 – 600 €</option>
-                                            <option>600 – 1.000 €</option>
-                                            <option>1.000 – 2.000 €</option>
-                                            <option>Preko 2.000 €</option>
-                                        </select>
+                                    <div class="col-12 col-md-4">
+                                        <label for="izd-cena-od" class="form-label">Cena (€/mes.)</label>
+                                        <div class="price-range">
+                                            <input type="number" class="form-control" id="izd-cena-od" name="priceMin" placeholder="Od" min="0" step="50" inputmode="numeric" aria-label="Cena od (€ mesečno)">
+                                            <span class="price-range-sep" aria-hidden="true">–</span>
+                                            <input type="number" class="form-control" id="izd-cena-do" name="priceMax" placeholder="Do" min="0" step="50" inputmode="numeric" aria-label="Cena do (€ mesečno)">
+                                        </div>
                                     </div>
                                     <div class="col-12 col-md-1 d-flex align-items-end">
-                                        <button type="submit" class="btn-search w-100" aria-label="Pretraži"><i class="bi bi-search"></i></button>
+                                        <button type="submit" class="btn-search w-100" aria-label="Pretraži"><i class="bi bi-search" aria-hidden="true"></i></button>
                                     </div>
                                 </div>
                             </form>
                         </div>
+
+                        <!-- Location suggestions: the API matches a whole district or city name -->
+                        <datalist id="lokacije">
+                            <option value="Novi Sad"></option>
+                            <option value="Grbavica"></option>
+                            <option value="Liman"></option>
+                            <option value="Petrovaradin"></option>
+                            <option value="Stari Grad"></option>
+                            <option value="Detelinara"></option>
+                            <option value="Sajam"></option>
+                            <option value="Adice"></option>
+                        </datalist>
 
                     </div><!-- /.search-container -->
                 </div>
@@ -155,7 +160,7 @@
                 <!-- Populated by page-home.js -->
             </div>
             <div class="text-center mt-5">
-                <a href="nekretnine.html" class="btn" style="padding:14px 40px;font-weight:700;background:var(--accent);color:var(--white);border-radius:8px;font-size:15px;transition:background .3s,box-shadow .3s;text-decoration:none;display:inline-flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--accent-dark)';this.style.boxShadow='0 8px 20px rgba(201,162,39,.35)';" onmouseout="this.style.background='var(--accent)';this.style.boxShadow='none';">Pogledaj sve nekretnine <i class="bi bi-arrow-right ms-2"></i></a>
+                <a href="nekretnine.html" class="btn-view-all">Pogledaj sve nekretnine <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
             </div>
         </div>
     </section>
@@ -272,44 +277,12 @@
     <footer class="footer py-5">
         <div class="container">
             <div class="row g-4">
-                <div class="col-lg-4">
-                    <h3 class="footer-brand">ProVizija</h3>
-                    <p class="footer-text">Vodimo vas kroz svaki korak ka vašem novom domu. Sa preko 15 godina iskustva na tržištu nekretnina, nudimo profesionalnu uslugu i pristup vrhunskim nekretninama.</p>
-                </div>
-                <div class="col-lg-2 col-md-4">
-                    <h4 class="footer-title">Istraži</h4>
-                    <ul class="footer-links">
-                        <li><a href="nekretnine.html">Stanovi</a></li>
-                        <li><a href="nekretnine.html">Kuće</a></li>
-                        <li><a href="nekretnine.html">Poslovni prostor</a></li>
-                        <li><a href="nekretnine.html">Zemljište</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-2 col-md-4">
-                    <h4 class="footer-title">Kompanija</h4>
-                    <ul class="footer-links">
-                        <li><a href="o-nama.html">O Nama</a></li>
-                        <li><a href="agenti.html">Naš Tim</a></li>
-                        <li><a href="kontakt.html">Kontakt</a></li>
-                        <li><a href="oglasite-nekretninu.html">Oglasite</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-4 col-md-4">
-                    <h4 class="footer-title">Kontakt</h4>
-                    <ul class="footer-links">
-                        <li><a href="tel:+381111234567">+381 11 123 4567</a></li>
-                        <li><a href="/cdn-cgi/l/email-protection#076e69616847777568716e7d6e6d66297574"><span class="__cf_email__" data-cfemail="254c4b434a6555574a534c5f4c4f440b5756">[email&#160;protected]</span></a></li>
-                        <li>Bulevar Oslobođenja 10, Novi Sad</li>
-                    </ul>
-                </div>
+                <div class="col-lg-4"><h3 class="footer-brand">ProVizija</h3><p class="footer-text">Vodimo vas kroz svaki korak ka vašem novom domu. Sa preko 15 godina iskustva na tržištu nekretnina, nudimo profesionalnu uslugu i pristup vrhunskim nekretninama.</p></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Istraži</h4><ul class="footer-links"><li><a href="nekretnine.html?propertyType=apartment">Stanovi</a></li><li><a href="nekretnine.html?propertyType=house">Kuće</a></li><li><a href="nekretnine.html?propertyType=commercial">Poslovni prostor</a></li><li><a href="nekretnine.html?propertyType=land">Zemljište</a></li></ul></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Kompanija</h4><ul class="footer-links"><li><a href="o-nama.html">O Nama</a></li><li><a href="agenti.html">Naš Tim</a></li><li><a href="kontakt.html">Kontakt</a></li><li><a href="oglasite-nekretninu.html">Oglasite</a></li></ul></div>
+                <div class="col-lg-4 col-md-4"><h4 class="footer-title">Kontakt</h4><ul class="footer-links"><li><a href="tel:+381111234567">+381 11 123 4567</a></li><li><a href="mailto:info@provizija.rs">info@provizija.rs</a></li><li><span class="footer-address">Bulevar oslobođenja 10, Novi Sad</span></li></ul></div>
             </div>
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="footer-bottom text-center">
-                        <p>&copy; 2026 ProVizija Nekretnine. Sva prava zadržana.</p>
-                               </div>
-                </div>
-            </div>
+            <div class="row mt-4"><div class="col-12"><div class="footer-bottom text-center"><p>&copy; 2026 ProVizija Nekretnine. Sva prava zadržana.</p></div></div></div>
         </div>
     </footer>
 
@@ -336,7 +309,7 @@
                 this.setAttribute('aria-selected', 'true');
 
                 panes.forEach(function(pane) {
-                    pane.style.display = (pane.id === 'tab-' + target) ? 'block' : 'none';
+                    pane.hidden = pane.id !== 'tab-' + target;
                 });
             });
         });

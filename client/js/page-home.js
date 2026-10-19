@@ -57,6 +57,12 @@ window.PV = window.PV || {};
 
   // --- Hero search form redirect ---
 
+  function readPrice(form, name) {
+    var input = form.querySelector('input[name="' + name + '"]');
+    var value = input ? Math.round(Number(input.value)) : 0;
+    return value > 0 ? value : 0;
+  }
+
   function setupSearchForms() {
     var forms = document.querySelectorAll('.search-form');
     forms.forEach(function (form) {
@@ -92,6 +98,17 @@ window.PV = window.PV || {};
           var ptVal = ptMap[tip.value];
           if (ptVal) params.set('propertyType', ptVal);
         }
+
+        // Price range — the listing page reads priceMin / priceMax from the URL
+        var priceMin = readPrice(form, 'priceMin');
+        var priceMax = readPrice(form, 'priceMax');
+        if (priceMin && priceMax && priceMin > priceMax) {
+          var tmp = priceMin;
+          priceMin = priceMax;
+          priceMax = tmp;
+        }
+        if (priceMin) params.set('priceMin', priceMin);
+        if (priceMax) params.set('priceMax', priceMax);
 
         var qs = params.toString();
         window.location.href = 'nekretnine.html' + (qs ? '?' + qs : '');

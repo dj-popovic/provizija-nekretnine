@@ -1,36 +1,71 @@
+var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 // ===========================
-// Navbar Scroll Effect
+// Header: navy fade over the hero at the top, white bar once the page scrolls
 // ===========================
-window.addEventListener('scroll', function() {
-    const navbar = document.getElementById('mainNav');
-    if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
+(function () {
+    var header = document.getElementById('mainNav');
+    if (!header) return;
+
+    var menu = document.getElementById('navbarNav');
+    var menuOpen = false;
+    var ticking = false;
+
+    function update() {
+        ticking = false;
+        // data-header="solid": pages without a navy hero keep the white bar
+        var solid = header.dataset.header === 'solid' || menuOpen || window.scrollY > 12;
+        header.classList.toggle('is-solid', solid);
     }
-});
+
+    window.addEventListener('scroll', function () {
+        if (!ticking) {
+            ticking = true;
+            requestAnimationFrame(update);
+        }
+    }, { passive: true });
+
+    if (menu) {
+        // The open mobile menu needs the white background behind its links
+        menu.addEventListener('show.bs.collapse', function () {
+            menuOpen = true;
+            update();
+        });
+        menu.addEventListener('hidden.bs.collapse', function () {
+            menuOpen = false;
+            update();
+        });
+    }
+
+    update();
+})();
 
 // ===========================
 // Smooth Scroll for Anchor Links
 // ===========================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
+        const id = this.getAttribute('href');
+        // Bare "#" links are placeholders or handled by page scripts
+        if (id === '#') {
+            e.preventDefault();
+            return;
+        }
+        const target = document.querySelector(id);
         if (target) {
+            e.preventDefault();
             const navbarHeight = document.querySelector('.navbar').offsetHeight;
             const targetPosition = target.offsetTop - navbarHeight;
-            
+
             window.scrollTo({
                 top: targetPosition,
-                behavior: 'smooth'
+                behavior: prefersReducedMotion ? 'auto' : 'smooth'
             });
-            
+
             // Close mobile menu if open
             const navbarCollapse = document.querySelector('.navbar-collapse');
             if (navbarCollapse.classList.contains('show')) {
-                const bsCollapse = new bootstrap.Collapse(navbarCollapse);
-                bsCollapse.hide();
+                bootstrap.Collapse.getOrCreateInstance(navbarCollapse).hide();
             }
         }
     });
@@ -41,24 +76,29 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // ===========================
 function animateStats() {
     const stats = document.querySelectorAll('.stat-number');
-    
+
     stats.forEach(stat => {
-        const target = parseInt(stat.getAttribute('data-target'));
+        const target = parseInt(stat.getAttribute('data-target'), 10);
         const suffix = stat.textContent.includes('+') ? '+' : stat.textContent.includes('%') ? '%' : '';
-        let current = 0;
-        const increment = target / 50;
-        
-        const updateCounter = () => {
-            current += increment;
-            if (current < target) {
-                stat.textContent = Math.floor(current).toLocaleString() + suffix;
-                setTimeout(updateCounter, 30);
-            } else {
-                stat.textContent = target.toLocaleString() + suffix;
-            }
+        const format = (n) => n.toLocaleString('sr-RS') + suffix;
+
+        // Lock the box to the final value's width so the row doesn't shift while counting.
+        // (Neither site font has tabular figures, so tabular-nums alone can't do this.)
+        stat.textContent = format(target);
+        if (prefersReducedMotion) return;
+        stat.style.minWidth = stat.getBoundingClientRect().width + 'px';
+
+        const duration = 1200;
+        const start = performance.now();
+
+        const tick = (now) => {
+            const t = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - t, 3);
+            stat.textContent = format(Math.round(target * eased));
+            if (t < 1) requestAnimationFrame(tick);
         };
-        
-        updateCounter();
+
+        requestAnimationFrame(tick);
     });
 }
 
@@ -76,144 +116,40 @@ if (statsSection) {
         threshold: 0.5,
         rootMargin: '0px 0px -100px 0px'
     });
-    
+
     statsObserver.observe(statsSection);
 }
-
-// ===========================
-// Property Cards Hover Effect
-// ===========================
-const propertyCards = document.querySelectorAll('.property-card');
-propertyCards.forEach(card => {
-    card.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-8px)';
-    });
-    
-    card.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(0)';
-    });
-});
 
 // ===========================
 // Step Cards Animation on Scroll
 // ===========================
 const stepCards = document.querySelectorAll('.step-card');
-if (stepCards.length > 0) {
+if (stepCards.length > 0 && !prefersReducedMotion) {
     const stepObserver = new IntersectionObserver((entries) => {
         entries.forEach((entry, index) => {
             if (entry.isIntersecting) {
+                const card = entry.target;
                 setTimeout(() => {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
                 }, index * 100);
-                stepObserver.unobserve(entry.target);
+                // Drop the reveal styles afterwards so they don't override the stylesheet
+                card.addEventListener('transitionend', () => {
+                    ['opacity', 'transform', 'transition'].forEach(prop => card.style.removeProperty(prop));
+                }, { once: true });
+                stepObserver.unobserve(card);
             }
         });
     }, {
         threshold: 0.2
     });
-    
+
     stepCards.forEach(card => {
         card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = 'all 0.6s ease';
+        card.style.transform = 'translateY(24px)';
+        card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
         stepObserver.observe(card);
     });
-}
-
-// ===========================
-// Team Cards Animation on Scroll
-// ===========================
-const teamCards = document.querySelectorAll('.team-card');
-if (teamCards.length > 0) {
-    const teamObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry, index) => {
-            if (entry.isIntersecting) {
-                setTimeout(() => {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }, index * 100);
-                teamObserver.unobserve(entry.target);
-            }
-        });
-    }, {
-        threshold: 0.2
-    });
-    
-    teamCards.forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = 'all 0.6s ease';
-        teamObserver.observe(card);
-    });
-}
-
-// ===========================
-// Search Form Submission Handler
-// ===========================
-const searchForm = document.querySelector('.search-form');
-if (searchForm) {
-    searchForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const location = document.getElementById('location').value;
-        const propertyType = document.getElementById('property-type').value;
-        const priceRange = document.getElementById('price-range').value;
-        
-        console.log('Search parameters:', {
-            location,
-            propertyType,
-            priceRange
-        });
-        alert(`Pretraga: ${location}, ${propertyType}, ${priceRange}`);
-    });
-}
-
-// ===========================
-// Property Card Click Handler
-// ===========================
-propertyCards.forEach(card => {
-    card.addEventListener('click', function() {
-        const propertyTitle = this.querySelector('.property-title').textContent;
-        console.log('Clicked property:', propertyTitle);
-    });
-});
-
-// ===========================
-// Initialize AOS (Animate on Scroll) - Optional
-// ===========================
-
-// ===========================
-// Contact Buttons Click Tracking
-// ===========================
-const ctaButtons = document.querySelectorAll('.btn-primary-cta, .btn-secondary-cta');
-ctaButtons.forEach(button => {
-    button.addEventListener('click', function(e) {
-        const buttonText = this.textContent.trim();
-        console.log('CTA Button clicked:', buttonText);
-    });
-});
-
-// ===========================
-// Lazy Loading Images
-// ===========================
-if ('IntersectionObserver' in window) {
-    const imageObserver = new IntersectionObserver((entries, observer) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                if (img.dataset.src) {
-                    img.src = img.dataset.src;
-                    img.removeAttribute('data-src');
-                }
-                observer.unobserve(img);
-            }
-        });
-    });
-
-    // Za implementaciju lazy loading-a, zamenite src sa data-src u HTML-u
-    const lazyImages = document.querySelectorAll('img[data-src]');
-    lazyImages.forEach(img => imageObserver.observe(img));
 }
 
 // ===========================
@@ -222,59 +158,58 @@ if ('IntersectionObserver' in window) {
 document.addEventListener('click', function(e) {
     const navbar = document.querySelector('.navbar');
     const navbarCollapse = document.querySelector('.navbar-collapse');
-    const navbarToggler = document.querySelector('.navbar-toggler');
-    
+
     if (navbarCollapse && navbarCollapse.classList.contains('show')) {
         if (!navbar.contains(e.target)) {
-            const bsCollapse = new bootstrap.Collapse(navbarCollapse);
-            bsCollapse.hide();
+            bootstrap.Collapse.getOrCreateInstance(navbarCollapse).hide();
         }
     }
 });
 
 // ===========================
-// FAQ Accordion Custom Behavior
+// Opening hours badge (kontakt.html) — computed in Novi Sad time, hidden until known
 // ===========================
-const accordionButtons = document.querySelectorAll('.accordion-button');
-accordionButtons.forEach(button => {
-    button.addEventListener('click', function() {
-        console.log('FAQ opened:', this.textContent.trim());
-    });
-});
+(function () {
+    const badge = document.getElementById('openStatus');
+    if (!badge) return;
 
-// ===========================
-// Window Load Event
-// ===========================
-window.addEventListener('load', function() {
-    console.log('Page fully loaded');
-    
-    // Ovde možete dodati kod koji treba da se izvrši nakon potpunog učitavanja stranice
-    // Na primer, init Google Analytics, Facebook Pixel, itd.
-});
+    const parts = new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Europe/Belgrade',
+        weekday: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+        hourCycle: 'h23'
+    }).formatToParts(new Date());
+    const part = (type) => parts.find(p => p.type === type).value;
+
+    // Same hours as listed on the page: Mon–Fri 09–20, Sat 10–16, Sunday by appointment
+    const hours = { Mon: [9, 20], Tue: [9, 20], Wed: [9, 20], Thu: [9, 20], Fri: [9, 20], Sat: [10, 16] };
+    const today = hours[part('weekday')];
+    const minutes = Number(part('hour')) * 60 + Number(part('minute'));
+    const open = Boolean(today) && minutes >= today[0] * 60 && minutes < today[1] * 60;
+
+    badge.classList.toggle('is-closed', !open);
+    badge.querySelector('.open-status-text').textContent = open ? 'Trenutno otvoreno' : 'Trenutno zatvoreno';
+    badge.hidden = false;
+})();
 
 // ===========================
 // Form Validation Enhancement
 // ===========================
 (function() {
     'use strict';
-    
+
     // Fetch all forms that need validation
     const forms = document.querySelectorAll('.needs-validation');
-    
+
     Array.from(forms).forEach(form => {
         form.addEventListener('submit', event => {
             if (!form.checkValidity()) {
                 event.preventDefault();
                 event.stopPropagation();
             }
-            
+
             form.classList.add('was-validated');
         }, false);
     });
 })();
-
-// ===========================
-// Console Welcome Message
-// ===========================
-console.log('%c Premium Nekretnine ', 'background: #0F172A; color: #C9A227; font-size: 20px; padding: 10px;');
-console.log('%c Dobrodošli na naš sajt! ', 'background: #C9A227; color: #fff; font-size: 14px; padding: 5px;');
