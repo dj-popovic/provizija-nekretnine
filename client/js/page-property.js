@@ -7,7 +7,6 @@ window.PV = window.PV || {};
   'use strict';
 
   var esc = PV.render.esc;
-  var formatPrice = PV.render.formatPrice;
   var maps = PV.maps;
 
   var contentWrap = document.getElementById('propertyContent');
@@ -21,25 +20,87 @@ window.PV = window.PV || {};
 
   // --- Build gallery HTML ---
 
+  // Thumbnails under the slider; when there are more photos, the last slot is "+N"
+  var STRIP_SLOTS = 5;
+
+  function slideImages(images, width, height, eagerFirst) {
+    return images.map(function (img, i) {
+      return '<img src="' + esc(img.url) + '" alt="' + esc(img.alt) + '" loading="' + (eagerFirst && i === 0 ? 'eager' : 'lazy') + '" decoding="async" draggable="false" width="' + width + '" height="' + height + '">';
+    }).join('');
+  }
+
+  function thumbImage(img, width, height) {
+    return '<img src="' + esc(img.url) + '" alt="" loading="lazy" decoding="async" width="' + width + '" height="' + height + '">';
+  }
+
   function buildGallery(images) {
     if (!images || images.length === 0) {
-      return '<div class="col-lg-7"><div style="height:420px;border-radius:12px;background:var(--bg-light);display:flex;align-items:center;justify-content:center;"><i class="bi bi-image" style="font-size:4rem;color:#ccc;" aria-hidden="true"></i></div></div>';
+      return '<div class="col-lg-7"><div class="detail-gallery-placeholder"><i class="bi bi-image" aria-hidden="true"></i></div></div>';
     }
 
-    var main = images[0];
-    var html = '<div class="col-lg-7">';
-    html += '<img src="' + esc(main.url) + '" alt="' + esc(main.alt) + '" class="detail-gallery-main" loading="eager" width="900" height="420" id="mainPhoto" style="height:420px;border-radius:12px 12px 0 0;width:100%;object-fit:cover;display:block;">';
+    var count = images.length;
+    var html = '<div class="col-lg-7"><div class="detail-gallery">';
 
-    if (images.length > 1) {
-      html += '<div class="detail-gallery-thumbs">';
-      for (var i = 1; i < images.length; i++) {
-        var img = images[i];
-        html += '<img src="' + esc(img.url) + '" alt="' + esc(img.alt) + '" loading="lazy" width="400" height="100" data-full="' + esc(img.url) + '" data-alt="' + esc(img.alt) + '">';
+    // Same slider as the cards: renderers.js drives the arrows and the counter
+    html += '<div class="property-media gallery-stage">';
+    html += '<div class="property-slides" id="gallerySlides">' + slideImages(images, 900, 420, true) + '</div>';
+    if (count > 1) html += PV.render.mediaNav(count);
+    html += '<button type="button" class="gallery-open" aria-haspopup="dialog" aria-label="Otvori galeriju preko celog ekrana"><i class="bi bi-arrows-fullscreen" aria-hidden="true"></i></button>';
+    html += '</div>';
+
+    if (count > 1) {
+      var more = count > STRIP_SLOTS ? count - (STRIP_SLOTS - 1) : 0;
+      var slots = more ? STRIP_SLOTS : count;
+      html += '<div class="gallery-strip">';
+      for (var i = 0; i < slots; i++) {
+        if (more && i === slots - 1) {
+          html +=
+            '<button type="button" class="gallery-thumb gallery-thumb--more" data-index="' + i + '" aria-haspopup="dialog" aria-label="Prikaži još ' + more + ' ' + PV.render.plural(more, 'fotografiju', 'fotografije', 'fotografija') + '">' +
+              thumbImage(images[i], 160, 88) +
+              '<span class="gallery-more" aria-hidden="true">+' + more + '</span>' +
+            '</button>';
+        } else {
+          html +=
+            '<button type="button" class="gallery-thumb" data-index="' + i + '" aria-pressed="' + (i === 0) + '" aria-label="Slika ' + (i + 1) + ' od ' + count + '">' +
+              thumbImage(images[i], 160, 88) +
+            '</button>';
+        }
       }
       html += '</div>';
     }
 
-    html += '</div>';
+    html += '</div></div>';
+    return html;
+  }
+
+  // Full-screen gallery: one big photo (arrows, swipe, ←/→), every photo in a row at the bottom
+  function buildLightbox(images) {
+    var count = images.length;
+    var html =
+      '<div class="modal fade gallery-modal" id="galleryModal" tabindex="-1" aria-label="Galerija fotografija" aria-hidden="true">' +
+        '<div class="modal-dialog modal-fullscreen">' +
+          '<div class="modal-content">' +
+            '<div class="gallery-modal-top">' +
+              '<span class="gallery-modal-count" aria-live="polite"><span class="lb-current">1</span> / ' + count + '</span>' +
+              '<button type="button" class="gallery-modal-close" data-bs-dismiss="modal" aria-label="Zatvori galeriju"><i class="bi bi-x-lg" aria-hidden="true"></i></button>' +
+            '</div>' +
+            '<div class="gallery-modal-stage">' +
+              '<div class="property-slides" id="lightboxSlides">' + slideImages(images, 1600, 1000, false) + '</div>' +
+              (count > 1 ? PV.render.mediaNav() : '') +
+            '</div>';
+
+    if (count > 1) {
+      html += '<div class="gallery-modal-strip">';
+      for (var i = 0; i < count; i++) {
+        html +=
+          '<button type="button" class="lb-thumb" data-index="' + i + '" aria-pressed="' + (i === 0) + '" aria-label="Slika ' + (i + 1) + ' od ' + count + '">' +
+            thumbImage(images[i], 96, 64) +
+          '</button>';
+      }
+      html += '</div>';
+    }
+
+    html += '</div></div></div>';
     return html;
   }
 
@@ -53,6 +114,9 @@ window.PV = window.PV || {};
   function formatFloor(floor) {
     return ui(maps.floor, floor);
   }
+
+  var formatRooms = PV.render.formatRooms;
+  var formatBathrooms = PV.render.formatBathrooms;
 
   // Row order agreed with the client. The API sends null (or [] for heating)
   // for anything that doesn't apply to the property type, so those rows are skipped.
@@ -74,7 +138,7 @@ window.PV = window.PV || {};
       rows += specRow('Lokacija', s.location);
     }
     if (s.rooms != null) {
-      rows += specRow('Sobe', s.rooms);
+      rows += specRow('Sobe', s.rooms === 0.5 ? 'Garsonjera' : String(s.rooms).replace('.', ','));
     }
     if (s.bathrooms != null) {
       rows += specRow('Kupatila', s.bathrooms);
@@ -104,7 +168,7 @@ window.PV = window.PV || {};
 
     return (
       '<div class="col-lg-5">' +
-        '<div class="detail-specs" style="background:var(--bg-light);border-radius:12px;padding:28px;height:100%;">' +
+        '<div class="detail-specs">' +
           '<h4>Specifikacije</h4>' +
           rows +
         '</div>' +
@@ -128,13 +192,13 @@ window.PV = window.PV || {};
       chips += featureChip('bi-grid-3x3', PV.render.formatLandArea(s.landArea));
     }
     if (s.rooms != null) {
-      chips += featureChip('bi-door-open', s.rooms + ' sobe');
+      chips += featureChip('bi-door-open', formatRooms(s.rooms));
     }
     if (s.bathrooms != null) {
-      chips += featureChip('bi-water', s.bathrooms + ' kupatila');
+      chips += featureChip('bi-water', formatBathrooms(s.bathrooms));
     }
     if (s.floor != null) {
-      chips += featureChip('bi-building', s.floor === 'ground' ? formatFloor(s.floor) : s.floor + '. sprat');
+      chips += featureChip('bi-building', PV.render.formatFloor(s.floor));
     }
 
     // Highlights
@@ -153,17 +217,12 @@ window.PV = window.PV || {};
       chips += featureChip(icon, highlights[i]);
     }
 
-    // Transaction type badge
-    if (p.transactionType) {
-      var badgeText = maps.transactionType.toUi[p.transactionType] || p.transactionType;
-      chips += '<div class="detail-feature" style="background:rgba(201,162,39,.1);padding:9px 16px;border-radius:8px;font-size:14px;color:var(--accent);font-weight:700;"><span class="property-badge" style="position:static;font-size:12px;">' + esc(badgeText) + '</span></div>';
-    }
-
+    // The transaction type is already shown as the badge above the gallery
     return chips;
   }
 
   function featureChip(icon, text) {
-    return '<div class="detail-feature" style="background:var(--bg-light);padding:9px 16px;border-radius:8px;font-size:14px;"><i class="bi ' + icon + '" aria-hidden="true"></i> ' + esc(text) + '</div>';
+    return '<div class="detail-feature detail-chip"><i class="bi ' + icon + '" aria-hidden="true"></i> ' + esc(text) + '</div>';
   }
 
   // --- Build agent card ---
@@ -171,13 +230,12 @@ window.PV = window.PV || {};
   function buildAgent(agent, propertyId) {
     if (!agent) return '';
 
-    var photo = agent.photo || 'images/placeholder-agent.jpg';
     var profileLink = PV.render.agentHref(agent);
 
     var html =
       '<div class="agent-contact-card">' +
         '<div class="agent-contact-card-head">' +
-          '<img src="' + esc(photo) + '" alt="Agent ' + esc(agent.fullName) + '" loading="lazy" width="64" height="64">' +
+          PV.render.agentAvatar(agent, 'agent-contact-avatar') +
           '<div>' +
             '<div class="agent-contact-card-name">' + esc(agent.fullName) + '</div>' +
             (agent.shortBio ? '<div class="agent-contact-card-role">' + esc(agent.shortBio) + '</div>' : '') +
@@ -223,6 +281,21 @@ window.PV = window.PV || {};
     );
   }
 
+  // --- Build price + agency commission ---
+
+  function buildPrice(p) {
+    var price = PV.render.priceParts(p.price, p.transactionType);
+    if (!price) {
+      return '<div class="detail-price"><div class="detail-price-tag is-on-request">Cena na upit</div></div>';
+    }
+    return (
+      '<div class="detail-price">' +
+        '<div class="detail-price-tag">' + esc(price.amount) + ' <span class="detail-price-unit">' + price.unit + '</span></div>' +
+        '<div class="detail-commission"><strong>+3%</strong> posrednička provizija</div>' +
+      '</div>'
+    );
+  }
+
   // --- Build full page content ---
 
   function buildPage(p) {
@@ -250,21 +323,21 @@ window.PV = window.PV || {};
     html += buildSpecs(p);
     html += '</div>';
 
-    // Row 2: Title, location, price, features
+    // Row 2: Title, location, price, features — same left edge as the gallery
     html += '<div class="row mb-4"><div class="col-12">';
-    html += '<div style="background:var(--white);border-top:none;border-radius:0 0 12px 12px;padding:28px 32px;">';
+    html += '<div class="detail-summary">';
 
     // Title + price
-    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:12px;">';
+    html += '<div class="detail-summary-head">';
     html += '<div>';
-    html += '<h1 class="detail-title" style="margin-bottom:6px;">' + esc(p.title) + '</h1>';
-    html += '<div class="detail-location"><i class="bi bi-geo-alt-fill" style="color:var(--accent);" aria-hidden="true"></i> ' + esc(p.location || '') + '</div>';
+    html += '<h1 class="detail-title">' + esc(p.title) + '</h1>';
+    html += '<div class="detail-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> ' + esc(p.location || '') + '</div>';
     html += '</div>';
-    html += '<div class="detail-price-tag" style="margin-bottom:0;white-space:nowrap;">' + formatPrice(p.price, p.transactionType) + '</div>';
+    html += buildPrice(p);
     html += '</div>';
 
     // Feature chips
-    html += '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;padding-top:16px;">';
+    html += '<div class="detail-chips">';
     html += buildFeatures(p);
     html += '</div>';
 
@@ -274,6 +347,7 @@ window.PV = window.PV || {};
     html += '<div class="row g-4"><div class="col-12">';
     if (p.description) {
       html += '<div class="detail-description"><h2>Opis nekretnine</h2>';
+      html += '<div class="detail-description-body is-clamped" id="descBody">';
       // Split description paragraphs
       var paragraphs = p.description.split(/\n\n|\n/);
       for (var i = 0; i < paragraphs.length; i++) {
@@ -281,6 +355,8 @@ window.PV = window.PV || {};
           html += '<p>' + esc(paragraphs[i].trim()) + '</p>';
         }
       }
+      html += '</div>';
+      html += '<button type="button" class="detail-readmore" id="descToggle" aria-expanded="false" aria-controls="descBody" hidden><span>Vidi više</span> <i class="bi bi-chevron-down" aria-hidden="true"></i></button>';
       html += '</div>';
     }
     html += buildAgent(p.agent, p.id);
@@ -305,20 +381,181 @@ window.PV = window.PV || {};
     );
   }
 
-  // --- Gallery thumbnail swap ---
+  // --- Gallery: thumbnails follow the slider, the lightbox opens at the current photo ---
 
-  function setupGallerySwap() {
-    var thumbs = document.querySelectorAll('.detail-gallery-thumbs img');
+  function slideIndex(track) {
+    return Math.round(track.scrollLeft / track.clientWidth);
+  }
+
+  function goTo(track, index, smooth) {
+    track.scrollTo({
+      left: index * track.clientWidth,
+      behavior: smooth && !PV.render.prefersReducedMotion() ? 'smooth' : 'auto',
+    });
+  }
+
+  function markPressed(buttons, index) {
+    buttons.forEach(function (b) {
+      b.setAttribute('aria-pressed', String(Number(b.dataset.index) === index));
+    });
+  }
+
+  function setupGallery(images) {
+    var stage = document.getElementById('gallerySlides');
+    if (!stage) return;
+
+    var thumbs = document.querySelectorAll('.gallery-thumb[aria-pressed]');
+    var moreBtn = document.querySelector('.gallery-thumb--more');
+    stage.addEventListener('scroll', function () {
+      var index = slideIndex(stage);
+      markPressed(thumbs, index);
+      // Photos behind "+N" light up that tile instead
+      if (moreBtn) moreBtn.classList.toggle('is-current', index >= Number(moreBtn.dataset.index));
+    }, { passive: true });
     thumbs.forEach(function (thumb) {
       thumb.addEventListener('click', function () {
-        var mainPhoto = document.getElementById('mainPhoto');
-        if (!mainPhoto) return;
-        mainPhoto.src = this.dataset.full;
-        mainPhoto.alt = this.dataset.alt;
-        // Reset opacity
-        thumbs.forEach(function (t) { t.style.opacity = '1'; });
-        this.style.opacity = '0.5';
+        goTo(stage, Number(thumb.dataset.index), true);
       });
+    });
+
+    document.body.insertAdjacentHTML('beforeend', buildLightbox(images));
+    var modalEl = document.getElementById('galleryModal');
+    var modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    var track = document.getElementById('lightboxSlides');
+    var counter = modalEl.querySelector('.lb-current');
+    var strip = modalEl.querySelector('.gallery-modal-strip');
+    var lbThumbs = modalEl.querySelectorAll('.lb-thumb');
+    var openBtn = document.querySelector('.gallery-open');
+    var current = 0;
+    var startAt = 0;
+    var opener = null;
+    var pending = 0;
+
+    // Lightbox photos are lazy; load the one on screen and its neighbours
+    function warmUp(index) {
+      [index - 1, index, index + 1].forEach(function (i) {
+        var img = track.children[i];
+        if (img && img.loading === 'lazy') img.loading = 'eager';
+      });
+    }
+
+    function sync() {
+      if (!track.clientWidth) return;
+      var index = slideIndex(track);
+      if (index === current) return;
+      current = index;
+      counter.textContent = index + 1;
+      markPressed(lbThumbs, index);
+      warmUp(index);
+
+      // Keep the active thumbnail centred in the bottom row
+      var thumb = lbThumbs[index];
+      if (strip && thumb) {
+        var s = strip.getBoundingClientRect();
+        var t = thumb.getBoundingClientRect();
+        strip.scrollBy({
+          left: (t.left + t.width / 2) - (s.left + s.width / 2),
+          behavior: PV.render.prefersReducedMotion() ? 'auto' : 'smooth',
+        });
+      }
+    }
+
+    function open(index, from) {
+      startAt = index;
+      // Focus goes back where it came from; a click on the photo itself returns to the expand button
+      opener = from || openBtn;
+      warmUp(index);
+      modal.show();
+    }
+
+    stage.addEventListener('click', function () { open(slideIndex(stage)); });
+    openBtn.addEventListener('click', function () { open(slideIndex(stage), openBtn); });
+    if (moreBtn) {
+      moreBtn.addEventListener('click', function () { open(Number(moreBtn.dataset.index), moreBtn); });
+    }
+
+    track.addEventListener('scroll', sync, { passive: true });
+    lbThumbs.forEach(function (thumb) {
+      thumb.addEventListener('click', function () {
+        goTo(track, Number(thumb.dataset.index), true);
+      });
+    });
+
+    // ←/→ step through the photos (Esc already closes the modal)
+    modalEl.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      var btn = modalEl.querySelector(e.key === 'ArrowLeft' ? '.media-nav--prev' : '.media-nav--next');
+      if (!btn) return;
+      e.preventDefault();
+      btn.click();
+    });
+
+    // Bootstrap keeps the dialog display:none until the backdrop has faded in,
+    // so wait for it to have a width before jumping to the photo
+    modalEl.addEventListener('show.bs.modal', function () {
+      cancelAnimationFrame(pending);
+      (function jump() {
+        if (!track.clientWidth) {
+          pending = requestAnimationFrame(jump);
+          return;
+        }
+        current = -1;
+        goTo(track, startAt, false);
+        sync();
+      })();
+    });
+
+    // The slider on the page continues from the photo the visitor stopped at
+    modalEl.addEventListener('hidden.bs.modal', function () {
+      cancelAnimationFrame(pending);
+      if (current >= 0) goTo(stage, current, false);
+      if (opener && document.body.contains(opener)) opener.focus();
+    });
+  }
+
+  // --- "Vidi više" for long descriptions ---
+
+  function setupReadMore() {
+    var body = document.getElementById('descBody');
+    var btn = document.getElementById('descToggle');
+    if (!body || !btn) return;
+
+    // Only a few lines over the limit: show it all, no button
+    if (body.scrollHeight <= body.clientHeight + 40) {
+      body.classList.remove('is-clamped');
+      return;
+    }
+
+    var label = btn.querySelector('span');
+    btn.hidden = false;
+
+    btn.addEventListener('click', function () {
+      var open = btn.getAttribute('aria-expanded') !== 'true';
+      btn.setAttribute('aria-expanded', String(open));
+      label.textContent = open ? 'Prikaži manje' : 'Vidi više';
+
+      if (open) {
+        body.classList.add('is-open');
+        body.style.maxHeight = PV.render.prefersReducedMotion() ? 'none' : body.scrollHeight + 'px';
+      } else {
+        // From the full height back to the clamp; start at a pixel value so it animates
+        body.style.maxHeight = body.scrollHeight + 'px';
+        void body.offsetHeight;
+        body.style.maxHeight = '';
+        body.classList.remove('is-open');
+        // If the visitor had read past the top, bring the heading back into view
+        var top = body.parentNode.getBoundingClientRect().top;
+        if (top < 0) {
+          window.scrollBy({ top: top - 100, behavior: PV.render.prefersReducedMotion() ? 'auto' : 'smooth' });
+        }
+      }
+    });
+
+    // Once open, drop the pixel cap so the text can reflow on resize
+    body.addEventListener('transitionend', function (e) {
+      if (e.propertyName === 'max-height' && btn.getAttribute('aria-expanded') === 'true') {
+        body.style.maxHeight = 'none';
+      }
     });
   }
 
@@ -344,8 +581,8 @@ window.PV = window.PV || {};
       // Render content
       contentWrap.innerHTML = buildPage(p);
 
-      // Wire gallery
-      setupGallerySwap();
+      setupGallery(p.images);
+      setupReadMore();
 
     } catch (err) {
       if (err.status === 404) {

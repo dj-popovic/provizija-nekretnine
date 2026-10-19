@@ -10,6 +10,7 @@ window.PV = window.PV || {};
   var grid = document.getElementById('propertiesGrid');
   var paginationWrap = document.getElementById('paginationWrap');
   var resultsCount = document.getElementById('resultsCount');
+  var resultsNoun = document.getElementById('resultsNoun');
   var btnSearch = document.getElementById('btnSearch');
   var btnReset = document.getElementById('btnReset');
   var priceMinEl = document.getElementById('priceMin');
@@ -27,6 +28,11 @@ window.PV = window.PV || {};
     sajam: 'Sajam',
     adice: 'Adice',
   };
+
+  // --- Room chip value → API rooms value (the feed stores a studio as 0.5 rooms) ---
+  function roomsFromChip(val) {
+    return val === 'garsonjera' ? 0.5 : Number(val);
+  }
 
   // --- Filter state ---
   var filters = {
@@ -96,8 +102,7 @@ window.PV = window.PV || {};
     // Room chips
     syncChipGroup('sobe', function (val) {
       if (val === 'sve') return filters.rooms === undefined;
-      if (val === '4+') return filters.rooms !== undefined && filters.rooms >= 4;
-      return String(filters.rooms) === val;
+      return roomsFromChip(val) === filters.rooms;
     });
 
     // Numeric inputs
@@ -109,8 +114,13 @@ window.PV = window.PV || {};
 
   function syncChipGroup(filterName, isActiveFn) {
     document.querySelectorAll('.filter-chip[data-filter="' + filterName + '"]').forEach(function (chip) {
-      chip.classList.toggle('active', isActiveFn(chip.dataset.val));
+      setChipActive(chip, isActiveFn(chip.dataset.val));
     });
+  }
+
+  function setChipActive(chip, isActive) {
+    chip.classList.toggle('active', isActive);
+    chip.setAttribute('aria-pressed', isActive ? 'true' : 'false');
   }
 
   // --- Fetch and render ---
@@ -127,7 +137,9 @@ window.PV = window.PV || {};
       var pg = res.pagination;
 
       // Results count
-      if (resultsCount) resultsCount.textContent = pg ? pg.total : items.length;
+      var total = pg ? pg.total : items.length;
+      if (resultsCount) resultsCount.textContent = total;
+      if (resultsNoun) resultsNoun.textContent = PV.render.plural(total, 'nekretnina', 'nekretnine', 'nekretnina');
 
       // Cards
       if (items.length === 0) {
@@ -149,7 +161,7 @@ window.PV = window.PV || {};
             fetchAndRender();
             // Scroll to top of grid
             var filterSection = document.querySelector('.filter-section');
-            if (filterSection) filterSection.scrollIntoView({ behavior: 'smooth' });
+            if (filterSection) filterSection.scrollIntoView({ behavior: PV.render.prefersReducedMotion() ? 'auto' : 'smooth' });
           });
         });
       }
@@ -181,10 +193,10 @@ window.PV = window.PV || {};
         var val = this.dataset.val;
 
         // Activate this chip in its group
+        var self = this;
         document.querySelectorAll('.filter-chip[data-filter="' + group + '"]').forEach(function (c) {
-          c.classList.remove('active');
+          setChipActive(c, c === self);
         });
-        this.classList.add('active');
 
         // Update filter state
         if (group === 'tip') {
@@ -192,18 +204,21 @@ window.PV = window.PV || {};
         } else if (group === 'lok') {
           filters.location = val === 'sve' ? undefined : (locationMap[val] || undefined);
         } else if (group === 'sobe') {
-          if (val === 'sve') {
-            filters.rooms = undefined;
-          } else if (val === '4+') {
-            filters.rooms = 4;
-          } else {
-            filters.rooms = Number(val);
-          }
+          filters.rooms = val === 'sve' ? undefined : roomsFromChip(val);
         }
 
         filters.page = 1;
       });
     });
+  }
+
+  // "Od 200.000 Do 100.000" is read as the same range typed the other way round
+  function orderRange(minKey, maxKey) {
+    if (filters[minKey] !== undefined && filters[maxKey] !== undefined && filters[minKey] > filters[maxKey]) {
+      var tmp = filters[minKey];
+      filters[minKey] = filters[maxKey];
+      filters[maxKey] = tmp;
+    }
   }
 
   // --- Wire up search/reset buttons ---
@@ -215,7 +230,10 @@ window.PV = window.PV || {};
         filters.priceMax = priceMaxEl && priceMaxEl.value ? Number(priceMaxEl.value) : undefined;
         filters.areaMin = sqmMinEl && sqmMinEl.value ? Number(sqmMinEl.value) : undefined;
         filters.areaMax = sqmMaxEl && sqmMaxEl.value ? Number(sqmMaxEl.value) : undefined;
+        orderRange('priceMin', 'priceMax');
+        orderRange('areaMin', 'areaMax');
         filters.page = 1;
+        syncUiToFilters();
         fetchAndRender();
       });
     }

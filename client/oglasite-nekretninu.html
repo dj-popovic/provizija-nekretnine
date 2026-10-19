@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Oglasite Nekretninu | ProVizija – Besplatna Procena i Profesionalni Marketing</title>
     <meta name="description" content="Prodajte ili iznajmite vašu nekretninu putem ProVizija agencije. Besplatna procena, profesionalna fotografija i ciljani marketing. Popunite formular – javimo se u roku od 24h.">
-    <meta name="keywords" content="oglasite nekretninu, prodaja stana, iznajmljivanje stana, procena nekretnine, ProVizija, Beograd">
+    <meta name="keywords" content="oglasite nekretninu, prodaja stana, iznajmljivanje stana, procena nekretnine, ProVizija, Novi Sad">
     <meta property="og:title" content="Oglasite Nekretninu | ProVizija Nekretnine">
     <meta property="og:description" content="Besplatna procena i profesionalni marketing vaše nekretnine. Prodajte brže i po boljoj ceni.">
     <meta property="og:type" content="website">
@@ -21,16 +21,18 @@
 <body>
 
     <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+    <nav class="navbar navbar-expand-lg fixed-top site-header" id="mainNav">
         <div class="container">
-            <a class="navbar-brand" href="index.html"><img src="images/logo-dark.png" alt="ProVizija Nekretnine Logo" class="navbar-logo" width="120" height="45"></a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Otvori navigaciju"><span class="navbar-toggler-icon"></span></button>
+            <a class="navbar-brand" href="index.html">
+                <img src="images/pro-vizija-logo.svg" alt="ProVizija Nekretnine" class="navbar-logo" width="83" height="54">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Otvori navigaciju"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item"><a class="nav-link" href="nekretnine.html">Nekretnine</a></li>
                     <li class="nav-item"><a class="nav-link" href="agenti.html">Agenti</a></li>
                     <li class="nav-item"><a class="nav-link" href="o-nama.html">O Nama</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="oglasite-nekretninu.html">Oglasite</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="oglasite-nekretninu.html" aria-current="page">Oglasite</a></li>
                     <li class="nav-item"><a class="nav-link btn-contact" href="kontakt.html">Kontaktirajte Nas</a></li>
                 </ul>
             </div>
@@ -52,7 +54,7 @@
     <!-- MAIN -->
     <section class="oglasite-section" aria-label="Forma za oglašavanje nekretnine">
         <div class="container">
-            <div class="row g-5">
+            <div class="row g-4 g-lg-5">
 
                 <!-- LEFT: Form -->
                 <div class="col-lg-8">
@@ -68,16 +70,16 @@
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label for="og-namena">Šta želite?</label>
-                                    <select id="og-namena" class="form-control">
+                                    <select id="og-namena" class="form-select">
                                         <option>Prodaja</option>
-                                        <option>Iznajmljivanje</option>
+                                        <option>Izdavanje</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label for="og-tip">Tip nekretnine</label>
-                                    <select id="og-tip" class="form-control">
+                                    <select id="og-tip" class="form-select">
                                         <option>Stan</option>
                                         <option>Kuća</option>
                                         <option>Poslovni prostor</option>
@@ -98,25 +100,24 @@
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label for="og-grad">Grad</label>
-                                    <select id="og-grad" class="form-control">
-                                        <option>Beograd</option><option>Novi Sad</option><option>Niš</option><option>Kragujevac</option><option>Subotica</option><option>Ostalo</option>
+                                    <select id="og-grad" class="form-select">
+                                        <option>Novi Sad</option><option>Petrovaradin</option><option>Sremska Kamenica</option><option>Futog</option><option>Veternik</option><option>Ostalo</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label for="og-opstina">Opština / Kvart</label>
-                                    <select id="og-opstina" class="form-control">
+                                    <select id="og-opstina" class="form-select">
                                         <option value="">Odaberite...</option>
-                                        <option>Novi Beograd</option><option>Vračar</option><option>Zemun</option><option>Palilula</option>
-                                        <option>Stari Grad</option><option>Zvezdara</option><option>Čukarica</option><option>Voždovac</option><option>Dedinje</option>
+                                        <option>Centar</option><option>Stari Grad</option><option>Liman</option><option>Grbavica</option><option>Adice</option><option>Detelinara</option><option>Novo Naselje</option><option>Sajam</option><option>Telep</option><option>Podbara</option><option>Salajka</option><option>Rotkvarija</option><option>Bistrica</option><option>Klisa</option><option>Ostalo</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group-custom">
                                     <label for="og-adresa">Ulica i broj (opciono)</label>
-                                    <input type="text" id="og-adresa" class="form-control" placeholder="Npr. Kneza Miloša 15">
+                                    <input type="text" id="og-adresa" class="form-control" placeholder="Npr. Bulevar oslobođenja 10">
                                 </div>
                             </div>
                         </div>
@@ -136,7 +137,7 @@
                             <div class="col-md-4">
                                 <div class="form-group-custom">
                                     <label for="og-sobe">Broj soba</label>
-                                    <select id="og-sobe" class="form-control">
+                                    <select id="og-sobe" class="form-select">
                                         <option>Garsonjera</option><option>1 soba</option><option>2 sobe</option><option>3 sobe</option><option>4 sobe</option><option>5+ soba</option>
                                     </select>
                                 </div>
@@ -144,7 +145,7 @@
                             <div class="col-md-4">
                                 <div class="form-group-custom">
                                     <label for="og-sprat">Sprat</label>
-                                    <select id="og-sprat" class="form-control">
+                                    <select id="og-sprat" class="form-select">
                                         <option>Prizemlje</option><option>1. sprat</option><option>2. sprat</option><option>3. sprat</option><option>4. sprat</option><option>5+ sprat</option><option>Poslednji sprat</option>
                                     </select>
                                 </div>
@@ -152,7 +153,7 @@
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label for="og-grejanje">Grejanje</label>
-                                    <select id="og-grejanje" class="form-control">
+                                    <select id="og-grejanje" class="form-select">
                                         <option>Centralno</option><option>Podno grejanje</option><option>Gas</option><option>Struja</option><option>TA peć</option><option>Klima</option>
                                     </select>
                                 </div>
@@ -160,7 +161,7 @@
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label for="og-godina">Godina izgradnje</label>
-                                    <input type="number" id="og-godina" class="form-control" placeholder="Npr. 2015" min="1900" max="2025">
+                                    <input type="number" id="og-godina" class="form-control" placeholder="Npr. 2015" min="1900" max="2030">
                                 </div>
                             </div>
                             <div class="col-12">
@@ -195,7 +196,7 @@
                             <div class="col-md-6">
                                 <div class="form-group-custom">
                                     <label for="og-pregovaranje">Cena je</label>
-                                    <select id="og-pregovaranje" class="form-control">
+                                    <select id="og-pregovaranje" class="form-select">
                                         <option>Fiksna</option><option>Po dogovoru</option><option>Hitna prodaja</option>
                                     </select>
                                 </div>
@@ -295,10 +296,10 @@
     <footer class="footer py-5">
         <div class="container">
             <div class="row g-4">
-                <div class="col-lg-4"><h3 class="footer-brand">ProVizija</h3><p class="footer-text">Vodimo vas kroz svaki korak ka prodaji ili iznajmljivanju vaše nekretnine. Sa preko 15 godina iskustva.</p></div>
-                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Istraži</h4><ul class="footer-links"><li><a href="nekretnine.html">Stanovi</a></li><li><a href="nekretnine.html">Kuće</a></li><li><a href="nekretnine.html">Poslovni prostor</a></li></ul></div>
+                <div class="col-lg-4"><h3 class="footer-brand">ProVizija</h3><p class="footer-text">Vodimo vas kroz svaki korak ka prodaji ili izdavanju vaše nekretnine. Sa preko 15 godina iskustva.</p></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Istraži</h4><ul class="footer-links"><li><a href="nekretnine.html?propertyType=apartment">Stanovi</a></li><li><a href="nekretnine.html?propertyType=house">Kuće</a></li><li><a href="nekretnine.html?propertyType=commercial">Poslovni prostor</a></li><li><a href="nekretnine.html?propertyType=land">Zemljište</a></li></ul></div>
                 <div class="col-lg-2 col-md-4"><h4 class="footer-title">Kompanija</h4><ul class="footer-links"><li><a href="o-nama.html">O Nama</a></li><li><a href="agenti.html">Naš Tim</a></li><li><a href="kontakt.html">Kontakt</a></li><li><a href="oglasite-nekretninu.html">Oglasite</a></li></ul></div>
-                <div class="col-lg-4 col-md-4"><h4 class="footer-title">Kontakt</h4><ul class="footer-links"><li><a href="tel:+381111234567">+381 11 123 4567</a></li><li><a href="mailto:info@provizija.rs">info@provizija.rs</a></li><li>Bulevar Oslobodjenja 10, Novi Sad</li></ul></div>
+                <div class="col-lg-4 col-md-4"><h4 class="footer-title">Kontakt</h4><ul class="footer-links"><li><a href="tel:+381111234567">+381 11 123 4567</a></li><li><a href="mailto:info@provizija.rs">info@provizija.rs</a></li><li><span class="footer-address">Vase Stajića 36, Novi Sad</span></li></ul></div>
             </div>
             <div class="row mt-4"><div class="col-12"><div class="footer-bottom text-center"><p>&copy; 2026 ProVizija Nekretnine. Sva prava zadržana.</p></div></div></div>
         </div>
