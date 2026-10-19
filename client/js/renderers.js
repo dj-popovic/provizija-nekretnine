@@ -166,6 +166,16 @@ window.PV = window.PV || {};
     );
   }
 
+  // Prev/next arrows + "1 / N" counter of a photo slider (cards and the detail gallery).
+  // Without a count it returns just the arrows.
+  function mediaNav(count) {
+    return (
+      '<button type="button" class="media-nav media-nav--prev" data-dir="-1" aria-label="Prethodna slika"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>' +
+      '<button type="button" class="media-nav media-nav--next" data-dir="1" aria-label="Sledeća slika"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>' +
+      (count ? '<span class="media-count" aria-hidden="true"><span class="media-count-current">1</span> / ' + count + '</span>' : '')
+    );
+  }
+
   function propertyCard(item) {
     var images = item.images && item.images.length
       ? item.images
@@ -179,13 +189,7 @@ window.PV = window.PV || {};
       return '<img src="' + esc(img.url) + '" alt="' + esc(img.alt || item.title) + '" loading="lazy" decoding="async" draggable="false" width="600" height="400">';
     }).join('');
 
-    var nav = '';
-    if (images.length > 1) {
-      nav =
-        '<button type="button" class="media-nav media-nav--prev" data-dir="-1" aria-label="Prethodna slika"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>' +
-        '<button type="button" class="media-nav media-nav--next" data-dir="1" aria-label="Sledeća slika"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>' +
-        '<span class="media-count" aria-hidden="true"><span class="media-count-current">1</span> / ' + images.length + '</span>';
-    }
+    var nav = images.length > 1 ? mediaNav(images.length) : '';
 
     var price = priceParts(item.price, item.transactionType);
     var priceHtml = price
@@ -363,7 +367,7 @@ window.PV = window.PV || {};
   document.addEventListener('error', function (e) {
     var img = e.target;
     if (img.tagName !== 'IMG' || img.dataset.fallback) return;
-    if (!img.closest('.property-media, .detail-gallery')) return;
+    if (!img.closest('.property-media, .detail-gallery, .gallery-modal')) return;
     img.dataset.fallback = '1';
     img.src = PLACEHOLDER_PROPERTY;
   }, true);
@@ -376,6 +380,7 @@ window.PV = window.PV || {};
     propertyCard: propertyCard,
     agentCard: agentCard,
     agentAvatar: agentAvatar,
+    mediaNav: mediaNav,
     pagination: pagination,
     spinner: spinner,
     emptyState: emptyState,

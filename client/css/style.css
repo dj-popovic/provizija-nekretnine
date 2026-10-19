@@ -55,7 +55,7 @@ p, li,
 /* ===========================
    Navigation
    =========================== */
-/* Two looks: a navy fade that melts into the hero while the page is at the top,
+/* Two looks: a gold fade over the hero while the page is at the top,
    and a white bar once it scrolls (.is-solid, toggled in script.js). */
 .site-header {
     padding-block: 1rem;
@@ -72,12 +72,13 @@ p, li,
     transition: opacity 0.3s var(--ease-out);
 }
 
-/* Brand gradient whose opacity falls off toward the bottom edge */
+/* Logo gold that fades out at the bottom edge. The fade is kept short:
+   a long gold-to-transparent fade over the navy hero turns into a grey-brown band. */
 .site-header::before {
-    bottom: -24px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.85) 45%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.85) 45%, transparent 100%);
+    bottom: -10px;
+    background: linear-gradient(135deg, var(--gold-soft) 0%, var(--gold-mid) 55%, var(--gold-deep) 100%);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
 }
 
 .site-header::after {
@@ -100,9 +101,8 @@ p, li,
     opacity: 1;
 }
 
-/* Light and dark logo are stacked and cross-faded */
+/* Navy logo reads well on the gold fade and on the white bar; it shrinks a little on scroll */
 .navbar-brand {
-    position: relative;
     display: block;
     padding: 0;
     transform-origin: left center;
@@ -113,25 +113,10 @@ p, li,
     display: block;
     height: 54px;
     width: auto;
-    transition: opacity 0.3s var(--ease-out);
-}
-
-.navbar-logo--dark {
-    position: absolute;
-    inset: 0;
-    opacity: 0;
 }
 
 .site-header.is-solid .navbar-brand {
     scale: 0.85;
-}
-
-.site-header.is-solid .navbar-logo--light {
-    opacity: 0;
-}
-
-.site-header.is-solid .navbar-logo--dark {
-    opacity: 1;
 }
 
 .nav-link {
@@ -162,22 +147,31 @@ p, li,
     transform: scaleX(1);
 }
 
+/* On the gold fade: navy text, navy underline (gold would vanish on gold) */
 .site-header .nav-link {
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(15, 23, 42, 0.82);
     transition: color 0.3s var(--ease-out);
+}
+
+.site-header .nav-link::after {
+    background: var(--primary);
 }
 
 .site-header .nav-link:hover,
 .site-header .nav-link:focus-visible,
 .site-header .nav-link.active {
-    color: var(--white);
+    color: var(--primary);
 }
 
 .site-header .nav-link:focus-visible {
     box-shadow: none;
-    outline: 2px solid var(--white);
+    outline: 2px solid var(--primary);
     outline-offset: 2px;
     border-radius: 4px;
+}
+
+.site-header.is-solid .nav-link::after {
+    background: var(--accent);
 }
 
 .site-header.is-solid .nav-link {
@@ -194,7 +188,7 @@ p, li,
     outline-color: var(--accent);
 }
 
-/* "Kontaktirajte Nas": white over the navy fade, gold on the white bar */
+/* "Kontaktirajte Nas": white over the gold fade, gold on the white bar */
 .site-header .nav-link.btn-contact {
     margin-left: 1rem;
     padding: 0.75rem 1.8rem !important;
@@ -212,7 +206,7 @@ p, li,
 .site-header .nav-link.btn-contact:hover {
     background: rgba(255, 255, 255, 0.88);
     color: var(--primary);
-    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.18);
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
 }
 
 .site-header.is-solid .nav-link.btn-contact {
@@ -233,8 +227,8 @@ p, li,
 /* Burger: one glyph, colored through currentColor in both header states */
 .site-header .navbar-toggler {
     padding: 0.4375rem 0.75rem;
-    border-color: rgba(255, 255, 255, 0.35);
-    color: var(--white);
+    border-color: rgba(15, 23, 42, 0.25);
+    color: var(--primary);
     transition: color 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
 }
 
@@ -631,34 +625,10 @@ p, li,
     background: var(--primary);
 }
 
-/* On card photos the badge is glass, so gold stays reserved for the price */
+/* Solid badge on card photos (gold for sale, navy for rent): stays readable on any photo */
 .property-media .property-badge {
-    top: 12px;
-    left: 12px;
     z-index: 3;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.375rem 0.75rem;
-    border-radius: 999px;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    background: rgba(15, 23, 42, 0.62);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
     pointer-events: none;
-}
-
-.property-media .property-badge::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--gold-soft);
-}
-
-.property-media .property-badge.badge-rent::before {
-    background: #93C5FD;
 }
 
 .media-nav {
@@ -775,40 +745,44 @@ p, li,
     text-decoration: none;
 }
 
-/* Gold price tag with a soft glow — navy text keeps it readable on the gold */
+/* Gold price with a glow: a metallic gradient fills the glyphs (darker at the bottom so the
+   strokes hold up on white) and drop-shadow adds the glow — text-shadow would show through
+   the transparent, gradient-filled text. Shared with the detail page price. */
+.property-price,
+.detail-price-tag {
+    color: var(--accent);
+    background: linear-gradient(180deg, #E2C15A 0%, var(--accent) 48%, #9C7B16 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px rgba(201, 162, 39, 0.45));
+    font-variant-numeric: lining-nums;
+}
+
 .property-price {
     align-self: flex-start;
     display: inline-flex;
     align-items: baseline;
     gap: 0.35rem;
     margin: 0 0 1.25rem;
-    padding: 0.5rem 0.9rem;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--gold-soft) 0%, var(--gold-mid) 55%, var(--gold-deep) 100%);
-    color: var(--primary);
     font-family: 'Playfair Display', serif;
     font-weight: 800;
-    font-variant-numeric: lining-nums;
-    line-height: 1.1;
-    box-shadow:
-        0 10px 28px -10px rgba(201, 162, 39, 0.85),
-        0 2px 8px -2px rgba(201, 162, 39, 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    line-height: 1.15;
 }
 
 .property-price-amount {
-    font-size: 1.45rem;
+    font-size: 1.6rem;
 }
 
 .property-price-unit {
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 700;
+    font-size: 1rem;
 }
 
 .property-price.is-on-request {
+    color: var(--text-light);
     background: none;
-    box-shadow: inset 0 0 0 1.5px var(--gold-mid);
+    -webkit-text-fill-color: currentColor;
+    filter: none;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.95rem;
     font-weight: 700;
@@ -1695,16 +1669,18 @@ p, li,
 /* ===========================
    PROPERTY DETAIL PAGE
    =========================== */
-/* Main photo and thumbnails are separate tiles, so the corners work for any photo count */
-.detail-gallery-main {
-    width: 100%;
+/* Photo slider: the card slider again (renderers.js drives its arrows and counter),
+   one row of thumbnails under it, and a full-screen gallery behind "+N" */
+.gallery-stage {
+    aspect-ratio: auto;
     height: 420px;
-    object-fit: cover;
     border-radius: 12px;
-    display: block;
+    overflow: hidden;
     outline: 1px solid var(--image-outline);
     outline-offset: -1px;
 }
+.gallery-stage .property-slides { cursor: zoom-in; }
+.gallery-stage:hover .media-nav { opacity: 1; }
 .detail-gallery-placeholder {
     height: 420px;
     border-radius: 12px;
@@ -1714,33 +1690,137 @@ p, li,
     color: #ccc;
     font-size: 4rem;
 }
-.detail-gallery-thumbs {
+.gallery-open {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 3;
+    width: 40px;
+    height: 40px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, .55);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: var(--white);
+    cursor: pointer;
+    transition: background-color .15s ease-out, scale .15s ease-out;
+}
+.gallery-open::after { content: ''; position: absolute; inset: -4px; }
+.gallery-open:hover { background: rgba(15, 23, 42, .75); }
+.gallery-open:active { scale: .96; }
+.gallery-open:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.gallery-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;
     margin-top: 8px;
 }
 .gallery-thumb {
+    position: relative;
     padding: 0;
     border: 0;
     background: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: opacity .15s ease-out, scale .15s ease-out;
+    transition: opacity .15s ease-out, scale .15s ease-out, box-shadow .15s ease-out;
 }
 .gallery-thumb img {
     display: block;
     width: 100%;
-    height: 100px;
+    height: 88px;
     object-fit: cover;
     border-radius: 8px;
     outline: 1px solid var(--image-outline);
     outline-offset: -1px;
 }
 .gallery-thumb:hover { opacity: .85; }
-.gallery-thumb[aria-pressed="true"] { outline: 2px solid var(--accent); outline-offset: 2px; }
-.gallery-thumb:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.gallery-thumb[aria-pressed="true"],
+.gallery-thumb--more.is-current { box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--accent); }
+.gallery-thumb:focus-visible { outline: 2px solid var(--primary); outline-offset: 6px; }
 .gallery-thumb:active { scale: .96; }
+/* Last slot: "+N" over the dimmed photo */
+.gallery-more {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 8px;
+    background: rgba(15, 23, 42, .6);
+    color: var(--white);
+    font-size: 1.25rem;
+    font-weight: 700;
+    transition: background-color .15s ease-out;
+}
+.gallery-thumb--more:hover { opacity: 1; }
+.gallery-thumb--more:hover .gallery-more { background: rgba(15, 23, 42, .75); }
+
+/* Full-screen gallery (Bootstrap modal): big photo, arrows, swipe, thumbnail strip */
+.gallery-modal .modal-dialog { transform: none; }
+.gallery-modal { --lightbox-bg: #0A0F1E; }
+.gallery-modal .modal-content {
+    background: var(--lightbox-bg);
+    color: var(--white);
+    border: 0;
+    border-radius: 0;
+}
+.gallery-modal-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 0 24px;
+}
+.gallery-modal-count { font-weight: 600; color: rgba(255, 255, 255, .8); }
+.gallery-modal-close {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .08);
+    color: var(--white);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color .15s ease-out, scale .15s ease-out;
+}
+.gallery-modal-close:hover { background: rgba(255, 255, 255, .16); }
+.gallery-modal-close:active { scale: .96; }
+.gallery-modal-close:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gallery-modal-stage { position: relative; flex: 1; min-height: 0; margin: 12px 0; }
+.gallery-modal-stage .property-slides img { object-fit: contain; }
+.gallery-modal-stage .media-nav { opacity: 1; width: 48px; height: 48px; }
+.gallery-modal-stage .media-nav--prev { left: 20px; }
+.gallery-modal-stage .media-nav--next { right: 20px; }
+.gallery-modal-strip {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    justify-content: safe center;
+    overflow-x: auto;
+    padding: 8px 16px 20px;
+    scrollbar-width: thin;
+}
+.lb-thumb {
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    border-radius: 8px;
+    opacity: .55;
+    cursor: pointer;
+    transition: opacity .15s ease-out, scale .15s ease-out, box-shadow .15s ease-out;
+}
+.lb-thumb img { display: block; width: 96px; height: 64px; object-fit: cover; border-radius: 8px; }
+.lb-thumb:hover { opacity: .85; }
+.lb-thumb[aria-pressed="true"] { opacity: 1; box-shadow: 0 0 0 2px var(--lightbox-bg), 0 0 0 4px var(--accent); }
+.lb-thumb:focus-visible { outline: 2px solid var(--white); outline-offset: 6px; }
+.lb-thumb:active { scale: .96; }
 
 .detail-info-sidebar {
     background: var(--bg-light);
@@ -1763,10 +1843,23 @@ p, li,
 }
 .detail-location { display: flex; align-items: center; gap: 6px; color: var(--text-light); font-size: 15px; margin-bottom: 16px; }
 .detail-location i { color: var(--accent); }
+.detail-price { text-align: right; }
 .detail-price-tag {
-    font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 800; color: var(--primary);
-    font-variant-numeric: lining-nums; white-space: nowrap;
+    font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 800; line-height: 1.15;
+    white-space: nowrap;
 }
+.detail-price-unit { font-size: 22px; }
+.detail-price-tag.is-on-request {
+    color: var(--text-light);
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    filter: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+}
+.detail-commission { margin-top: 2px; font-size: 14px; font-weight: 500; color: var(--text-light); }
+.detail-commission strong { color: var(--accent-dark); font-weight: 700; }
 
 .detail-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; padding-top: 16px; }
 .detail-chip { background: var(--bg-light); padding: 9px 16px; border-radius: 8px; }
@@ -1789,6 +1882,33 @@ p, li,
 .detail-description { margin-top: 32px; }
 .detail-description h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--primary); margin-bottom: 16px; }
 .detail-description p { color: var(--text-light); font-size: 16px; line-height: 1.8; margin-bottom: 14px; }
+/* Long descriptions start clamped with a fade; "Vidi više" opens them */
+.detail-description-body { overflow: hidden; transition: max-height .3s var(--ease-out); }
+.detail-description-body.is-clamped {
+    max-height: 11.5rem;
+    -webkit-mask-image: linear-gradient(to bottom, #000 60%, transparent);
+    mask-image: linear-gradient(to bottom, #000 60%, transparent);
+}
+.detail-description-body.is-open { -webkit-mask-image: none; mask-image: none; }
+.detail-readmore {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 2px;
+    border: 0;
+    background: none;
+    color: var(--accent-dark);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color .15s ease-out;
+}
+.detail-readmore i { -webkit-text-stroke: .4px currentColor; transition: transform .2s var(--ease-out); }
+.detail-readmore[aria-expanded="true"] i { transform: rotate(180deg); }
+.detail-readmore:hover { color: var(--primary); }
+.detail-readmore:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.detail-readmore[hidden] { display: none; }
 
 /* Agent contact card - below description, NOT sticky */
 .agent-contact-card {
@@ -1999,7 +2119,7 @@ textarea.field-input { resize: none; }
     .property-location { font-size: 0.8rem; margin-bottom: 0.25rem; }
     .property-title { font-size: 1.05rem; margin-bottom: 0.75rem; }
     .property-price { margin-bottom: 1rem; }
-    .property-price-amount { font-size: 1.3rem; }
+    .property-price-amount { font-size: 1.45rem; }
     .property-stat { font-size: 0.85rem; gap: 0.35rem; }
 
     /* --- Team cards (agent kartice) – manje, slika fiksirana --- */
@@ -2059,10 +2179,20 @@ textarea.field-input { resize: none; }
 
     /* --- Detail page --- */
     .detail-title { font-size: 22px; }
-    .detail-price-tag { font-size: 26px; }
-    .detail-gallery-main { height: 260px; }
+    .detail-summary-head { gap: 4px; }
+    .detail-price { text-align: left; }
+    .detail-price-tag { font-size: 28px; }
+    .detail-price-unit { font-size: 18px; }
+    .gallery-stage { height: 260px; }
     .detail-gallery-placeholder { height: 260px; }
-    .gallery-thumb img { height: 70px; }
+    .gallery-strip { gap: 6px; }
+    .gallery-thumb img { height: 56px; }
+    .gallery-more { font-size: 1rem; }
+    .gallery-modal-top { padding-left: 16px; }
+    .gallery-modal-stage .media-nav { width: 40px; height: 40px; }
+    .gallery-modal-stage .media-nav--prev { left: 8px; }
+    .gallery-modal-stage .media-nav--next { right: 8px; }
+    .lb-thumb img { width: 72px; height: 50px; }
 
     /* --- Filters --- */
     .filter-chip { padding: 13px 16px; } /* 44px touch targets */
@@ -2113,11 +2243,12 @@ textarea.field-input { resize: none; }
     .site-header::before,
     .site-header::after,
     .navbar-brand,
-    .navbar-logo,
     .site-header .nav-link,
     .site-header .navbar-toggler,
     .property-card,
-    .team-card {
+    .team-card,
+    .detail-description-body,
+    .detail-readmore i {
         transition: none;
     }
 
