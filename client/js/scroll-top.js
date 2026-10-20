@@ -1,5 +1,5 @@
 // ===========================
-// scroll-top.js — "back to top" button, bottom-left on every page
+// scroll-top.js — "back to top" button, bottom-right on every page
 // ===========================
 (function () {
   'use strict';
@@ -10,7 +10,7 @@
   btn.type = 'button';
   btn.className = 'scroll-top';
   btn.setAttribute('aria-label', 'Nazad na vrh stranice');
-  btn.innerHTML = '<i class="bi bi-arrow-up" aria-hidden="true"></i>';
+  btn.innerHTML = '<i class="bi bi-chevron-up" aria-hidden="true"></i>';
   // Hidden from keyboard and screen readers until it is shown
   btn.tabIndex = -1;
   btn.setAttribute('aria-hidden', 'true');
