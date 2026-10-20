@@ -20,6 +20,7 @@ The MVP contract includes these public endpoints:
 - `GET /api/home`
 - `GET /api/properties`
 - `GET /api/properties/:slug-id`
+- `GET /api/filter-options`
 - `GET /api/agents`
 - `GET /api/agents/:slug`
 - `GET /api/health`
@@ -38,7 +39,7 @@ The MVP does not include:
 - protected/internal management endpoints
 - CMS-like content management endpoints
 - dynamic FAQ / CTA / buying-process content endpoints
-- filter facets / available-filters endpoints
+- generic filter facets on the listing response (the one exception is `GET /api/filter-options`: locations and present property types, approved for #15 on 2026-10-20)
 
 ---
 
@@ -224,23 +225,49 @@ This is the single listing endpoint for all property browsing modes, including p
 
 Supported MVP query params:
 
-- `transactionType`
-- `propertyType`
-- `location`
-- `rooms`
-- `priceMin`
-- `priceMax`
-- `areaMin`
-- `areaMax`
-- `page`
-- `pageSize`
-- `sort` *(supported in MVP, but should stay limited)*
+| Param | Repeatable | Meaning |
+|---|---|---|
+| `transactionType` | no | `sale` or `rent` |
+| `propertyType` | yes | type key(s); several = any of them. "Poslovni prostor" in the UI sends `commercial` + `office` |
+| `city` | no | exact city name as listed by `GET /api/filter-options` (case-insensitive) |
+| `hood` | yes | district(s) of `city`; several = any of them. **Requires `city`**: a district name is only unique within its city ("Okolina") |
+| `roomsMin`, `roomsMax` | no | inclusive rooms range, positive numbers; a studio (garsonjera) is `0.5`. Listings without rooms (plots, farmland) never match |
+| `priceMin`, `priceMax` | no | inclusive, €; "cena na upit" never matches a price filter |
+| `areaMin`, `areaMax` | no | inclusive building area in **m²**; plots / farmland (no building area) never match |
+| `landAreaMin`, `landAreaMax` | no | inclusive plot area in **ares** (the `landArea` value); apartments and listings without a plot area never match |
+| `page`, `pageSize` | no | pagination (`pageSize` ≤ 100) |
+| `sort` | no | see below |
+
+"Više filtera" (#16). Every rule works on the values the site shows (spec panel, feature chips); a listing without the value never matches a set filter.
+
+| Param | Repeatable | Meaning |
+|---|---|---|
+| `newBuild` | no | `true` = Novogradnja tab: listings with feature `new_build` or `under_construction` |
+| `bathroomsMin` | no | at least this many bathrooms |
+| `floorMin`, `floorMax` | no | inclusive floor range, **apartments only**; prizemlje = `0` |
+| `notGroundFloor` | no | `true` = apartments with a known floor above prizemlje |
+| `notTopFloor` | no | `true` = apartments with a known floor below `totalFloors` |
+| `yearMin`, `yearMax` | no | inclusive construction year range |
+| `heating` | yes | **any of** the heating keys (`central`, `gas`…; unmapped XML values pass through as-is) |
+| `furnished` | yes | **any of** the furnishing keys (`furnished`, `semi_furnished`, `empty`) |
+| `construction` | yes | **any of**: `new` (Novogradnja), `under_construction` (U izgradnji), `old` (Stara gradnja) |
+| `condition` | yes | **any of**: `original` (Izvorno stanje), `renovated` (Renoviran), `needs_renovation` (Za adaptaciju) |
+| `registered` | no | `true` = only `registration: "registered"` (Uknjižen) |
+| `feature` | yes | **all of** the feature-chip keys (see the Features table); only features the site shows for that type count (no `elevator` for houses) |
+| `equipment` | yes | **all of**: `air_conditioning` (Klima), `internet`, `cable_tv` (Kablovska), `intercom` (Interfon), `video_intercom` (Video interfon), `video_surveillance` (Video nadzor) |
+
+Switches (`newBuild`, `notGroundFloor`, `notTopFloor`, `registered`) accept `true` / `1` / `false` / `0`; anything else → `400`. Unknown `feature`, `equipment`, `construction`, `condition` keys → `400`.
+
+Example: `/api/properties?transactionType=sale&city=Novi%20Sad&hood=Telep&hood=Grbavica&roomsMin=2&roomsMax=3`
 
 #### Query param notes
 
 - `transactionType` is a main filter and should be supported.
 - Do not create separate endpoints for sale/rent tabs. Those are variants of this same route.
-- The endpoint should not return filter metadata/facets in MVP.
+- The endpoint does not return filter metadata/facets. Filter choices come from `GET /api/filter-options`.
+- Repeat a param to give several values (`hood=a&hood=b`); commas are not separators.
+- Validation → `400 VALIDATION_ERROR` with `details`: `hood` without `city`; a non-repeatable param given twice; a non-numeric or negative number (`roomsMin` / `roomsMax` must be > 0); any `…Min` greater than its `…Max`; more than 50 values of one param.
+- The old `location` and `rooms` params were removed in #15 (2026-10-20) and are ignored like any unknown param.
 
 #### Suggested sort values
 
@@ -336,7 +363,7 @@ Suggested simple image shape:
 The listing response should not include:
 
 - `agentSummary`
-- filter metadata / facets / available filter values
+- filter metadata / facets / available filter values (those come from `GET /api/filter-options`)
 
 ### Error responses
 
@@ -552,7 +579,7 @@ The following may be `null` or omitted if not available or not reliably mapped f
 
 | Field | Type | Notes |
 |---|---|---|
-| `propertyType` | string | key: `apartment`, `house`, `plot`, `land`, `commercial`, `office`, `garage`, `cottage`, `other` |
+| `propertyType` | string | key: `apartment`, `house`, `plot`, `land`, `commercial`, `office`, `garage`, `other` |
 | `area` | number \| null | m². `null` for plots / farmland |
 | `landArea` | number \| null | **ares**. Always `null` for apartments |
 | `location` | string | `"City, Hood"`; never a street or number |
@@ -585,9 +612,9 @@ Priority order and keys:
 | Condition / buying | `renovated` (Renoviran), `move_in_ready` (Odmah useljiv), `mortgage_eligible` (Može na kredit) |
 
 Type rules applied by the backend:
-- infrastructure keys only for `house`, `cottage`, `plot`, `land` (apartments always have them, so they're noise there)
+- infrastructure keys only for `house`, `plot`, `land` (apartments always have them, so they're noise there)
 - permit keys only for `plot`, `land`
-- `elevator` never for `house`, `cottage`, `plot`, `land`
+- `elevator` never for `house`, `plot`, `land`
 
 The legacy `highlights` field (Serbian labels) is kept for backward compatibility and will be removed during the i18n migration.
 
@@ -638,6 +665,77 @@ RELPER requires a price, so agents enter a symbolic **1 €** for "cena na upit"
 - `highlights` are derived from `<other>` XML elements (curated subset, TBD during implementation).
 - `registrationStatus` (legacy flat field) is a three-state string derived from `<other>` XML values: `"registered"`, `"unregisterable"`, `"in_progress"`, or `null`. `specs.registration` maps `null` to `"not_registered"`.
 - `propertyType` (flat field) is the Serbian label (legacy). `specs.propertyType` is the stable key.
+
+---
+
+## 3a. GET /api/filter-options
+
+### Purpose
+
+Returns the choices the listing filters offer, built from the runtime dataset: every city with its districts (`property_hood`, exactly as RELPER sends them; `hood_part` is not used), with counts, and the property types present.
+
+### Used by page(s)
+
+- Properties listing page (Grad / Deo grada dropdowns, the extra type chips)
+- Home page hero (Lokacija picker)
+
+### Query params
+
+**The same filters as `GET /api/properties`** (same names, same validation, same `400`): the frontend sends the filter panel as it is on screen, so the counts follow the whole combination (e.g. Stan + Novi Sad + Telep). `page`, `pageSize` and `sort` are accepted and ignored.
+
+What is **listed** depends only on the tab: `transactionType` (`sale` / `rent`) and `newBuild` (Novogradnja). The other filters only change the **counts**, so the lists don't jump while the user clicks.
+
+### Success response
+
+```json
+{
+  "data": {
+    "propertyTypes": [
+      { "key": "apartment", "count": 17 },
+      { "key": "house", "count": 7 },
+      { "key": "plot", "count": 1 }
+    ],
+    "cities": [
+      {
+        "name": "Novi Sad",
+        "count": 21,
+        "hoods": [
+          { "name": "Adamovićevo Naselje", "count": 2 },
+          { "name": "Telep", "count": 6 }
+        ]
+      },
+      { "name": "Bač", "count": 1, "hoods": [] }
+    ],
+    "counts": {
+      "feature": { "terrace": 19, "elevator": 12, "parking": 8 },
+      "equipment": { "air_conditioning": 16, "intercom": 12 },
+      "heating": { "central": 12, "gas": 8 },
+      "furnished": { "empty": 9, "furnished": 9 },
+      "construction": { "new": 9, "old": 10 },
+      "condition": { "original": 3, "renovated": 4 },
+      "registration": { "registered": 11, "in_progress": 1 }
+    }
+  }
+}
+```
+
+### Response notes
+
+- `propertyTypes`: every type key with at least one listing in the tab (the most common first). The frontend shows an extra type chip (e.g. `garage`) only when its key is here. `count`: listings of that type matching only the panel's **location and price** (`0` → that type chip is dimmed: e.g. no Plac in Telep). The other filters are left out on purpose: switching the type clears the ones that don't fit the new type (rooms for a plot, Terasa, m² ↔ ares), so they must not block the switch.
+- `cities`: every city with at least one listing in the tab, the biggest first (by all its listings in the tab, so the order never jumps); ties A–Ž.
+- `hoods`: the city's districts in Serbian alphabetical order. `[]` when no listing of that city has a district (e.g. Bač).
+- City / district `count`: listings matching the panel **without its location choice**, so every other city and district stays pickable. It can be `0` (dimmed in the dropdown).
+- Names are grouped case-insensitively; the first spelling seen is returned. A listing without a district counts toward its city only.
+- Use `name` values as-is for `city` / `hood` in `GET /api/properties`.
+- `counts`: for each "Više filtera" group, how many listings have each value together with the rest of the panel. Only values with at least one listing appear; a missing key means 0 (the frontend dims and disables that chip).
+  - "any of" groups (`heating`, `furnished`, `construction`, `condition`, `registration`) are counted **without their own choice**: choosing Centralno doesn't dim Gas.
+  - "all of" groups (`feature`, `equipment`) are counted **with every choice**: after Lift, a feature no listing with a lift has is 0.
+  - `feature` counts only features the site shows for the listing's type.
+
+### Error responses
+
+- `400` for invalid query params (the same rules as `GET /api/properties`)
+- `500` for unexpected backend errors
 
 ---
 

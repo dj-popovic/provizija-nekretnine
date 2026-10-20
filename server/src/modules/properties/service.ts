@@ -153,21 +153,25 @@ function matchesFilters(property: Property, query: PropertyListingQuery): boolea
     return false;
   }
 
-  if (query.propertyType && property.propertyTypeKey !== query.propertyType) {
+  if (query.propertyTypes.length > 0 && !query.propertyTypes.includes(property.propertyTypeKey)) {
     return false;
   }
 
-  if (query.location) {
-    const loc = query.location.toLowerCase();
-    const matchesCity = property.city.toLowerCase() === loc;
-    const matchesHood = property.hood?.toLowerCase() === loc;
-    if (!matchesCity && !matchesHood) {
-      return false;
+  // Location: one city, then optionally any of its districts (case-insensitive)
+  if (query.city !== undefined) {
+    if (property.city.toLowerCase() !== query.city.toLowerCase()) return false;
+    if (query.hoods.length > 0) {
+      const hood = property.hood?.toLowerCase();
+      if (!hood || !query.hoods.some((h) => h.toLowerCase() === hood)) return false;
     }
   }
 
-  if (query.rooms !== undefined && property.roomStructure !== query.rooms) {
-    return false;
+  // Rooms range, inclusive; land without rooms never matches it
+  if (query.roomsMin !== undefined || query.roomsMax !== undefined) {
+    const rooms = property.roomStructure;
+    if (rooms === null) return false;
+    if (query.roomsMin !== undefined && rooms < query.roomsMin) return false;
+    if (query.roomsMax !== undefined && rooms > query.roomsMax) return false;
   }
 
   // "Cena na upit" has no real price, so it never matches a price filter
@@ -191,6 +195,78 @@ function matchesFilters(property: Property, query: PropertyListingQuery): boolea
       return false;
     }
   }
+
+  // Land area filter is in ares, on the same value the cards show (never for apartments)
+  if (query.landAreaMin !== undefined || query.landAreaMax !== undefined) {
+    const landArea = publicLandArea(property);
+    if (landArea === null) return false;
+    if (query.landAreaMin !== undefined && landArea < query.landAreaMin) return false;
+    if (query.landAreaMax !== undefined && landArea > query.landAreaMax) return false;
+  }
+
+  return matchesMoreFilters(property, query);
+}
+
+// ---------------------------------------------------------------------------
+// "Više filtera" (#16) — every rule works on the values the site shows
+// (spec panel, feature chips), so a filter never finds a hidden value.
+// A listing without the value (null / empty) never matches a set filter.
+// ---------------------------------------------------------------------------
+
+/** Floor as a number (prizemlje = 0); null when unknown or not an apartment. */
+function floorNumber(property: Property): number | null {
+  if (property.propertyTypeKey !== "apartment" || property.floor === null) return null;
+  if (property.floor === "ground") return 0;
+  const n = Number(property.floor);
+  return Number.isFinite(n) ? n : null;
+}
+
+function hasPublicFeature(property: Property, key: string): boolean {
+  return property.featureKeys.includes(key) && featureApplies(key, property.propertyTypeKey);
+}
+
+function matchesConstruction(property: Property, value: string): boolean {
+  if (value === "new") return property.featureKeys.includes("new_build");
+  if (value === "under_construction") return property.featureKeys.includes("under_construction");
+  return property.isOldBuild;
+}
+
+function inRange(value: number | null, min: number | undefined, max: number | undefined): boolean {
+  if (min === undefined && max === undefined) return true;
+  if (value === null) return false;
+  return (min === undefined || value >= min) && (max === undefined || value <= max);
+}
+
+function matchesMoreFilters(property: Property, query: PropertyListingQuery): boolean {
+  // Novogradnja tab: new builds and buildings still under construction
+  if (query.newBuild && !matchesConstruction(property, "new") && !matchesConstruction(property, "under_construction")) {
+    return false;
+  }
+
+  if (query.bathroomsMin !== undefined && (property.bathrooms ?? 0) < query.bathroomsMin) return false;
+
+  const floor = floorNumber(property);
+  if (!inRange(floor, query.floorMin, query.floorMax)) return false;
+  if (query.notGroundFloor && (floor === null || floor === 0)) return false;
+  if (query.notTopFloor && (floor === null || property.totalFloors === null || floor >= property.totalFloors)) {
+    return false;
+  }
+
+  if (!inRange(property.constructionYear, query.yearMin, query.yearMax)) return false;
+
+  // Any of the chosen values
+  if (query.heating.length > 0 && !query.heating.some((h) => property.heatingKeys.includes(h))) return false;
+  if (query.furnished.length > 0 && !query.furnished.includes(property.furnishedKey ?? "")) return false;
+  if (query.construction.length > 0 && !query.construction.some((c) => matchesConstruction(property, c))) {
+    return false;
+  }
+  if (query.condition.length > 0 && !query.condition.includes(property.conditionKey ?? "")) return false;
+
+  if (query.registered && property.registrationStatus !== "registered") return false;
+
+  // All of the chosen values
+  if (!query.features.every((f) => hasPublicFeature(property, f))) return false;
+  if (!query.equipment.every((e) => property.equipmentKeys.includes(e))) return false;
 
   return true;
 }
@@ -328,9 +404,9 @@ const MAX_FEATURES = 12;
 
 // Infrastructure only says something for houses and land; apartments always have it
 const INFRASTRUCTURE_FEATURES: ReadonlySet<string> = new Set(["paved_road", "city_water", "city_sewage"]);
-const INFRASTRUCTURE_TYPES: ReadonlySet<string> = new Set(["house", "cottage", "plot", "land"]);
+const INFRASTRUCTURE_TYPES: ReadonlySet<string> = new Set(["house", "plot", "land"]);
 const PERMIT_FEATURES: ReadonlySet<string> = new Set(["building_permit", "location_permit", "occupancy_permit"]);
-const NO_ELEVATOR_TYPES: ReadonlySet<string> = new Set(["house", "cottage", "plot", "land"]);
+const NO_ELEVATOR_TYPES: ReadonlySet<string> = new Set(["house", "plot", "land"]);
 
 function featureApplies(key: string, propertyTypeKey: string): boolean {
   if (INFRASTRUCTURE_FEATURES.has(key)) return INFRASTRUCTURE_TYPES.has(propertyTypeKey);
@@ -512,4 +588,5 @@ export function getPropertyDetail(propertyId: string): PropertyDetail | null {
 // Exports for tests and downstream modules
 // ---------------------------------------------------------------------------
 
+export { hasPublicFeature, matchesConstruction };
 export { buildPropertyUrl, mapImages, buildHighlights, toListItem, matchesFilters, sortProperties, buildAgentSummary, getRelatedProperties, buildSpecs, buildFeatureList, FEATURE_PRIORITY };

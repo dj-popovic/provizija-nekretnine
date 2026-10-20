@@ -3,11 +3,13 @@
 //
 // GET /api/properties        — filtered, sorted, paginated listing
 // GET /api/properties/:slugId — single property detail (Task 8.5)
+// GET /api/filter-options     — cities / districts / types for the filters
 // ---------------------------------------------------------------------------
 
 import type { FastifyInstance } from "fastify";
 import { parseListingQuery } from "./query.js";
 import { getPropertyListing, getPropertyDetail } from "./service.js";
+import { getFilterOptions } from "./filter-options.js";
 
 export async function propertiesRoutes(app: FastifyInstance): Promise<void> {
   // -----------------------------------------------------------------------
@@ -29,6 +31,30 @@ export async function propertiesRoutes(app: FastifyInstance): Promise<void> {
 
     const listing = getPropertyListing(result.query);
     return reply.send(listing);
+  });
+
+  // -----------------------------------------------------------------------
+  // GET /api/filter-options
+  //
+  // Cities → districts and the property types present, with counts, for
+  // the listing filters. Built from the runtime dataset.
+  // -----------------------------------------------------------------------
+  app.get("/api/filter-options", async (request, reply) => {
+    // Same filters as the listing: the counts follow the whole filter panel
+    const raw = request.query as Record<string, unknown>;
+    const result = parseListingQuery(raw);
+
+    if (!result.ok) {
+      return reply.status(400).send({
+        error: {
+          code: "VALIDATION_ERROR",
+          message: "Invalid query parameters.",
+          details: result.errors,
+        },
+      });
+    }
+
+    return reply.send({ data: getFilterOptions(result.query) });
   });
 
   // -----------------------------------------------------------------------

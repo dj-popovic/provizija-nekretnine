@@ -64,6 +64,7 @@ export interface Property {
   heating: string[];
   heatingKeys: string[]; // stable keys ("central", "gas"…); unknown values pass through as-is
   equipment: string[];
+  equipmentKeys: string[]; // stable keys from <equipment> ("air_conditioning"…); unmapped values dropped
   otherFeatures: string[];
   featureKeys: string[]; // feature-chip keys mapped from otherFeatures ("elevator", "pool"…); unmapped values dropped
 
@@ -73,6 +74,8 @@ export interface Property {
   hasParking: boolean;
   hasGarage: boolean;
   isNewConstruction: boolean;
+  isOldBuild: boolean; // <other> "Stara gradnja"
+  conditionKey: "original" | "renovated" | "needs_renovation" | null; // Izvorno stanje / Renoviran / Za adaptaciju
 
   // Registration status derived from <other> XML values
   registrationStatus: "registered" | "unregisterable" | "in_progress" | null;
@@ -121,7 +124,7 @@ export interface NormalizedDataset {
 
 // Bump whenever the Property / Agent shape changes, so an old JSON snapshot
 // on disk is ignored at startup instead of being served with missing fields.
-export const DATASET_SCHEMA_VERSION = 4;
+export const DATASET_SCHEMA_VERSION = 5;
 
 // ---------------------------------------------------------------------------
 // Sync status

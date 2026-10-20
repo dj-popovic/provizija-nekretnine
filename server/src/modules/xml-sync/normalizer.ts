@@ -40,7 +40,7 @@ const PROPERTY_TYPE: Record<string, { key: string; label: string }> = {
   Garaža: { key: "garage", label: "Garaža" },
   "Poslovni prostor": { key: "commercial", label: "Poslovni prostor" },
   Kancelarija: { key: "office", label: "Kancelarija" },
-  Vikendica: { key: "cottage", label: "Vikendica" },
+  Vikendica: { key: "house", label: "Kuća" }, // a weekend house is listed as a house
 };
 
 function mapPropertyType(value: unknown): { key: string; label: string } {
@@ -141,6 +141,52 @@ const IGNORED_OTHER = new Set([
 
 /** All feature keys the normalizer can produce. */
 export const FEATURE_KEYS: ReadonlySet<string> = new Set(Object.values(FEATURES));
+
+// ---------------------------------------------------------------------------
+// Condition ("stanje") and construction age — <other> values used by filters
+// ---------------------------------------------------------------------------
+
+export type ConditionKey = "original" | "renovated" | "needs_renovation";
+
+// In this order: if an agent ticks two, the first one wins
+const CONDITION: [string, ConditionKey][] = [
+  ["Renoviran", "renovated"],
+  ["Za adaptaciju", "needs_renovation"],
+  ["Izvorno stanje", "original"],
+];
+
+function deriveCondition(features: string[]): ConditionKey | null {
+  for (const [value, key] of CONDITION) {
+    if (hasFeature(features, value)) return key;
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Equipment mapping — <equipment> values → stable keys (case-insensitive).
+// Unmapped values are dropped from the keys (they stay in `equipment`).
+// ---------------------------------------------------------------------------
+
+const EQUIPMENT: Record<string, string> = {
+  klima: "air_conditioning",
+  internet: "internet",
+  kablovska: "cable_tv",
+  interfon: "intercom",
+  "video interfon": "video_intercom",
+  "video nadzor": "video_surveillance",
+};
+
+/** All equipment keys the normalizer can produce. */
+export const EQUIPMENT_KEYS: ReadonlySet<string> = new Set(Object.values(EQUIPMENT));
+
+function mapEquipment(values: string[]): string[] {
+  const keys = new Set<string>();
+  for (const v of values) {
+    const key = EQUIPMENT[v.toLowerCase()];
+    if (key) keys.add(key);
+  }
+  return [...keys];
+}
 
 /** True if an <other> value is either mapped to a feature or deliberately ignored. */
 export function isKnownOtherValue(value: string): boolean {
@@ -364,6 +410,7 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
   const hasGarage =
     hasFeature(otherFeatures, "Garažno mesto") || hasFeature(otherFeatures, "Garaža");
   const isNewConstruction = hasFeature(otherFeatures, "Novogradnja");
+  const isOldBuild = hasFeature(otherFeatures, "Stara gradnja");
 
   // --- Registration status ---
   const registrationStatus = deriveRegistrationStatus(otherFeatures);
@@ -414,6 +461,7 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
     heating,
     heatingKeys: mapHeating(heating),
     equipment,
+    equipmentKeys: mapEquipment(equipment),
     otherFeatures,
     featureKeys: mapFeatures(otherFeatures),
     hasTerrace,
@@ -421,6 +469,8 @@ export function normalizeProperty(raw: RawXmlListing): Property | null {
     hasParking,
     hasGarage,
     isNewConstruction,
+    isOldBuild,
+    conditionKey: deriveCondition(otherFeatures),
     registrationStatus,
     images,
     primaryImage,

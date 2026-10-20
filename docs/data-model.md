@@ -235,6 +235,7 @@ It represents a valid property record that has passed mapping and validation and
 - `heating: string[]` — raw XML labels
 - `heatingKeys: string[]` — stable keys for translation (`Centralno` → `central`, `Gas` → `gas`, `Podno` → `underfloor`, `Čvrsta goriva` → `solid_fuel`, `Norveški radijatori` → `norwegian_radiators`, `TA` → `storage_heater`); unknown values pass through unchanged
 - `equipment: string[]`
+- `equipmentKeys: string[]` — stable keys mapped from `equipment` (case-insensitive): `Klima` → `air_conditioning`, `Internet` → `internet`, `Kablovska` → `cable_tv`, `Interfon` → `intercom`, `Video interfon` → `video_intercom`, `Video nadzor` → `video_surveillance`; unmapped values are dropped (they stay in `equipment`). Used by the `equipment` filter (#16)
 - `otherFeatures: string[]`
 
 - `featureKeys: string[]` — feature-chip keys mapped from `otherFeatures` (case-insensitive), e.g. `Lift` → `elevator`, `Gradska` → `city_water`, `Garažno mesto` → `garage_space`. Values that aren't features (registration, "Nije prizemlje", "Stara gradnja"…) are dropped. Unmapped `<other>` values are logged once per sync, so new RELPER checkboxes or unexpected spellings show up in the logs. Display order and type rules live in the API layer (see `features` in `api-contract.md`).
@@ -248,6 +249,10 @@ These are optional normalized helper fields derived from XML feature lists where
 - `hasParking: boolean`
 - `hasGarage: boolean` — from `Garažno mesto` (the value RELPER actually sends) or `Garaža`
 - `isNewConstruction: boolean`
+- `isOldBuild: boolean` — `<other>` "Stara gradnja" (filter `construction=old`)
+- `conditionKey: "original" | "renovated" | "needs_renovation" | null` — `<other>` "Izvorno stanje" / "Renoviran" / "Za adaptaciju"; if several are ticked, Renoviran wins, then Za adaptaciju (filter `condition`)
+
+The snapshot `schemaVersion` is 5 since these three fields were added (2026-10-20, #16).
 
 ### Registration status
 
@@ -488,7 +493,7 @@ Examples:
 - commercial
 - office
 - garage
-- cottage
+- (XML `Vikendica` is mapped to `house`)
 - other
 
 The model should also preserve a human-readable label:

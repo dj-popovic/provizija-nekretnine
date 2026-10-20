@@ -103,7 +103,7 @@ describe("normalizeProperty", () => {
       ["Garaža", "garage"],
       ["Poslovni prostor", "commercial"],
       ["Kancelarija", "office"],
-      ["Vikendica", "cottage"],
+      ["Vikendica", "house"],
     ];
     for (const [xmlType, expectedKey] of cases) {
       const raw = makeRawListing({
@@ -245,6 +245,32 @@ describe("normalizeProperty", () => {
   it("recognizes the garage as RELPER actually sends it ('Garažno mesto')", () => {
     const p = normalizeProperty(makeRawListing({ otherFeatures: ["Garažno mesto"] }));
     expect(p!.hasGarage).toBe(true);
+  });
+
+  // -----------------------------------------------------------------------
+  // Filter values (#16): old build, condition, equipment keys
+  // -----------------------------------------------------------------------
+
+  it("flags 'Stara gradnja' as an old build", () => {
+    expect(normalizeProperty(makeRawListing({ otherFeatures: ["Stara gradnja"] }))!.isOldBuild).toBe(true);
+    expect(normalizeProperty(makeRawListing({ otherFeatures: ["Novogradnja"] }))!.isOldBuild).toBe(false);
+  });
+
+  it("derives the condition key; Renoviran wins over the others", () => {
+    const condition = (values: string[]) =>
+      normalizeProperty(makeRawListing({ otherFeatures: values }))!.conditionKey;
+    expect(condition(["Izvorno stanje"])).toBe("original");
+    expect(condition(["za adaptaciju"])).toBe("needs_renovation");
+    expect(condition(["Izvorno stanje", "Renoviran"])).toBe("renovated");
+    expect(condition(["Lift"])).toBeNull();
+  });
+
+  it("maps equipment to keys case-insensitively and drops unknown values", () => {
+    const p = normalizeProperty(
+      makeRawListing({ equipment: ["Klima", "video nadzor", "Video interfon", "Veš mašina"] }),
+    );
+    expect(p!.equipmentKeys).toEqual(["air_conditioning", "video_surveillance", "video_intercom"]);
+    expect(p!.equipment).toContain("Veš mašina"); // raw list stays complete
   });
 
   // -----------------------------------------------------------------------

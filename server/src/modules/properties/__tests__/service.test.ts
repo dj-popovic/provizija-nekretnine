@@ -23,13 +23,32 @@ import type { Property } from "../../shared/models.js";
 function makeQuery(overrides: Partial<PropertyListingQuery> = {}): PropertyListingQuery {
   return {
     transactionType: undefined,
-    propertyType: undefined,
-    location: undefined,
-    rooms: undefined,
+    propertyTypes: [],
+    city: undefined,
+    hoods: [],
+    roomsMin: undefined,
+    roomsMax: undefined,
     priceMin: undefined,
     priceMax: undefined,
     areaMin: undefined,
     areaMax: undefined,
+    landAreaMin: undefined,
+    landAreaMax: undefined,
+    newBuild: false,
+    bathroomsMin: undefined,
+    floorMin: undefined,
+    floorMax: undefined,
+    notGroundFloor: false,
+    notTopFloor: false,
+    yearMin: undefined,
+    yearMax: undefined,
+    heating: [],
+    furnished: [],
+    construction: [],
+    condition: [],
+    registered: false,
+    features: [],
+    equipment: [],
     sort: "newest",
     page: 1,
     pageSize: 12,
@@ -54,24 +73,158 @@ describe("matchesFilters", () => {
   });
 
   it("filters by propertyType (key)", () => {
-    expect(matchesFilters(property, makeQuery({ propertyType: "apartment" }))).toBe(true);
-    expect(matchesFilters(property, makeQuery({ propertyType: "house" }))).toBe(false);
+    expect(matchesFilters(property, makeQuery({ propertyTypes: ["apartment"] }))).toBe(true);
+    expect(matchesFilters(property, makeQuery({ propertyTypes: ["house"] }))).toBe(false);
   });
 
-  it("filters by location matching city", () => {
-    expect(matchesFilters(property, makeQuery({ location: "Beograd" }))).toBe(true);
-    expect(matchesFilters(property, makeQuery({ location: "beograd" }))).toBe(true);
-    expect(matchesFilters(property, makeQuery({ location: "Novi Sad" }))).toBe(false);
+  it("matches any of several property types", () => {
+    const office = makeProperty({ propertyTypeKey: "office" });
+    const types = ["commercial", "office"];
+    expect(matchesFilters(office, makeQuery({ propertyTypes: types }))).toBe(true);
+    expect(matchesFilters(property, makeQuery({ propertyTypes: types }))).toBe(false);
   });
 
-  it("filters by location matching hood", () => {
-    expect(matchesFilters(property, makeQuery({ location: "Vračar" }))).toBe(true);
-    expect(matchesFilters(property, makeQuery({ location: "vračar" }))).toBe(true);
+  it("filters by city (case-insensitive)", () => {
+    expect(matchesFilters(property, makeQuery({ city: "Beograd" }))).toBe(true);
+    expect(matchesFilters(property, makeQuery({ city: "beograd" }))).toBe(true);
+    expect(matchesFilters(property, makeQuery({ city: "Novi Sad" }))).toBe(false);
   });
 
-  it("filters by rooms", () => {
-    expect(matchesFilters(property, makeQuery({ rooms: 3 }))).toBe(true);
-    expect(matchesFilters(property, makeQuery({ rooms: 2 }))).toBe(false);
+  it("filters by any of the city's districts", () => {
+    expect(matchesFilters(property, makeQuery({ city: "Beograd", hoods: ["vračar"] }))).toBe(true);
+    expect(matchesFilters(property, makeQuery({ city: "Beograd", hoods: ["Zvezdara", "Vračar"] }))).toBe(true);
+    expect(matchesFilters(property, makeQuery({ city: "Beograd", hoods: ["Zvezdara"] }))).toBe(false);
+  });
+
+  it("keeps a district inside its city (same name in two cities)", () => {
+    const beocin = makeProperty({ city: "Beočin", hood: "Okolina" });
+    expect(matchesFilters(beocin, makeQuery({ city: "Beočin", hoods: ["Okolina"] }))).toBe(true);
+    expect(matchesFilters(beocin, makeQuery({ city: "Bačka palanka", hoods: ["Okolina"] }))).toBe(false);
+  });
+
+  it("a district filter excludes a listing without a district", () => {
+    const bac = makeProperty({ city: "Bač", hood: null });
+    expect(matchesFilters(bac, makeQuery({ city: "Bač" }))).toBe(true);
+    expect(matchesFilters(bac, makeQuery({ city: "Bač", hoods: ["Centar"] }))).toBe(false);
+  });
+
+  it("filters by an inclusive rooms range", () => {
+    const twoAndHalf = makeProperty({ roomStructure: 2.5 });
+    expect(matchesFilters(twoAndHalf, makeQuery({ roomsMin: 2, roomsMax: 2.5 }))).toBe(true);
+    expect(matchesFilters(twoAndHalf, makeQuery({ roomsMin: 2.5 }))).toBe(true);
+    expect(matchesFilters(twoAndHalf, makeQuery({ roomsMax: 2 }))).toBe(false);
+    expect(matchesFilters(twoAndHalf, makeQuery({ roomsMin: 3 }))).toBe(false);
+  });
+
+  it("a studio matches a 0.5 rooms range", () => {
+    const studio = makeProperty({ roomStructure: 0.5 });
+    expect(matchesFilters(studio, makeQuery({ roomsMin: 0.5, roomsMax: 0.5 }))).toBe(true);
+    expect(matchesFilters(studio, makeQuery({ roomsMin: 1 }))).toBe(false);
+  });
+
+  it("excludes properties without rooms from a rooms filter", () => {
+    const plot = makeProperty({ propertyTypeKey: "plot", roomStructure: null });
+    expect(matchesFilters(plot, makeQuery())).toBe(true);
+    expect(matchesFilters(plot, makeQuery({ roomsMax: 10 }))).toBe(false);
+  });
+
+  it("filters by land area in ares", () => {
+    const plot = makeProperty({ propertyTypeKey: "plot", surface: null, landSurface: 21.06 });
+    expect(matchesFilters(plot, makeQuery({ landAreaMin: 10, landAreaMax: 25 }))).toBe(true);
+    expect(matchesFilters(plot, makeQuery({ landAreaMin: 25 }))).toBe(false);
+    expect(matchesFilters(plot, makeQuery({ landAreaMax: 20 }))).toBe(false);
+  });
+
+  // --- "Više filtera" (#16) ---
+
+  it("newBuild matches new builds and buildings under construction", () => {
+    const fresh = makeProperty({ featureKeys: ["new_build"] });
+    const building = makeProperty({ featureKeys: ["under_construction"] });
+    expect(matchesFilters(fresh, makeQuery({ newBuild: true }))).toBe(true);
+    expect(matchesFilters(building, makeQuery({ newBuild: true }))).toBe(true);
+    expect(matchesFilters(property, makeQuery({ newBuild: true }))).toBe(false);
+  });
+
+  it("filters by minimum bathrooms", () => {
+    const two = makeProperty({ bathrooms: 2 });
+    const unknown = makeProperty({ bathrooms: null });
+    expect(matchesFilters(two, makeQuery({ bathroomsMin: 2 }))).toBe(true);
+    expect(matchesFilters(two, makeQuery({ bathroomsMin: 3 }))).toBe(false);
+    expect(matchesFilters(unknown, makeQuery({ bathroomsMin: 1 }))).toBe(false);
+  });
+
+  it("filters apartments by floor; prizemlje is 0", () => {
+    const ground = makeProperty({ floor: "ground", totalFloors: 4 });
+    const third = makeProperty({ floor: "3", totalFloors: 5 });
+    expect(matchesFilters(ground, makeQuery({ floorMax: 0 }))).toBe(true);
+    expect(matchesFilters(ground, makeQuery({ floorMin: 1 }))).toBe(false);
+    expect(matchesFilters(third, makeQuery({ floorMin: 2, floorMax: 4 }))).toBe(true);
+    expect(matchesFilters(third, makeQuery({ floorMax: 2 }))).toBe(false);
+  });
+
+  it("a floor filter skips houses and unknown floors", () => {
+    const house = makeProperty({ propertyTypeKey: "house", floor: "1" });
+    const unknown = makeProperty({ floor: "vpr" });
+    expect(matchesFilters(house, makeQuery({ floorMin: 0 }))).toBe(false);
+    expect(matchesFilters(unknown, makeQuery({ notGroundFloor: true }))).toBe(false);
+  });
+
+  it("'nije prizemlje' and 'nije poslednji sprat'", () => {
+    const ground = makeProperty({ floor: "ground", totalFloors: 4 });
+    const top = makeProperty({ floor: "5", totalFloors: 5 });
+    const middle = makeProperty({ floor: "2", totalFloors: 5 });
+    const noTotal = makeProperty({ floor: "2", totalFloors: null });
+    expect(matchesFilters(ground, makeQuery({ notGroundFloor: true }))).toBe(false);
+    expect(matchesFilters(middle, makeQuery({ notGroundFloor: true, notTopFloor: true }))).toBe(true);
+    expect(matchesFilters(top, makeQuery({ notTopFloor: true }))).toBe(false);
+    expect(matchesFilters(noTotal, makeQuery({ notTopFloor: true }))).toBe(false);
+  });
+
+  it("filters by construction year range", () => {
+    expect(matchesFilters(property, makeQuery({ yearMin: 2000, yearMax: 2010 }))).toBe(true); // 2005
+    expect(matchesFilters(property, makeQuery({ yearMin: 2010 }))).toBe(false);
+    expect(matchesFilters(makeProperty({ constructionYear: null }), makeQuery({ yearMax: 2030 }))).toBe(false);
+  });
+
+  it("heating / furnished / condition / construction: any of the chosen values", () => {
+    const p = makeProperty({ heatingKeys: ["underfloor", "gas"], furnishedKey: "empty", conditionKey: "renovated", isOldBuild: true });
+    expect(matchesFilters(p, makeQuery({ heating: ["central", "gas"] }))).toBe(true);
+    expect(matchesFilters(p, makeQuery({ heating: ["central"] }))).toBe(false);
+    expect(matchesFilters(p, makeQuery({ furnished: ["furnished", "empty"] }))).toBe(true);
+    expect(matchesFilters(p, makeQuery({ furnished: ["furnished"] }))).toBe(false);
+    expect(matchesFilters(p, makeQuery({ condition: ["renovated"] }))).toBe(true);
+    expect(matchesFilters(p, makeQuery({ condition: ["original"] }))).toBe(false);
+    expect(matchesFilters(p, makeQuery({ construction: ["new", "old"] }))).toBe(true);
+    expect(matchesFilters(p, makeQuery({ construction: ["new"] }))).toBe(false);
+    expect(matchesFilters(makeProperty({ furnishedKey: null }), makeQuery({ furnished: ["empty"] }))).toBe(false);
+  });
+
+  it("registered: only 'Uknjižen'", () => {
+    expect(matchesFilters(property, makeQuery({ registered: true }))).toBe(true);
+    expect(matchesFilters(makeProperty({ registrationStatus: "in_progress" }), makeQuery({ registered: true }))).toBe(false);
+    expect(matchesFilters(makeProperty({ registrationStatus: null }), makeQuery({ registered: true }))).toBe(false);
+  });
+
+  it("features and equipment: all of the chosen values", () => {
+    expect(matchesFilters(property, makeQuery({ features: ["terrace", "elevator"] }))).toBe(true);
+    expect(matchesFilters(property, makeQuery({ features: ["terrace", "pool"] }))).toBe(false);
+    expect(matchesFilters(property, makeQuery({ equipment: ["air_conditioning"] }))).toBe(true);
+    expect(matchesFilters(property, makeQuery({ equipment: ["air_conditioning", "internet"] }))).toBe(false);
+  });
+
+  it("a feature the site doesn't show for the type never matches (lift on a house)", () => {
+    const house = makeProperty({ propertyTypeKey: "house", featureKeys: ["elevator", "paved_road"] });
+    const flat = makeProperty({ featureKeys: ["paved_road"] });
+    expect(matchesFilters(house, makeQuery({ features: ["elevator"] }))).toBe(false);
+    expect(matchesFilters(house, makeQuery({ features: ["paved_road"] }))).toBe(true);
+    expect(matchesFilters(flat, makeQuery({ features: ["paved_road"] }))).toBe(false);
+  });
+
+  it("the land area filter skips apartments and listings without a plot area", () => {
+    const flat = makeProperty({ propertyTypeKey: "apartment", landSurface: 5 });
+    const house = makeProperty({ propertyTypeKey: "house", landSurface: null });
+    expect(matchesFilters(flat, makeQuery({ landAreaMin: 1 }))).toBe(false);
+    expect(matchesFilters(house, makeQuery({ landAreaMin: 1 }))).toBe(false);
   });
 
   it("filters by price range", () => {
@@ -97,14 +250,14 @@ describe("matchesFilters", () => {
     expect(
       matchesFilters(
         property,
-        makeQuery({ transactionType: "sale", location: "Beograd", rooms: 3, priceMax: 200000 }),
+        makeQuery({ transactionType: "sale", city: "Beograd", roomsMin: 3, roomsMax: 3, priceMax: 200000 }),
       ),
     ).toBe(true);
 
     expect(
       matchesFilters(
         property,
-        makeQuery({ transactionType: "rent", location: "Beograd" }),
+        makeQuery({ transactionType: "rent", city: "Beograd" }),
       ),
     ).toBe(false);
   });
@@ -356,8 +509,8 @@ describe("getPropertyListing", () => {
     expect(result.items.every((i) => i.transactionType === "sale")).toBe(true);
   });
 
-  it("filters by location (city)", () => {
-    const result = getPropertyListing(makeQuery({ location: "Beograd" }));
+  it("filters by city", () => {
+    const result = getPropertyListing(makeQuery({ city: "Beograd" }));
     expect(result.pagination.total).toBe(3);
   });
 

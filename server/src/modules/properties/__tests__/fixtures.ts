@@ -37,6 +37,7 @@ export function makeProperty(overrides: Partial<Property> = {}): Property {
     heating: ["Centralno"],
     heatingKeys: ["central"],
     equipment: ["Klima", "Veš mašina"],
+    equipmentKeys: ["air_conditioning"],
     otherFeatures: ["Terasa", "Lift", "Uknjižen"],
     featureKeys: ["terrace", "elevator"],
     hasTerrace: true,
@@ -44,6 +45,8 @@ export function makeProperty(overrides: Partial<Property> = {}): Property {
     hasParking: false,
     hasGarage: false,
     isNewConstruction: false,
+    isOldBuild: false,
+    conditionKey: null,
     registrationStatus: "registered",
     images: [
       { url: "https://example.com/img1.jpg", order: 1 },
