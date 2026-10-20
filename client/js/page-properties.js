@@ -37,6 +37,8 @@ window.PV = window.PV || {};
   // --- Filter state ---
   var filters = {
     transactionType: undefined,
+    // Novogradnja tab: new builds for sale (backend filters on newBuild=true)
+    newBuild: undefined,
     propertyType: undefined,
     location: undefined,
     rooms: undefined,
@@ -52,6 +54,7 @@ window.PV = window.PV || {};
   function readUrlParams() {
     var params = new URLSearchParams(window.location.search);
     filters.transactionType = params.get('transactionType') || undefined;
+    filters.newBuild = params.get('newBuild') === 'true' ? true : undefined;
     filters.propertyType = params.get('propertyType') || undefined;
     filters.location = params.get('location') || undefined;
     filters.rooms = params.get('rooms') ? Number(params.get('rooms')) : undefined;
@@ -80,9 +83,9 @@ window.PV = window.PV || {};
   // --- Sync UI controls to match filter state ---
   function syncUiToFilters() {
     // Subnav tabs
+    var tab = filters.newBuild ? 'new' : (filters.transactionType || 'sale');
     document.querySelectorAll('.properties-subnav .nav-link').forEach(function (link) {
-      var type = link.dataset.type;
-      var isActive = type === (filters.transactionType || 'sale');
+      var isActive = link.dataset.type === tab;
       link.classList.toggle('active', isActive);
       link.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
@@ -177,7 +180,9 @@ window.PV = window.PV || {};
       link.addEventListener('click', function (e) {
         e.preventDefault();
         var type = this.dataset.type;
-        filters.transactionType = type;
+        // "new" = new builds, which are always for sale
+        filters.transactionType = type === 'new' ? 'sale' : type;
+        filters.newBuild = type === 'new' ? true : undefined;
         filters.page = 1;
         syncUiToFilters();
         fetchAndRender();
@@ -240,7 +245,7 @@ window.PV = window.PV || {};
 
     if (btnReset) {
       btnReset.addEventListener('click', function () {
-        filters.transactionType = filters.transactionType; // keep current tab
+        // transactionType / newBuild stay: the reset keeps the current tab
         filters.propertyType = undefined;
         filters.location = undefined;
         filters.rooms = undefined;
