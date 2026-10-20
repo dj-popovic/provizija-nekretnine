@@ -55,8 +55,8 @@ p, li,
 /* ===========================
    Navigation
    =========================== */
-/* Two looks: a gold fade over the hero while the page is at the top,
-   and a white bar once it scrolls (.is-solid, toggled in script.js). */
+/* Two looks: transparent over the hero while the page is at the top (light logo,
+   white links), and a white bar once it scrolls (.is-solid, toggled in script.js). */
 .site-header {
     padding-block: 1rem;
     transition: padding-block 0.3s var(--ease-out);
@@ -72,13 +72,10 @@ p, li,
     transition: opacity 0.3s var(--ease-out);
 }
 
-/* Logo gold that fades out at the bottom edge. The fade is kept short:
-   a long gold-to-transparent fade over the navy hero turns into a grey-brown band. */
+/* Faint scrim so the white links stay readable over light hero photos */
 .site-header::before {
-    bottom: -10px;
-    background: linear-gradient(135deg, var(--gold-soft) 0%, var(--gold-mid) 55%, var(--gold-deep) 100%);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 78%, transparent 100%);
+    bottom: -24px;
+    background: linear-gradient(to bottom, rgba(10, 15, 30, 0.35), transparent);
 }
 
 .site-header::after {
@@ -101,8 +98,9 @@ p, li,
     opacity: 1;
 }
 
-/* Navy logo reads well on the gold fade and on the white bar; it shrinks a little on scroll */
+/* Light and dark logo are stacked and cross-faded; the brand shrinks a little on scroll */
 .navbar-brand {
+    position: relative;
     display: block;
     padding: 0;
     transform-origin: left center;
@@ -113,6 +111,21 @@ p, li,
     display: block;
     height: 54px;
     width: auto;
+    transition: opacity 0.3s var(--ease-out);
+}
+
+.navbar-logo--dark {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+}
+
+.site-header.is-solid .navbar-logo--light {
+    opacity: 0;
+}
+
+.site-header.is-solid .navbar-logo--dark {
+    opacity: 1;
 }
 
 .site-header.is-solid .navbar-brand {
@@ -147,32 +160,25 @@ p, li,
     transform: scaleX(1);
 }
 
-/* On the gold fade: navy text, navy underline (gold would vanish on gold) */
+/* Over the hero: white text, gold underline */
 .site-header .nav-link {
-    color: rgba(15, 23, 42, 0.82);
+    color: rgba(255, 255, 255, 0.85);
     transition: color 0.3s var(--ease-out);
-}
-
-.site-header .nav-link::after {
-    background: var(--primary);
 }
 
 .site-header .nav-link:hover,
 .site-header .nav-link:focus-visible,
 .site-header .nav-link.active {
-    color: var(--primary);
+    color: var(--white);
 }
 
 .site-header .nav-link:focus-visible {
     box-shadow: none;
-    outline: 2px solid var(--primary);
+    outline: 2px solid var(--white);
     outline-offset: 2px;
     border-radius: 4px;
 }
 
-.site-header.is-solid .nav-link::after {
-    background: var(--accent);
-}
 
 .site-header.is-solid .nav-link {
     color: var(--text-dark);
@@ -188,14 +194,14 @@ p, li,
     outline-color: var(--accent);
 }
 
-/* "Kontaktirajte Nas": white over the gold fade, gold on the white bar */
+/* "Kontaktirajte Nas": gold in both header states */
 .site-header .nav-link.btn-contact {
     margin-left: 1rem;
     padding: 0.75rem 1.8rem !important;
     border-radius: 8px;
     font-weight: 600;
-    background: var(--white);
-    color: var(--primary);
+    background: var(--accent);
+    color: var(--white);
     transition: background-color 0.3s var(--ease-out), color 0.3s var(--ease-out), box-shadow 0.3s var(--ease-out), scale 0.15s ease-out;
 }
 
@@ -204,17 +210,6 @@ p, li,
 }
 
 .site-header .nav-link.btn-contact:hover {
-    background: rgba(255, 255, 255, 0.88);
-    color: var(--primary);
-    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.18);
-}
-
-.site-header.is-solid .nav-link.btn-contact {
-    background: var(--accent);
-    color: var(--white);
-}
-
-.site-header.is-solid .nav-link.btn-contact:hover {
     background: var(--accent-dark);
     color: var(--white);
     box-shadow: 0 4px 16px rgba(201, 162, 39, 0.35);
@@ -227,8 +222,8 @@ p, li,
 /* Burger: one glyph, colored through currentColor in both header states */
 .site-header .navbar-toggler {
     padding: 0.4375rem 0.75rem;
-    border-color: rgba(15, 23, 42, 0.25);
-    color: var(--primary);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: var(--white);
     transition: color 0.3s var(--ease-out), border-color 0.3s var(--ease-out);
 }
 
@@ -581,6 +576,8 @@ p, li,
     position: relative;
     z-index: 2; /* above the stretched link, so swipes and arrows reach the slider */
     aspect-ratio: 3 / 2;
+    /* Without it, aspect-ratio lets a tall (portrait) photo stretch the box: every card a different height */
+    overflow: hidden;
     background: var(--bg-light);
 }
 
