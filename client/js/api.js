@@ -26,9 +26,10 @@ window.PV = window.PV || {};
       var qs = new URLSearchParams();
       Object.keys(params).forEach(function (key) {
         var val = params[key];
-        if (val !== undefined && val !== null && val !== '') {
-          qs.set(key, val);
-        }
+        // An array is sent as a repeated param: hood=Telep&hood=Grbavica
+        [].concat(val).forEach(function (v) {
+          if (v !== undefined && v !== null && v !== '') qs.append(key, v);
+        });
       });
       var str = qs.toString();
       if (str) url += '?' + str;

@@ -17,12 +17,15 @@ window.PV = window.PV || {};
       toUi:  { sale: 'Prodaja', rent: 'Izdavanje' },
     },
     propertyType: {
-      toApi: {
-        stan: 'apartment',
-        kuca: 'house',
-        poslovni: 'commercial',
-        plac: 'plot',
-        zemljiste: 'land',
+      // Type chip / select value → API type keys. "Poslovni prostor" covers
+      // both RELPER types Poslovni prostor and Kancelarija.
+      chips: {
+        stan: ['apartment'],
+        kuca: ['house'],
+        plac: ['plot'],
+        zemljiste: ['land'],
+        poslovni: ['commercial', 'office'],
+        garaza: ['garage'],
       },
       toUi: {
         apartment: 'Stan',
@@ -32,7 +35,6 @@ window.PV = window.PV || {};
         land: 'Zemljište',
         garage: 'Garaža',
         office: 'Kancelarija',
-        cottage: 'Vikendica',
       },
     },
     // Spec value keys from the API → Serbian UI text.
@@ -55,6 +57,31 @@ window.PV = window.PV || {};
     },
     floor: {
       toUi: { ground: 'Prizemlje' },
+    },
+    // "Više filtera" groups (#16)
+    construction: {
+      toUi: { new: 'Novogradnja', under_construction: 'U izgradnji', old: 'Stara gradnja' },
+    },
+    condition: {
+      toUi: { original: 'Izvorno stanje', renovated: 'Renovirano', needs_renovation: 'Za adaptaciju' },
+    },
+    equipment: {
+      toUi: {
+        air_conditioning: 'Klima',
+        internet: 'Internet',
+        cable_tv: 'Kablovska',
+        intercom: 'Interfon',
+        video_intercom: 'Video interfon',
+        video_surveillance: 'Video nadzor',
+      },
+      icon: {
+        air_conditioning: 'bi-snow',
+        internet: 'bi-wifi',
+        cable_tv: 'bi-tv',
+        intercom: 'bi-bell',
+        video_intercom: 'bi-camera-video',
+        video_surveillance: 'bi-webcam',
+      },
     },
     // Feature chips (kvadratići) — keys arrive from the API already in display order
     feature: {
@@ -412,6 +439,13 @@ window.PV = window.PV || {};
     var current = track.parentNode.querySelector('.media-count-current');
     if (current) current.textContent = slideIndex(track) + 1;
   }, { capture: true, passive: true });
+
+  // The card photo is a duplicate, aria-hidden link: a mouse click must not focus it
+  // (Chrome warns "Blocked aria-hidden on an element because its descendant retained focus").
+  // The click itself still opens the property.
+  document.addEventListener('mousedown', function (e) {
+    if (e.target.closest && e.target.closest('a.property-slides[aria-hidden="true"]')) e.preventDefault();
+  });
 
   document.addEventListener('pointerover', function (e) {
     var media = e.target.closest && e.target.closest('.property-media');

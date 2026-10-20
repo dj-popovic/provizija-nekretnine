@@ -1590,6 +1590,7 @@ p, li,
 .price-inputs { display: flex; align-items: center; gap: 12px; }
 .price-inputs input {
     flex: 1;
+    min-width: 0; /* let the pair shrink to its column (narrow columns: year, plot ares) */
     padding: 10px 14px;
     border: 2px solid #e5e5e5;
     border-radius: 8px;
@@ -1640,7 +1641,535 @@ p, li,
 .btn-filter-search:active,
 .btn-filter-reset:active { scale: .96; }
 .filter-results-count { margin-left: auto; font-size: 14px; color: var(--text-light); font-weight: 500; }
-.filter-results-count #resultsCount { color: var(--primary); font-weight: 700; font-size: 18px; }
+.filter-results-count #resultsCount { color: var(--primary); font-weight: 700; font-size: 18px; font-variant-numeric: tabular-nums; }
+
+/* Rooms od–do: two dropdowns sharing one label */
+.range-selects { display: flex; align-items: center; gap: 12px; }
+.range-selects .pv-dd { flex: 1; }
+.range-selects .separator { color: var(--text-light); font-size: 14px; }
+
+/* Results bar above the grid: count on the left, sort on the right */
+.results-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    margin-bottom: 28px;
+}
+.results-bar { justify-content: flex-end; }
+.results-sort { display: flex; align-items: center; gap: 10px; }
+.results-sort-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--text-light);
+}
+.results-sort .pv-dd { width: 200px; }
+.results-sort .pv-dd-panel { left: auto; right: 0; }
+
+/* ===========================
+   NEKRETNINE - Više filtera (#16) + actions row
+   =========================== */
+/* Actions row: buttons left · "Više filtera" centered · result count right */
+.filter-actions {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+}
+.filter-actions-buttons { display: flex; align-items: center; gap: 16px; }
+.filter-actions .filter-results-count { justify-self: end; margin-left: 0; white-space: nowrap; }
+
+/* The toggle: a soft gold-edged pill with text + gold chevron; on hover / while open it
+   turns white and a gold line fades in under the text */
+.btn-more-filters {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 24px 13px 26px;
+    border: 2px solid rgba(201, 162, 39, .35);
+    border-radius: 50px;
+    background: rgba(255, 255, 255, .55);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: .3px;
+    color: var(--primary);
+    cursor: pointer;
+    transition: background-color .2s ease-out, border-color .2s ease-out, box-shadow .2s ease-out, scale .15s ease-out;
+}
+.btn-more-filters::after {
+    content: '';
+    position: absolute;
+    left: 26px;
+    right: 26px;
+    bottom: 6px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    scale: .4 1;
+    transition: opacity .25s var(--ease-out), scale .25s var(--ease-out);
+}
+.btn-more-filters:hover,
+.btn-more-filters[aria-expanded="true"] {
+    background: var(--white);
+    border-color: var(--accent);
+    box-shadow: 0 6px 18px rgba(201, 162, 39, .15);
+}
+.btn-more-filters:hover::after,
+.btn-more-filters[aria-expanded="true"]::after { opacity: 1; scale: 1 1; }
+.btn-more-filters:active { scale: .96; }
+.btn-more-filters:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.btn-more-filters-caret { font-size: 16px; color: var(--accent); -webkit-text-stroke: .5px currentColor; transition: rotate .3s var(--ease-out); }
+.btn-more-filters[aria-expanded="true"] .btn-more-filters-caret { rotate: 180deg; }
+.btn-more-filters-badge {
+    display: inline-grid;
+    place-items: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 50px;
+    background: var(--accent);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.btn-more-filters-badge[hidden] { display: none; }
+
+/* Opens in place: grid rows 0fr → 1fr animate the real height. Once open
+   (.is-settled) it stops clipping, so the dropdowns inside can hang out. */
+.more-filters {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows .35s var(--ease-out);
+}
+.more-filters.is-open { grid-template-rows: 1fr; }
+.more-filters-inner { min-height: 0; overflow: hidden; }
+.more-filters.is-settled .more-filters-inner { overflow: visible; }
+.more-filters-body {
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px dashed #d9dce0;
+    opacity: 0;
+    translate: 0 -8px;
+    transition: opacity .25s var(--ease-out), translate .25s var(--ease-out);
+}
+.more-filters.is-open .more-filters-body { opacity: 1; translate: 0 0; transition-delay: .05s; }
+.more-filters.is-instant,
+.more-filters.is-instant .more-filters-body { transition: none; }
+
+.more-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px 32px;
+    margin-top: 28px;
+}
+.more-groups--wide { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+.more-section { margin-top: 28px; }
+.more-groups .filter-group,
+.more-section { margin-bottom: 0; }
+.more-groups > [hidden],
+.more-filters [data-scope][hidden] { display: none; }
+
+/* Toggle chips (with the same icons as the property page's feature chips) */
+.filter-chip--toggle { display: inline-flex; align-items: center; gap: 7px; }
+.filter-chip--toggle i { font-size: 14px; color: var(--accent); transition: color .15s ease-out; }
+.filter-chip--toggle:hover i { color: var(--accent); }
+.filter-chip--toggle.active i { color: var(--white); }
+/* No listing has it right now: dimmed and disabled (nothing happens on click) */
+.filter-chip.is-muted,
+.filter-chip.is-muted:hover { color: #a9aeb5; border-color: #ececee; background: #fafafa; cursor: default; }
+.filter-chip.is-muted i,
+.filter-chip.is-muted:hover i { color: #c9ccd1; }
+.filter-chips--sub { margin-top: 10px; }
+.filter-chips--sub .filter-chip { padding: 7px 12px; font-size: 13px; }
+
+@media (prefers-reduced-motion: reduce) {
+    .more-filters,
+    .more-filters-body { transition: none; }
+    .more-filters-body { translate: none; }
+}
+
+@media (max-width: 767px) {
+    .filter-actions { grid-template-columns: 1fr; gap: 12px; }
+    .btn-more-filters { justify-content: center; background: var(--white); }
+    .filter-actions .filter-results-count { justify-self: start; }
+    .more-groups,
+    .more-groups--wide { grid-template-columns: 1fr; }
+}
+
+/* ===========================
+   DROPDOWNS — PV.ui.select / PV.ui.locationPicker (js/dropdown.js)
+   One look for every filter dropdown; on phones the panel is a bottom sheet.
+   =========================== */
+.pv-dd { position: relative; min-width: 0; }
+.pv-dd.is-open { z-index: 40; }
+
+.pv-dd-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: var(--white);
+    border: 2px solid #e5e5e5;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--text-dark);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .2s ease-out, box-shadow .2s ease-out, background-color .2s ease-out;
+}
+.pv-dd-trigger:hover { border-color: #d3d5d9; }
+/* A chosen filter keeps a soft gold edge, so the panel shows at a glance what is set */
+.pv-dd.has-value .pv-dd-trigger { border-color: rgba(201, 162, 39, .5); }
+.pv-dd-trigger:focus-visible,
+.pv-dd.is-open .pv-dd-trigger {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(201, 162, 39, .12);
+    outline: none;
+}
+.pv-dd-value { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
+.pv-dd-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pv-dd:not(.has-value) .pv-dd-text { color: #8a9099; font-weight: 400; }
+.pv-dd-more {
+    flex-shrink: 0;
+    padding: 2px 7px;
+    border-radius: 50px;
+    background: rgba(201, 162, 39, .14);
+    color: var(--accent-dark);
+    font-size: 12px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+.pv-dd-caret {
+    flex-shrink: 0;
+    font-size: 12px;
+    color: var(--text-light);
+    transition: rotate .2s var(--ease-out), color .2s ease-out;
+}
+.pv-dd.is-open .pv-dd-caret { rotate: 180deg; color: var(--accent); }
+
+.pv-dd.is-disabled .pv-dd-trigger { background: #F7F7F8; border-color: #ececec; cursor: not-allowed; }
+.pv-dd.is-disabled .pv-dd-text { color: #b3b7bd; }
+.pv-dd.is-disabled .pv-dd-caret { opacity: .4; }
+
+/* Panel: fades and drops 4px; interruptible, so fast open/close never jumps */
+.pv-dd-panel {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    min-width: 100%;
+    width: max-content;
+    max-width: min(360px, calc(100vw - 32px));
+    padding: 6px;
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, .06), 0 12px 32px rgba(15, 23, 42, .14), 0 2px 6px rgba(15, 23, 42, .06);
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 -4px;
+    transition: opacity .15s var(--ease-out), translate .15s var(--ease-out), visibility 0s linear .15s;
+}
+.pv-dd.is-up .pv-dd-panel { top: auto; bottom: calc(100% + 6px); translate: 0 4px; }
+.pv-dd.is-open .pv-dd-panel {
+    opacity: 1;
+    visibility: visible;
+    translate: 0 0;
+    transition: opacity .15s var(--ease-out), translate .15s var(--ease-out), visibility 0s;
+}
+.pv-dd--picker .pv-dd-panel { width: max(100%, 320px); }
+
+.pv-dd-sheet-head,
+.pv-dd-backdrop { display: none; }
+
+.pv-dd-list {
+    position: relative; /* options' offsetTop is measured from the list */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 296px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    outline: none;
+}
+
+/* Inner radius 8px = panel 14px − 6px padding */
+.pv-dd-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-dark);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color .12s ease-out;
+}
+.pv-dd-option.is-active { background: var(--bg-light); }
+.pv-dd-option[aria-selected="true"] { font-weight: 600; color: var(--primary); }
+.pv-dd-option.is-muted .pv-dd-label { color: #b3b7bd; }
+/* 0 listings with the rest of the panel: not pickable */
+.pv-dd-option[aria-disabled="true"] { cursor: default; }
+.pv-dd-option[aria-disabled="true"]:hover .pv-dd-check { border-color: #d4d7dc; }
+.pv-dd-option[aria-disabled="true"] .pv-dd-count,
+.pv-dd-option[aria-disabled="true"] .pv-dd-check { opacity: .5; }
+.pv-dd-label { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 8px; }
+.pv-dd-hint {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-light);
+}
+
+.pv-dd-count {
+    flex-shrink: 0;
+    min-width: 26px;
+    padding: 2px 8px;
+    border-radius: 50px;
+    background: var(--bg-light);
+    color: var(--text-light);
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    transition: background-color .12s ease-out, color .12s ease-out;
+}
+.pv-dd-option.is-active .pv-dd-count { background: var(--white); }
+.pv-dd-option[aria-selected="true"] .pv-dd-count { background: rgba(201, 162, 39, .14); color: var(--accent-dark); }
+
+/* Check mark (single) and checkbox (multi): the icon fades, scales and unblurs in */
+.pv-dd-tick,
+.pv-dd-check i {
+    opacity: 0;
+    scale: .25;
+    filter: blur(4px);
+    transition: opacity .2s var(--ease-out), scale .2s var(--ease-out), filter .2s var(--ease-out);
+}
+.pv-dd-tick { flex-shrink: 0; font-size: 16px; color: var(--accent); }
+.pv-dd-option[aria-selected="true"] .pv-dd-tick,
+.pv-dd-option[aria-selected="true"] .pv-dd-check i { opacity: 1; scale: 1; filter: blur(0); }
+
+.pv-dd-check {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d4d7dc;
+    border-radius: 5px;
+    background: var(--white);
+    transition: background-color .15s ease-out, border-color .15s ease-out;
+}
+.pv-dd-check i { font-size: 13px; line-height: 1; color: var(--white); }
+.pv-dd-option:hover .pv-dd-check { border-color: var(--accent); }
+.pv-dd-option[aria-selected="true"] .pv-dd-check { background: var(--accent); border-color: var(--accent); }
+
+.pv-dd-next { flex-shrink: 0; font-size: 13px; color: #b3b7bd; transition: color .12s ease-out; }
+.pv-dd-option.is-active .pv-dd-next { color: var(--accent); }
+
+.pv-dd-empty { padding: 14px 10px; color: var(--text-light); font-size: 14px; text-align: center; }
+
+/* Search inside a long list (districts) */
+.pv-dd-search { position: relative; padding: 2px 2px 6px; }
+.pv-dd-search i {
+    position: absolute;
+    left: 14px;
+    top: calc(50% - 2px);
+    translate: 0 -50%;
+    font-size: 13px;
+    color: #9aa0a6;
+    pointer-events: none;
+}
+.pv-dd-search input {
+    width: 100%;
+    padding: 8px 12px 8px 33px;
+    border: 2px solid #e5e5e5;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text-dark);
+    transition: border-color .2s ease-out;
+}
+.pv-dd-search input:focus { border-color: var(--accent); outline: none; }
+
+.pv-dd-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 8px 2px 2px;
+    border-top: 1px solid var(--hairline);
+}
+.pv-dd-clear,
+.pv-dd-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    transition: color .15s ease-out, background-color .15s ease-out, scale .15s ease-out;
+}
+.pv-dd-clear:hover,
+.pv-dd-back:hover { color: var(--primary); background: var(--bg-light); }
+.pv-dd-done {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--white);
+    cursor: pointer;
+    transition: background-color .2s ease-out, scale .15s ease-out;
+}
+.pv-dd-done:hover { background: var(--accent-dark); }
+.pv-dd-clear:active,
+.pv-dd-back:active,
+.pv-dd-done:active { scale: .96; }
+
+/* Location picker, step 2 header: ‹ Gradovi … NOVI SAD */
+.pv-dd-subhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+    padding: 0 2px 6px;
+    border-bottom: 1px solid var(--hairline);
+}
+.pv-dd-subtitle {
+    padding-right: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--primary);
+}
+.pv-dd-view.is-entering-forward { animation: pvDdForward .18s var(--ease-out); }
+.pv-dd-view.is-entering-back { animation: pvDdBack .18s var(--ease-out); }
+@keyframes pvDdForward { from { opacity: 0; translate: 12px 0; } }
+@keyframes pvDdBack { from { opacity: 0; translate: -12px 0; } }
+
+/* Home hero: the picker / type field look like the hero inputs */
+.search-form .pv-dd-trigger { padding: 0.875rem 1rem; font-size: 0.95rem; line-height: 1.5; }
+.search-form span.form-label { display: block; } /* a <span> label (dropdown, no <input>) */
+
+@media (prefers-reduced-motion: reduce) {
+    .pv-dd-panel,
+    .pv-dd.is-open .pv-dd-panel { translate: none; }
+    .pv-dd-view.is-entering-forward,
+    .pv-dd-view.is-entering-back { animation: none; }
+}
+
+/* Phones: bottom sheet with a dimmed backdrop */
+@media (max-width: 575.98px) {
+    .pv-dd.is-open { z-index: 1060; }
+    /* the hero is its own stacking layer: let the backdrop cover the header too */
+    html.pv-dd-locked { overflow: hidden; }
+    html.pv-dd-locked .site-header { z-index: 0; }
+
+    .pv-dd-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, .45);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity .2s var(--ease-out), visibility 0s linear .2s;
+    }
+    .pv-dd.is-open .pv-dd-backdrop { opacity: 1; visibility: visible; transition: opacity .2s var(--ease-out), visibility 0s; }
+
+    .pv-dd-panel,
+    .pv-dd.is-up .pv-dd-panel,
+    .pv-dd--picker .pv-dd-panel,
+    .results-sort .pv-dd-panel {
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        max-height: 80vh;
+        max-height: 80dvh;
+        display: flex;
+        flex-direction: column;
+        padding: 0 12px calc(12px + env(safe-area-inset-bottom));
+        border-radius: 20px 20px 0 0;
+        opacity: 1;
+        translate: 0 100%;
+        transition: translate .28s var(--ease-out), visibility 0s linear .28s;
+    }
+    .pv-dd.is-open .pv-dd-panel { translate: 0 0; transition: translate .28s var(--ease-out), visibility 0s; }
+
+    .pv-dd-sheet-head {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 4px 10px;
+    }
+    .pv-dd-sheet-head::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        width: 36px;
+        height: 4px;
+        border-radius: 2px;
+        background: #dfe1e5;
+        translate: -50% 0;
+    }
+    .pv-dd-sheet-title { font-size: 16px; font-weight: 700; color: var(--primary); }
+    .pv-dd-close {
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 50%;
+        background: var(--bg-light);
+        color: var(--primary);
+        transition: scale .15s ease-out;
+    }
+    .pv-dd-close:active { scale: .96; }
+
+    .pv-dd-body,
+    .pv-dd-view { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    .pv-dd-list { flex: 1 1 auto; max-height: none; }
+    .pv-dd-option { min-height: 48px; padding: 12px; font-size: 15px; }
+    .pv-dd-clear,
+    .pv-dd-back { padding: 12px; }
+    .pv-dd-done { padding: 12px 24px; font-size: 14px; }
+
+    .search-form .pv-dd-trigger { padding: 0.75rem 0.875rem; font-size: 0.9rem; }
+    .pv-dd-trigger { padding: 12px 14px; }
+    .results-sort .pv-dd { width: 180px; }
+}
 
 /* ===========================
    PAGINATION (brand colors instead of Bootstrap blue)

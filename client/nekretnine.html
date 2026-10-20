@@ -51,7 +51,7 @@
         </div>
     </section>
 
-    <!-- SUBNAV – Prodaja / Izdavanje -->
+    <!-- SUBNAV – Prodaja / Izdavanje / Novogradnja -->
     <nav class="properties-subnav" aria-label="Tip oglasa">
         <div class="container">
             <ul class="nav" role="tablist">
@@ -60,6 +60,9 @@
                 </li>
                 <li class="nav-item" role="presentation">
                     <a class="nav-link" href="#" data-type="rent" role="tab" aria-selected="false">Izdavanje</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" href="#" data-type="new" role="tab" aria-selected="false">Novogradnja</a>
                 </li>
             </ul>
         </div>
@@ -72,88 +75,181 @@
                 <div class="filter-panel-title"><i class="bi bi-sliders" aria-hidden="true"></i> Filtriraj nekretnine</div>
                 <div class="row g-4">
 
-                    <!-- Tip nekretnine -->
-                    <div class="col-12 col-md-6 col-lg-4">
+                    <!-- Tip nekretnine (Garaža only appears when the feed has one) -->
+                    <div class="col-12">
                         <div class="filter-group">
-                            <span class="filter-label">Tip nekretnine</span>
-                            <div class="filter-chips" role="group" aria-label="Tip nekretnine">
-                                <button class="filter-chip active" data-filter="tip" data-val="sve">Sve</button>
-                                <button class="filter-chip" data-filter="tip" data-val="stan">Stan</button>
-                                <button class="filter-chip" data-filter="tip" data-val="kuca">Kuća</button>
-                                <button class="filter-chip" data-filter="tip" data-val="poslovni">Poslovni</button>
-                                <button class="filter-chip" data-filter="tip" data-val="plac">Plac</button>
-                                <button class="filter-chip" data-filter="tip" data-val="zemljiste">Zemljište</button>
+                            <span class="filter-label" id="lblTip">Tip nekretnine</span>
+                            <div class="filter-chips" role="group" aria-labelledby="lblTip">
+                                <button type="button" class="filter-chip active" data-filter="tip" data-val="sve" aria-pressed="true">Sve</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="stan" aria-pressed="false">Stan</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="kuca" aria-pressed="false">Kuća</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="plac" aria-pressed="false">Plac</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="zemljiste" aria-pressed="false">Zemljište</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="poslovni" aria-pressed="false">Poslovni prostor</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="garaza" aria-pressed="false" hidden>Garaža</button>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Lokacija – Novi Sad kvartovi -->
+                    <!-- Grad → Deo grada (filled from /api/filter-options) -->
                     <div class="col-12 col-md-6 col-lg-4">
                         <div class="filter-group">
-                            <span class="filter-label">Lokacija</span>
-                            <div class="filter-chips" role="group" aria-label="Lokacija">
-                                <button class="filter-chip active" data-filter="lok" data-val="sve">Sve</button>
-                                <button class="filter-chip" data-filter="lok" data-val="grbavica">Grbavica</button>
-                                <button class="filter-chip" data-filter="lok" data-val="liman">Liman</button>
-                                <button class="filter-chip" data-filter="lok" data-val="petrovaradin">Petrovaradin</button>
-                                <button class="filter-chip" data-filter="lok" data-val="stari">Stari Grad</button>
-                                <button class="filter-chip" data-filter="lok" data-val="detelinara">Detelinara</button>
-                                <button class="filter-chip" data-filter="lok" data-val="sajam">Sajam</button>
-                                <button class="filter-chip" data-filter="lok" data-val="adice">Adice</button>
-                            </div>
+                            <span class="filter-label">Grad</span>
+                            <div id="citySelect"></div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="filter-group">
+                            <span class="filter-label">Deo grada</span>
+                            <div id="hoodSelect"></div>
                         </div>
                     </div>
 
-                    <!-- Broj soba -->
+                    <!-- Broj soba od–do -->
                     <div class="col-12 col-md-6 col-lg-4">
                         <div class="filter-group">
                             <span class="filter-label">Broj soba</span>
-                            <div class="filter-chips" role="group" aria-label="Broj soba">
-                                <button class="filter-chip active" data-filter="sobe" data-val="sve">Sve</button>
-                                <button class="filter-chip" data-filter="sobe" data-val="garsonjera">Garson.</button>
-                                <button class="filter-chip" data-filter="sobe" data-val="1">1</button>
-                                <button class="filter-chip" data-filter="sobe" data-val="2">2</button>
-                                <button class="filter-chip" data-filter="sobe" data-val="3">3</button>
-                                <button class="filter-chip" data-filter="sobe" data-val="4">4</button>
+                            <div class="range-selects">
+                                <div id="roomsMinSelect"></div>
+                                <span class="separator" aria-hidden="true">–</span>
+                                <div id="roomsMaxSelect"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Cena od–do (novi red) -->
+                    <!-- Cena od–do -->
                     <div class="col-12 col-md-6">
                         <div class="filter-group">
                             <span class="filter-label">Cena (€)</span>
                             <div class="price-inputs">
-                                <input type="number" placeholder="Od" aria-label="Cena od" id="priceMin" min="0" step="1000">
+                                <input type="number" placeholder="Od" aria-label="Cena od" id="priceMin" min="0" step="1000" inputmode="numeric">
                                 <span class="separator">–</span>
-                                <input type="number" placeholder="Do" aria-label="Cena do" id="priceMax" min="0" step="1000">
+                                <input type="number" placeholder="Do" aria-label="Cena do" id="priceMax" min="0" step="1000" inputmode="numeric">
                                 <span class="currency">€</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Kvadratura od–do (isti red kao cena) -->
+                    <!-- Kvadratura od–do; for Plac / Zemljište it becomes Površina in ares -->
                     <div class="col-12 col-md-6">
                         <div class="filter-group">
-                            <span class="filter-label">Kvadratura (m²)</span>
+                            <span class="filter-label" id="areaLabel">Kvadratura (m²)</span>
                             <div class="price-inputs">
-                                <input type="number" placeholder="Od" aria-label="Kvadratura od" id="sqmMin" min="0" step="5">
+                                <input type="number" placeholder="Od" aria-label="Kvadratura od" id="sqmMin" min="0" step="5" inputmode="numeric">
                                 <span class="separator">–</span>
-                                <input type="number" placeholder="Do" aria-label="Kvadratura do" id="sqmMax" min="0" step="5">
-                                <span class="currency">m²</span>
+                                <input type="number" placeholder="Do" aria-label="Kvadratura do" id="sqmMax" min="0" step="5" inputmode="numeric">
+                                <span class="currency" id="areaUnit">m²</span>
                             </div>
                         </div>
                     </div>
 
                 </div>
 
-                <!-- Actions row -->
+                <!-- VIŠE FILTERA (#16): opens in place from the actions row.
+                     data-scope hides a group when it doesn't fit the chosen type (page-properties.js). -->
+                <div class="more-filters" id="moreFilters">
+                    <div class="more-filters-inner" id="moreFiltersInner" inert>
+                        <div class="more-filters-body">
+
+                            <div class="row g-4">
+                                <div class="col-12 col-md-6 col-xl-3" data-scope="building">
+                                    <div class="filter-group">
+                                        <span class="filter-label">Kupatila</span>
+                                        <div id="bathSelect"></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-3" data-scope="apartment">
+                                    <div class="filter-group">
+                                        <span class="filter-label">Sprat</span>
+                                        <div class="range-selects">
+                                            <div id="floorMinSelect"></div>
+                                            <span class="separator" aria-hidden="true">–</span>
+                                            <div id="floorMaxSelect"></div>
+                                        </div>
+                                        <div class="filter-chips filter-chips--sub" id="floorChips"></div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-3" data-scope="building">
+                                    <div class="filter-group">
+                                        <span class="filter-label">Godina izgradnje</span>
+                                        <div class="price-inputs">
+                                            <input type="number" placeholder="Od" aria-label="Godina izgradnje od" id="yearMin" min="1800" max="2100" step="1" inputmode="numeric">
+                                            <span class="separator">–</span>
+                                            <input type="number" placeholder="Do" aria-label="Godina izgradnje do" id="yearMax" min="1800" max="2100" step="1" inputmode="numeric">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-3" data-scope="plot">
+                                    <div class="filter-group">
+                                        <span class="filter-label">Površina placa (ari)</span>
+                                        <div class="price-inputs">
+                                            <input type="number" placeholder="Od" aria-label="Površina placa od (ari)" id="plotMin" min="0" step="1" inputmode="decimal">
+                                            <span class="separator">–</span>
+                                            <input type="number" placeholder="Do" aria-label="Površina placa do (ari)" id="plotMax" min="0" step="1" inputmode="decimal">
+                                            <span class="currency">ar</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Chip groups: filled by page-properties.js; a chip with no listing is dimmed -->
+                            <div class="more-groups">
+                                <div class="filter-group" data-scope="building">
+                                    <span class="filter-label">Grejanje</span>
+                                    <div class="filter-chips" data-group="heating" role="group" aria-label="Grejanje"></div>
+                                </div>
+                                <div class="filter-group" data-scope="building">
+                                    <span class="filter-label">Opremljenost</span>
+                                    <div class="filter-chips" data-group="furnished" role="group" aria-label="Opremljenost"></div>
+                                </div>
+                                <div class="filter-group" data-scope="building not-new">
+                                    <span class="filter-label">Gradnja</span>
+                                    <div class="filter-chips" data-group="construction" role="group" aria-label="Gradnja"></div>
+                                </div>
+                                <div class="filter-group" data-scope="building">
+                                    <span class="filter-label">Stanje</span>
+                                    <div class="filter-chips" data-group="condition" role="group" aria-label="Stanje"></div>
+                                </div>
+                                <div class="filter-group" data-scope="all">
+                                    <span class="filter-label">Uknjiženost</span>
+                                    <div class="filter-chips" data-group="registered" role="group" aria-label="Uknjiženost"></div>
+                                </div>
+                            </div>
+
+                            <div class="filter-group more-section" data-scope="building">
+                                <span class="filter-label">Karakteristike</span>
+                                <div class="filter-chips" data-group="feature" role="group" aria-label="Karakteristike"></div>
+                            </div>
+
+                            <div class="more-groups more-groups--wide">
+                                <div class="filter-group" data-scope="infra">
+                                    <span class="filter-label">Infrastruktura i dozvole</span>
+                                    <div class="filter-chips" data-group="infra" role="group" aria-label="Infrastruktura i dozvole"></div>
+                                </div>
+                                <div class="filter-group" data-scope="building">
+                                    <span class="filter-label">Oprema</span>
+                                    <div class="filter-chips" data-group="equipment" role="group" aria-label="Oprema"></div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions row: search / reset · Više filtera · result count -->
                 <div class="filter-actions">
-                    <button class="btn-filter-search" id="btnSearch" aria-label="Pretraži nekretnine">
-                        <i class="bi bi-search" aria-hidden="true"></i> Pretraži
-                    </button>
-                    <button class="btn-filter-reset" id="btnReset" aria-label="Resetuj filtere">
-                        <i class="bi bi-x-circle" aria-hidden="true"></i> Resetuj
+                    <div class="filter-actions-buttons">
+                        <button type="button" class="btn-filter-search" id="btnSearch">
+                            <i class="bi bi-search" aria-hidden="true"></i> Pretraži
+                        </button>
+                        <button type="button" class="btn-filter-reset" id="btnReset">
+                            <i class="bi bi-x-circle" aria-hidden="true"></i> Resetuj
+                        </button>
+                    </div>
+                    <button type="button" class="btn-more-filters" id="btnMoreFilters" aria-expanded="false" aria-controls="moreFilters">
+                        <span class="btn-more-filters-text">Više filtera</span>
+                        <span class="btn-more-filters-badge" id="moreFiltersBadge" hidden></span>
+                        <i class="bi bi-chevron-down btn-more-filters-caret" aria-hidden="true"></i>
                     </button>
                     <div class="filter-results-count" aria-live="polite">Pronađeno: <span id="resultsCount">…</span> <span id="resultsNoun">nekretnina</span></div>
                 </div>
@@ -164,6 +260,14 @@
     <!-- PROPERTIES GRID -->
     <section class="featured-section py-5" aria-label="Lista nekretnina">
         <div class="container">
+            <!-- Results bar: sort -->
+            <div class="results-bar">
+                <div class="results-sort">
+                    <span class="results-sort-label">Sortiraj</span>
+                    <div id="sortSelect"></div>
+                </div>
+            </div>
+
             <div class="row g-4" id="propertiesGrid" aria-live="polite">
                 <!-- Populated by page-properties.js -->
             </div>
@@ -181,7 +285,7 @@
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-4"><h3 class="footer-brand">ProVizija</h3><p class="footer-text">Vodimo vas kroz svaki korak ka vašem novom domu. Sa preko 15 godina iskustva na tržištu nekretnina.</p></div>
-                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Istraži</h4><ul class="footer-links"><li><a href="nekretnine.html?propertyType=apartment">Stanovi</a></li><li><a href="nekretnine.html?propertyType=house">Kuće</a></li><li><a href="nekretnine.html?propertyType=commercial">Poslovni prostor</a></li><li><a href="nekretnine.html?propertyType=land">Zemljište</a></li></ul></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Istraži</h4><ul class="footer-links"><li><a href="nekretnine.html?propertyType=apartment">Stanovi</a></li><li><a href="nekretnine.html?propertyType=house">Kuće</a></li><li><a href="nekretnine.html?propertyType=commercial&amp;propertyType=office">Poslovni prostor</a></li><li><a href="nekretnine.html?propertyType=land">Zemljište</a></li></ul></div>
                 <div class="col-lg-2 col-md-4"><h4 class="footer-title">Kompanija</h4><ul class="footer-links"><li><a href="o-nama.html">O Nama</a></li><li><a href="agenti.html">Naš Tim</a></li><li><a href="kontakt.html">Kontakt</a></li><li><a href="oglasite-nekretninu.html">Oglasite</a></li></ul></div>
                 <div class="col-lg-4 col-md-4"><h4 class="footer-title">Kontakt</h4><ul class="footer-links"><li><a href="tel:+381111234567">+381 11 123 4567</a></li><li><a href="mailto:info@provizija.rs">info@provizija.rs</a></li><li><span class="footer-address">Vase Stajića 36, Novi Sad</span></li></ul></div>
             </div>
@@ -192,6 +296,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/api.js"></script>
     <script src="js/renderers.js"></script>
+    <script src="js/dropdown.js"></script>
     <script src="js/page-properties.js"></script>
     <script src="js/script.js"></script>
 </body>

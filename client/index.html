@@ -57,26 +57,17 @@
                             <button class="nav-link" id="tab-btn-izdavanje" data-tab="izdavanje" role="tab" aria-selected="false" aria-controls="tab-izdavanje" type="button">Izdavanje</button>
                         </div>
 
-                        <!-- Kupovina form -->
+                        <!-- Kupovina form (Lokacija / Tip are PV.ui dropdowns, filled by page-home.js) -->
                         <div class="search-tab-content" id="tab-kupovina" role="tabpanel" aria-labelledby="tab-btn-kupovina">
-                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za kupovinu">
-                                <input type="hidden" name="tip_oglasa" value="kupovina">
+                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za kupovinu" data-transaction="sale">
                                 <div class="row g-3">
                                     <div class="col-12 col-md-4">
-                                        <label for="kup-lokacija" class="form-label">Lokacija</label>
-                                        <input type="text" class="form-control" id="kup-lokacija" name="lokacija" list="lokacije" placeholder="Kvart, npr. Liman" autocomplete="off">
+                                        <span class="form-label">Lokacija</span>
+                                        <div class="js-location"></div>
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="kup-tip" class="form-label">Tip</label>
-                                        <select class="form-select" id="kup-tip" name="tip">
-                                            <option value="">Sve</option>
-                                            <option>Stan</option>
-                                            <option>Kuća</option>
-                                            <option>Apartman</option>
-                                            <option>Plac</option>
-                                            <option>Zemljište</option>
-                                            <option>Poslovni prostor</option>
-                                        </select>
+                                        <span class="form-label">Tip</span>
+                                        <div class="js-type"></div>
                                     </div>
                                     <div class="col-12 col-md-4">
                                         <label for="kup-cena-od" class="form-label">Cena (€)</label>
@@ -95,22 +86,15 @@
 
                         <!-- Izdavanje form -->
                         <div class="search-tab-content" id="tab-izdavanje" role="tabpanel" aria-labelledby="tab-btn-izdavanje" hidden>
-                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za izdavanje">
-                                <input type="hidden" name="tip_oglasa" value="izdavanje">
+                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za izdavanje" data-transaction="rent">
                                 <div class="row g-3">
                                     <div class="col-12 col-md-4">
-                                        <label for="izd-lokacija" class="form-label">Lokacija</label>
-                                        <input type="text" class="form-control" id="izd-lokacija" name="lokacija" list="lokacije" placeholder="Kvart, npr. Liman" autocomplete="off">
+                                        <span class="form-label">Lokacija</span>
+                                        <div class="js-location"></div>
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <label for="izd-tip" class="form-label">Tip</label>
-                                        <select class="form-select" id="izd-tip" name="tip">
-                                            <option value="">Sve</option>
-                                            <option>Stan</option>
-                                            <option>Kuća</option>
-                                            <option>Apartman</option>
-                                            <option>Poslovni prostor</option>
-                                        </select>
+                                        <span class="form-label">Tip</span>
+                                        <div class="js-type"></div>
                                     </div>
                                     <div class="col-12 col-md-4">
                                         <label for="izd-cena-od" class="form-label">Cena (€/mes.)</label>
@@ -126,18 +110,6 @@
                                 </div>
                             </form>
                         </div>
-
-                        <!-- Location suggestions: the API matches a whole district or city name -->
-                        <datalist id="lokacije">
-                            <option value="Novi Sad"></option>
-                            <option value="Grbavica"></option>
-                            <option value="Liman"></option>
-                            <option value="Petrovaradin"></option>
-                            <option value="Stari Grad"></option>
-                            <option value="Detelinara"></option>
-                            <option value="Sajam"></option>
-                            <option value="Adice"></option>
-                        </datalist>
 
                     </div><!-- /.search-container -->
                 </div>
@@ -277,7 +249,7 @@
         <div class="container">
             <div class="row g-4">
                 <div class="col-lg-4"><h3 class="footer-brand">ProVizija</h3><p class="footer-text">Vodimo vas kroz svaki korak ka vašem novom domu. Sa preko 15 godina iskustva na tržištu nekretnina, nudimo profesionalnu uslugu i pristup vrhunskim nekretninama.</p></div>
-                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Istraži</h4><ul class="footer-links"><li><a href="nekretnine.html?propertyType=apartment">Stanovi</a></li><li><a href="nekretnine.html?propertyType=house">Kuće</a></li><li><a href="nekretnine.html?propertyType=commercial">Poslovni prostor</a></li><li><a href="nekretnine.html?propertyType=land">Zemljište</a></li></ul></div>
+                <div class="col-lg-2 col-md-4"><h4 class="footer-title">Istraži</h4><ul class="footer-links"><li><a href="nekretnine.html?propertyType=apartment">Stanovi</a></li><li><a href="nekretnine.html?propertyType=house">Kuće</a></li><li><a href="nekretnine.html?propertyType=commercial&amp;propertyType=office">Poslovni prostor</a></li><li><a href="nekretnine.html?propertyType=land">Zemljište</a></li></ul></div>
                 <div class="col-lg-2 col-md-4"><h4 class="footer-title">Kompanija</h4><ul class="footer-links"><li><a href="o-nama.html">O Nama</a></li><li><a href="agenti.html">Naš Tim</a></li><li><a href="kontakt.html">Kontakt</a></li><li><a href="oglasite-nekretninu.html">Oglasite</a></li></ul></div>
                 <div class="col-lg-4 col-md-4"><h4 class="footer-title">Kontakt</h4><ul class="footer-links"><li><a href="tel:+381111234567">+381 11 123 4567</a></li><li><a href="mailto:info@provizija.rs">info@provizija.rs</a></li><li><span class="footer-address">Vase Stajića 36, Novi Sad</span></li></ul></div>
             </div>
@@ -288,6 +260,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/api.js"></script>
     <script src="js/renderers.js"></script>
+    <script src="js/dropdown.js"></script>
     <script src="js/page-home.js"></script>
     <script src="js/script.js"></script>
     <script src="js/search-tabs.js"></script>
