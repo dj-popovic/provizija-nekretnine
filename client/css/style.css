@@ -3050,9 +3050,15 @@ textarea.field-input { resize: none; }
     font-weight: 700;
     letter-spacing: 0.02em;
     text-shadow: 0 1px 2px rgba(120, 90, 10, 0.35);
-    box-shadow: 0 6px 18px -6px rgba(201, 162, 39, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    /* Same four shadows, in the same order, in both states: only then can the
+       browser animate between them (a different list makes the glow pop in) */
+    box-shadow:
+        0 0 0 0 rgba(201, 162, 39, 0),
+        0 0 0 rgba(232, 196, 106, 0),
+        0 6px 18px -6px rgba(201, 162, 39, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
     cursor: pointer;
-    transition: box-shadow 0.25s var(--ease-out), translate 0.25s var(--ease-out), scale 0.15s ease-out, filter 0.25s ease-out;
+    transition: box-shadow 0.45s var(--ease-out), translate 0.35s var(--ease-out), scale 0.15s ease-out, filter 0.35s ease-out;
 }
 
 .btn-load-more:hover {
