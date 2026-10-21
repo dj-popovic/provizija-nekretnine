@@ -252,10 +252,11 @@ window.PV = window.PV || {};
 
   // Prev/next arrows + "1 / N" counter of a photo slider (cards and the detail gallery).
   // Without a count it returns just the arrows.
-  function mediaNav(count) {
+  // edges: card sliders stop at the first/last photo (no "back" on the first one);
+  // the detail gallery and lightbox go round in a circle.
+  function mediaNav(count, edges) {
     return (
-      // Starts on the first photo, so "back" starts off (see updateNav)
-      '<button type="button" class="media-nav media-nav--prev is-off" data-dir="-1" aria-label="Prethodna slika" disabled><i class="bi bi-chevron-left" aria-hidden="true"></i></button>' +
+      '<button type="button" class="media-nav media-nav--prev' + (edges ? ' is-off" disabled' : '"') + ' data-dir="-1" aria-label="Prethodna slika"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>' +
       '<button type="button" class="media-nav media-nav--next" data-dir="1" aria-label="Sledeća slika"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>' +
       (count ? '<span class="media-count" aria-hidden="true"><span class="media-count-current">1</span> / ' + count + '</span>' : '')
     );
@@ -292,7 +293,7 @@ window.PV = window.PV || {};
         '</span>';
     }
 
-    var nav = images.length > 1 ? mediaNav(images.length) : '';
+    var nav = images.length > 1 ? mediaNav(images.length, true) : '';
 
     var price = priceParts(item.price, item.transactionType);
     var priceHtml = price
@@ -444,17 +445,20 @@ window.PV = window.PV || {};
 
     var track = btn.parentNode.querySelector('.property-slides');
     var count = track.children.length;
-    // No wrap-around: the first photo has no "back", the last no "next"
-    var next = Math.max(0, Math.min(count - 1, slideIndex(track) + Number(btn.dataset.dir)));
+    var next = slideIndex(track) + Number(btn.dataset.dir);
+    // Cards stop at the ends; the detail gallery / lightbox go round
+    var wraps = !btn.closest('.property-card') && (next < 0 || next >= count);
+    next = wraps ? (next + count) % count : Math.max(0, Math.min(count - 1, next));
 
     warmUp(track, next);
+    // Wrapping around jumps instead of rewinding through every photo
     track.scrollTo({
       left: next * track.clientWidth,
-      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+      behavior: wraps || prefersReducedMotion() ? 'auto' : 'smooth',
     });
   });
 
-  // Hide "back" on the first photo and "next" on the last
+  // Cards: hide "back" on the first photo and "next" on the last
   function updateNav(track) {
     var index = slideIndex(track);
     var last = track.children.length - 1;
@@ -484,7 +488,7 @@ window.PV = window.PV || {};
     var slide = track.children[index];
     if (counter) counter.classList.toggle('is-hidden', !!(slide && slide.classList.contains('slide-more')));
     warmUp(track, index); // swipes on touch screens, where there is no hover
-    updateNav(track);
+    if (track.closest('.property-card')) updateNav(track);
   }, { capture: true, passive: true });
 
   // The card photo is a duplicate, aria-hidden link: a mouse click must not focus it
