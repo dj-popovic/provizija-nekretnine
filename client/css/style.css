@@ -658,6 +658,11 @@ p, li,
     text-align: center;
 }
 
+/* Playfair's "+" sits tight against the digits; a small gap keeps "+ 21" balanced */
+.slide-more-plus {
+    margin-right: 0.12em;
+}
+
 .slide-more-mark {
     width: 88px;
     height: auto;
@@ -775,6 +780,12 @@ p, li,
 .property-card:hover .media-nav,
 .property-media:focus-within .media-nav {
     opacity: 1;
+}
+
+/* First / last photo: that arrow is gone (pointer-events off so the photo under it stays clickable) */
+.media-nav.is-off {
+    opacity: 0 !important;
+    pointer-events: none;
 }
 
 .media-nav:hover {

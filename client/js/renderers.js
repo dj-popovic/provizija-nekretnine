@@ -254,7 +254,8 @@ window.PV = window.PV || {};
   // Without a count it returns just the arrows.
   function mediaNav(count) {
     return (
-      '<button type="button" class="media-nav media-nav--prev" data-dir="-1" aria-label="Prethodna slika"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>' +
+      // Starts on the first photo, so "back" starts off (see updateNav)
+      '<button type="button" class="media-nav media-nav--prev is-off" data-dir="-1" aria-label="Prethodna slika" disabled><i class="bi bi-chevron-left" aria-hidden="true"></i></button>' +
       '<button type="button" class="media-nav media-nav--next" data-dir="1" aria-label="Sledeća slika"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>' +
       (count ? '<span class="media-count" aria-hidden="true"><span class="media-count-current">1</span> / ' + count + '</span>' : '')
     );
@@ -285,7 +286,7 @@ window.PV = window.PV || {};
           '<img class="slide-more-bg" data-src="' + esc(images[CARD_SLIDES - 1].url) + '" alt="" loading="lazy" decoding="async" draggable="false" width="600" height="400">' +
           '<span class="slide-more-content">' +
             '<img class="slide-more-mark" src="images/pro-vizija-mark-white.svg" alt="" width="88" height="41">' +
-            '<span class="slide-more-count">+' + more + ' ' + plural(more, 'fotografija', 'fotografije', 'fotografija') + '</span>' +
+            '<span class="slide-more-count"><span class="slide-more-plus">+</span>' + more + ' ' + plural(more, 'fotografija', 'fotografije', 'fotografija') + '</span>' +
             '<span class="slide-more-cta">Pogledajte sve <i class="bi bi-chevron-right" aria-hidden="true"></i></span>' +
           '</span>' +
         '</span>';
@@ -443,17 +444,33 @@ window.PV = window.PV || {};
 
     var track = btn.parentNode.querySelector('.property-slides');
     var count = track.children.length;
-    var next = slideIndex(track) + Number(btn.dataset.dir);
-    var wraps = next < 0 || next >= count;
-    next = (next + count) % count;
+    // No wrap-around: the first photo has no "back", the last no "next"
+    var next = Math.max(0, Math.min(count - 1, slideIndex(track) + Number(btn.dataset.dir)));
 
     warmUp(track, next);
-    // Wrapping around jumps instead of rewinding through every photo
     track.scrollTo({
       left: next * track.clientWidth,
-      behavior: wraps || prefersReducedMotion() ? 'auto' : 'smooth',
+      behavior: prefersReducedMotion() ? 'auto' : 'smooth',
     });
   });
+
+  // Hide "back" on the first photo and "next" on the last
+  function updateNav(track) {
+    var index = slideIndex(track);
+    var last = track.children.length - 1;
+    var box = track.parentNode;
+    [['.media-nav--prev', index <= 0], ['.media-nav--next', index >= last]].forEach(function (pair) {
+      var btn = box.querySelector(pair[0]);
+      if (!btn) return;
+      if (pair[1] && btn === document.activeElement) {
+        // Keyboard focus moves to the other arrow instead of being lost
+        var other = box.querySelector(pair[0] === '.media-nav--prev' ? '.media-nav--next' : '.media-nav--prev');
+        if (other && last > 0) other.focus();
+      }
+      btn.classList.toggle('is-off', pair[1]);
+      btn.disabled = pair[1];
+    });
+  }
 
   // scroll does not bubble, so listen in the capture phase
   document.addEventListener('scroll', function (e) {
@@ -467,6 +484,7 @@ window.PV = window.PV || {};
     var slide = track.children[index];
     if (counter) counter.classList.toggle('is-hidden', !!(slide && slide.classList.contains('slide-more')));
     warmUp(track, index); // swipes on touch screens, where there is no hover
+    updateNav(track);
   }, { capture: true, passive: true });
 
   // The card photo is a duplicate, aria-hidden link: a mouse click must not focus it
