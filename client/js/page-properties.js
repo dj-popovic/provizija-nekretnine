@@ -549,6 +549,64 @@ window.PV = window.PV || {};
   var listRequest = 0;
   var shownCount = 0;
 
+  // --- Back from a property: same cards, same spot ---
+  // Before leaving, remember how many pages were open and where the clicked card sat.
+  // On "back" (when the browser didn't keep the page in memory) reload that many
+  // cards in one request and put the card back at the same height on screen.
+  var RESTORE_KEY = 'pv-list-return';
+  var PAGE_SIZE = 12;      // the API default
+  var MAX_PAGE_SIZE = 100; // the API limit
+  var restore = null;
+
+  function saveReturnPoint(link) {
+    var card = link && link.closest('.property-card');
+    try {
+      sessionStorage.setItem(RESTORE_KEY, JSON.stringify({
+        search: location.search,
+        pages: filters.page,
+        href: link ? link.getAttribute('href') : null,
+        top: card ? Math.round(card.getBoundingClientRect().top) : null,
+        y: Math.round(window.scrollY),
+      }));
+    } catch (e) { /* private mode: nothing to restore later */ }
+  }
+
+  function readReturnPoint() {
+    var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    if (!nav || nav.type !== 'back_forward') return null;
+    try {
+      var saved = JSON.parse(sessionStorage.getItem(RESTORE_KEY) || 'null');
+      return saved && saved.search === location.search ? saved : null;
+    } catch (e) { return null; }
+  }
+
+  function applyReturnPoint() {
+    var r = restore;
+    restore = null;
+    if (!r) return;
+    var link = r.href && grid.querySelector('a.stretched-link[href="' + CSS.escape(r.href) + '"]');
+    var card = link && link.closest('.property-card');
+    if (!card || r.top == null) {
+      window.scrollTo({ top: r.y, behavior: 'instant' });
+      return;
+    }
+    // Cards above are only estimated until they are painted (content-visibility),
+    // so correct the position for a few frames as they settle
+    var tries = 0;
+    (function settle() {
+      var off = card.getBoundingClientRect().top - r.top;
+      if (Math.abs(off) > 1) window.scrollBy({ top: off, behavior: 'instant' });
+      if (++tries < 6) requestAnimationFrame(settle);
+    })();
+  }
+
+  if (grid) {
+    grid.addEventListener('click', function (e) {
+      var link = e.target.closest && e.target.closest('a[href]');
+      if (link) saveReturnPoint(link.classList.contains('stretched-link') ? link : link.closest('.property-card').querySelector('.stretched-link'));
+    });
+  }
+
   function cardsHtml(items) {
     return items.map(function (item) {
       return '<div class="col-lg-4 col-md-6">' + PV.render.propertyCard(item) + '</div>';
@@ -565,7 +623,7 @@ window.PV = window.PV || {};
       '<div class="col-12 load-more">' +
         '<p class="load-more-status">Prikazano ' + shownCount + ' od ' + pg.total + '</p>' +
         '<button type="button" class="btn-load-more" id="btnLoadMore">' +
-          '<span class="btn-load-more-label">Učitaj još nekretnina</span>' +
+          '<span class="btn-load-more-label">Učitaj još nekretnina<i class="bi bi-chevron-down" aria-hidden="true"></i></span>' +
           '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>' +
         '</button>' +
       '</div>';
@@ -582,11 +640,21 @@ window.PV = window.PV || {};
 
     syncUrl();
 
+    // First load after "back": all pages that were open, in one request
+    var pages = restore ? Math.min(restore.pages || 1, Math.floor(MAX_PAGE_SIZE / PAGE_SIZE)) : 1;
+    var params = toParams(filters);
+    if (pages > 1) params.pageSize = pages * PAGE_SIZE;
+
     try {
-      var res = await PV.api.get('/api/properties', toParams(filters));
+      var res = await PV.api.get('/api/properties', params);
       if (id !== listRequest) return;
       var items = res.items || [];
       var pg = res.pagination;
+      if (pages > 1 && pg) {
+        // Continue "Učitaj još" in 12-card pages from where the big page ended
+        filters.page = pages;
+        pg = { page: pages, pageSize: PAGE_SIZE, total: pg.total, totalPages: Math.ceil(pg.total / PAGE_SIZE) };
+      }
 
       // Results count
       var total = pg ? pg.total : items.length;
@@ -601,6 +669,7 @@ window.PV = window.PV || {};
       }
       shownCount = items.length;
       renderLoadMore(pg);
+      applyReturnPoint();
     } catch (err) {
       if (id !== listRequest) return;
       if (grid) grid.innerHTML = PV.render.errorState(err.message);
@@ -836,6 +905,9 @@ window.PV = window.PV || {};
     // A link that already carries extra filters opens the section, without animation
     if (moreCount() > 0) setMoreOpen(true, true);
     loadOptions();
+    restore = readReturnPoint();
+    // The browser would jump before the cards exist; applyReturnPoint scrolls instead
+    if (restore && 'scrollRestoration' in history) history.scrollRestoration = 'manual';
     fetchAndRender();
   });
 })();

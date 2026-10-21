@@ -609,13 +609,103 @@ p, li,
     display: none;
 }
 
-.property-slides img {
+.property-slides > img,
+.property-slides > .slide-more {
     flex: 0 0 100%;
     width: 100%;
     height: 100%;
     object-fit: cover;
     scroll-snap-align: start;
     scroll-snap-stop: always;
+}
+
+/* Last card slide when a listing has more photos: the next photo blurred and
+   darkened, the eye mark and "+N fotografija" over it */
+.slide-more {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    background: var(--primary);
+}
+
+.slide-more-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: blur(10px) brightness(0.5) saturate(1.1);
+    scale: 1.15; /* hides the blur's soft edges */
+}
+
+.slide-more::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 45%, rgba(15, 23, 42, 0.15), rgba(15, 23, 42, 0.6));
+}
+
+.slide-more-content {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--white);
+    text-align: center;
+}
+
+.slide-more-mark {
+    width: 88px;
+    height: auto;
+    margin-bottom: 6px;
+    filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.35));
+}
+
+.slide-more-count {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.slide-more-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    padding: 0.4rem 1rem;
+    border: 1px solid rgba(232, 196, 106, 0.7);
+    border-radius: 999px;
+    color: #F1D58A;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease-out, color 0.2s ease-out;
+}
+
+.slide-more-cta i {
+    -webkit-text-stroke: 0.6px currentColor;
+    transition: translate 0.2s var(--ease-out);
+}
+
+.property-card:hover .slide-more-cta {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--white);
+}
+
+.property-card:hover .slide-more-cta i {
+    translate: 3px 0;
+}
+
+.media-count.is-hidden {
+    opacity: 0;
 }
 
 .property-badge {
@@ -2938,22 +3028,30 @@ textarea.field-input { resize: none; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 48px;
-    padding: 12px 40px;
-    border: 2px solid var(--accent);
-    border-radius: 8px;
-    background: var(--white);
-    color: var(--accent-dark);
+    gap: 10px;
+    min-height: 52px;
+    padding: 14px 44px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #DDB94F 0%, var(--accent) 50%, #A6851A 100%);
+    color: var(--white);
     font-size: 15px;
     font-weight: 700;
+    letter-spacing: 0.02em;
+    text-shadow: 0 1px 2px rgba(120, 90, 10, 0.35);
+    box-shadow: 0 6px 18px -6px rgba(201, 162, 39, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     cursor: pointer;
-    transition: background-color 0.2s ease-out, color 0.2s ease-out, box-shadow 0.2s ease-out, scale 0.15s ease-out;
+    transition: box-shadow 0.25s var(--ease-out), translate 0.25s var(--ease-out), scale 0.15s ease-out, filter 0.25s ease-out;
 }
 
 .btn-load-more:hover {
-    background: var(--accent);
-    color: var(--white);
-    box-shadow: 0 8px 20px rgba(201, 162, 39, 0.3);
+    translate: 0 -2px;
+    filter: brightness(1.05);
+    box-shadow:
+        0 0 0 4px rgba(201, 162, 39, 0.15),
+        0 0 28px rgba(232, 196, 106, 0.65),
+        0 12px 28px -8px rgba(201, 162, 39, 0.7),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .btn-load-more:active {
@@ -2963,6 +3061,29 @@ textarea.field-input { resize: none; }
 .btn-load-more:focus-visible {
     outline: 2px solid var(--primary);
     outline-offset: 3px;
+}
+
+.btn-load-more-label i {
+    margin-left: 6px;
+    -webkit-text-stroke: 0.6px currentColor;
+}
+
+@media (max-width: 575px) {
+    .load-more {
+        padding-inline: 4px;
+    }
+
+    .btn-load-more {
+        width: 100%;
+        min-height: 54px;
+        padding-inline: 20px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-load-more:hover {
+        translate: none;
+    }
 }
 
 /* Loading: the label keeps the button's width, the spinner sits on top of it */
@@ -2981,5 +3102,13 @@ textarea.field-input { resize: none; }
 
 .btn-load-more.is-loading .spinner-border {
     opacity: 1;
+}
+
+/* Long lists: cards far off-screen are not laid out or painted until they come near.
+   On the card itself (not its column): containment clips only what is inside the
+   element, so the card's own hover shadow and focus ring stay whole. */
+#propertiesGrid .property-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 480px;
 }
 

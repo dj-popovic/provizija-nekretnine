@@ -11,10 +11,11 @@
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
   // Tunables
-  var AREA_PER_PARTICLE = 14000; // px² of hero per particle
-  var MAX_PARTICLES = 90;
-  var MIN_SPEED = 18;            // px/s
-  var MAX_SPEED = 55;
+  var AREA_PER_PARTICLE = 6500;  // px² of hero per particle
+  var MAX_PARTICLES = 190;
+  var MIN_SPEED = 35;            // px/s
+  var MAX_SPEED = 95;
+  var GLOW_SIZE = 64;            // px of the pre-rendered glow sprite
   var COLORS = ['232, 196, 106', '201, 162, 39', '255, 236, 179']; // gold shades (rgb)
 
   var wrap = document.createElement('div');
@@ -31,6 +32,23 @@
 
   function rand(a, b) { return a + Math.random() * (b - a); }
 
+  // One soft radial glow per color, drawn once and then stamped with drawImage
+  // (far cheaper than shadowBlur on every particle, every frame)
+  var sprites = {};
+  COLORS.forEach(function (c) {
+    var s = document.createElement('canvas');
+    s.width = s.height = GLOW_SIZE;
+    var g = s.getContext('2d');
+    var grad = g.createRadialGradient(GLOW_SIZE / 2, GLOW_SIZE / 2, 0, GLOW_SIZE / 2, GLOW_SIZE / 2, GLOW_SIZE / 2);
+    grad.addColorStop(0, 'rgba(255, 250, 230, 1)');
+    grad.addColorStop(0.12, 'rgba(' + c + ', 0.95)');
+    grad.addColorStop(0.35, 'rgba(' + c + ', 0.35)');
+    grad.addColorStop(1, 'rgba(' + c + ', 0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, GLOW_SIZE, GLOW_SIZE);
+    sprites[c] = s;
+  });
+
   function spawn(p, fromTop) {
     p.x = rand(0, width);
     // On entry the dust starts above the hero and falls in; later ones respawn just above the top edge
@@ -40,8 +58,11 @@
     p.sway = rand(6, 18);
     p.phase = rand(0, Math.PI * 2);
     p.freq = rand(0.4, 1.1);
-    p.alpha = rand(0.25, 0.85);
+    p.alpha = rand(0.35, 0.95);
     p.color = COLORS[(Math.random() * COLORS.length) | 0];
+    // Twinkle: each particle pulses at its own speed
+    p.tw = rand(1.5, 4.5);
+    p.twPhase = rand(0, Math.PI * 2);
     return p;
   }
 
@@ -65,24 +86,21 @@
     var dt = Math.min((now - last) / 1000, 0.05); // clamp after a hidden tab / long frame
     last = now;
     ctx.clearRect(0, 0, width, height);
+    ctx.globalCompositeOperation = 'lighter'; // overlapping glows add up like light
 
     for (var i = 0; i < particles.length; i++) {
       var p = particles[i];
       p.y += p.vy * dt;
       p.phase += p.freq * dt;
+      p.twPhase += p.tw * dt;
       if (p.y - p.r > height) spawn(p, false);
       var x = p.x + Math.sin(p.phase) * p.sway;
+      var size = p.r * 9;
 
-      // Soft halo + bright core (cheaper than shadowBlur)
-      ctx.fillStyle = 'rgba(' + p.color + ',' + (p.alpha * 0.18) + ')';
-      ctx.beginPath();
-      ctx.arc(x, p.y, p.r * 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(' + p.color + ',' + p.alpha + ')';
-      ctx.beginPath();
-      ctx.arc(x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.globalAlpha = p.alpha * (0.45 + 0.55 * (0.5 + 0.5 * Math.sin(p.twPhase)));
+      ctx.drawImage(sprites[p.color], x - size / 2, p.y - size / 2, size, size);
     }
+    ctx.globalAlpha = 1;
     raf = requestAnimationFrame(frame);
   }
 

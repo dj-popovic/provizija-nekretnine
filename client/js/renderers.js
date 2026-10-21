@@ -260,6 +260,8 @@ window.PV = window.PV || {};
     );
   }
 
+  var CARD_SLIDES = 5;
+
   function propertyCard(item) {
     var images = item.images && item.images.length
       ? item.images
@@ -269,9 +271,25 @@ window.PV = window.PV || {};
     var isRent = item.transactionType === 'rent';
     var badgeText = maps.transactionType.toUi[item.transactionType] || '';
 
-    var slides = images.map(function (img) {
-      return '<img src="' + esc(img.url) + '" alt="' + esc(img.alt || item.title) + '" loading="lazy" decoding="async" draggable="false" width="600" height="400">';
+    // At most CARD_SLIDES slides: with more photos the last one is a blurred
+    // "+N fotografija" slide that opens the listing. Only the first photo has a src;
+    // the rest load on hover / arrow / swipe (warmUp), so a long list stays light.
+    var more = images.length > CARD_SLIDES ? images.length - (CARD_SLIDES - 1) : 0;
+    var photos = more ? images.slice(0, CARD_SLIDES - 1) : images;
+    var slides = photos.map(function (img, i) {
+      return '<img ' + (i === 0 ? 'src' : 'data-src') + '="' + esc(img.url) + '" alt="' + esc(img.alt || item.title) + '" loading="lazy" decoding="async" draggable="false" width="600" height="400">';
     }).join('');
+    if (more) {
+      slides +=
+        '<span class="slide-more">' +
+          '<img class="slide-more-bg" data-src="' + esc(images[CARD_SLIDES - 1].url) + '" alt="" loading="lazy" decoding="async" draggable="false" width="600" height="400">' +
+          '<span class="slide-more-content">' +
+            '<img class="slide-more-mark" src="images/pro-vizija-mark-white.svg" alt="" width="88" height="41">' +
+            '<span class="slide-more-count">+' + more + ' ' + plural(more, 'fotografija', 'fotografije', 'fotografija') + '</span>' +
+            '<span class="slide-more-cta">Pogledajte sve <i class="bi bi-chevron-right" aria-hidden="true"></i></span>' +
+          '</span>' +
+        '</span>';
+    }
 
     var nav = images.length > 1 ? mediaNav(images.length) : '';
 
@@ -406,11 +424,16 @@ window.PV = window.PV || {};
     return Math.round(track.scrollLeft / track.clientWidth);
   }
 
-  // Native lazy-loading waits until a photo scrolls in; start the neighbours early
+  // Card photos after the first have only data-src: give the current one and its
+  // neighbours their src. Detail-gallery photos use native lazy-loading instead.
   function warmUp(track, index) {
-    [index - 1, index + 1].forEach(function (i) {
-      var img = track.children[i];
-      if (img && img.loading === 'lazy') img.loading = 'eager';
+    [index - 1, index, index + 1].forEach(function (i) {
+      var slide = track.children[i];
+      if (!slide) return;
+      var img = slide.tagName === 'IMG' ? slide : slide.querySelector('img[data-src]');
+      if (!img) return;
+      if (img.dataset.src && !img.getAttribute('src')) img.src = img.dataset.src;
+      else if (img.loading === 'lazy') img.loading = 'eager';
     });
   }
 
@@ -436,8 +459,14 @@ window.PV = window.PV || {};
   document.addEventListener('scroll', function (e) {
     var track = e.target;
     if (!track.classList || !track.classList.contains('property-slides')) return;
+    var index = slideIndex(track);
     var current = track.parentNode.querySelector('.media-count-current');
-    if (current) current.textContent = slideIndex(track) + 1;
+    if (current) current.textContent = index + 1;
+    // The "+N" slide has its own text; the counter would only repeat it
+    var counter = track.parentNode.querySelector('.media-count');
+    var slide = track.children[index];
+    if (counter) counter.classList.toggle('is-hidden', !!(slide && slide.classList.contains('slide-more')));
+    warmUp(track, index); // swipes on touch screens, where there is no hover
   }, { capture: true, passive: true });
 
   // The card photo is a duplicate, aria-hidden link: a mouse click must not focus it
