@@ -59,7 +59,6 @@ p, li,
    white links), and a white bar once it scrolls (.is-solid, toggled in script.js). */
 .site-header {
     padding-block: 1rem;
-    transition: padding-block 0.3s var(--ease-out);
 }
 
 .site-header::before,
@@ -86,10 +85,6 @@ p, li,
     opacity: 0;
 }
 
-.site-header.is-solid {
-    padding-block: 0.5rem;
-}
-
 .site-header.is-solid::before {
     opacity: 0;
 }
@@ -98,13 +93,11 @@ p, li,
     opacity: 1;
 }
 
-/* Light and dark logo are stacked and cross-faded; the brand shrinks a little on scroll */
+/* Light and dark logo are stacked and cross-faded */
 .navbar-brand {
     position: relative;
     display: block;
     padding: 0;
-    transform-origin: left center;
-    transition: scale 0.3s var(--ease-out);
 }
 
 .navbar-logo {
@@ -126,10 +119,6 @@ p, li,
 
 .site-header.is-solid .navbar-logo--dark {
     opacity: 1;
-}
-
-.site-header.is-solid .navbar-brand {
-    scale: 0.85;
 }
 
 .nav-link {
@@ -296,6 +285,30 @@ p, li,
     pointer-events: none;
 }
 
+/* Falling gold dust (js/hero-particles.js): clipped to the hero, under its content */
+.hero-particles {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 1.2s ease-out;
+}
+
+.hero-particles.is-on {
+    opacity: 1;
+}
+
+.hero-particles canvas {
+    display: block;
+}
+
+.hero > .container {
+    position: relative;
+    z-index: 1;
+}
+
 .hero-title {
     font-family: 'Playfair Display', serif;
     font-size: 4.5rem;
@@ -368,11 +381,12 @@ p, li,
     display: none !important;
 }
 
-/* Our own bottom indicator */
+/* Our own bottom indicator, drawn exactly over the row's grey line
+   (the link already overlaps that line through margin-bottom: -2px) */
 .search-tabs .nav-link::before {
     content: '';
     position: absolute;
-    bottom: -2px;
+    bottom: 0;
     left: 0;
     right: 0;
     height: 2px;
@@ -2901,5 +2915,71 @@ textarea.field-input { resize: none; }
         transition: opacity 0.2s linear;
         translate: none;
     }
+}
+
+/* ===========================
+   "Učitaj još" on the listing (page-properties.js)
+   =========================== */
+.load-more {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.load-more-status {
+    margin: 0;
+    font-size: 14px;
+    color: var(--text-light);
+}
+
+.btn-load-more {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 12px 40px;
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    background: var(--white);
+    color: var(--accent-dark);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease-out, color 0.2s ease-out, box-shadow 0.2s ease-out, scale 0.15s ease-out;
+}
+
+.btn-load-more:hover {
+    background: var(--accent);
+    color: var(--white);
+    box-shadow: 0 8px 20px rgba(201, 162, 39, 0.3);
+}
+
+.btn-load-more:active {
+    scale: 0.96;
+}
+
+.btn-load-more:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+}
+
+/* Loading: the label keeps the button's width, the spinner sits on top of it */
+.btn-load-more .spinner-border {
+    position: absolute;
+    opacity: 0;
+}
+
+.btn-load-more.is-loading {
+    cursor: progress;
+}
+
+.btn-load-more.is-loading .btn-load-more-label {
+    visibility: hidden;
+}
+
+.btn-load-more.is-loading .spinner-border {
+    opacity: 1;
 }
 

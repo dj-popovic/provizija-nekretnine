@@ -214,7 +214,8 @@ window.PV = window.PV || {};
     LIST_KEYS.forEach(function (key) {
       filters[key] = params.getAll(PARAM_NAMES[key] || key).filter(Boolean);
     });
-    filters.page = numberParam(params, 'page') || 1;
+    // "Učitaj još" always starts from the first page; old ?page= links open page 1
+    filters.page = 1;
   }
 
   // State → params object (lists as arrays, switches only when on)
@@ -242,7 +243,8 @@ window.PV = window.PV || {};
     var params = new URLSearchParams();
     var p = toParams(filters);
     Object.keys(p).forEach(function (key) {
-      if ((key === 'page' && p[key] === 1) || (key === 'sort' && p[key] === 'newest')) return;
+      // page is not in the URL: with "Učitaj još" it only says how far the visitor scrolled
+      if (key === 'page' || (key === 'sort' && p[key] === 'newest')) return;
       [].concat(p[key]).forEach(function (v) {
         if (v !== undefined && v !== null && v !== '') params.append(key, v);
       });
@@ -541,10 +543,39 @@ window.PV = window.PV || {};
   }
 
   // --- Fetch and render ---
+  // Filters reload the grid from page 1; "Učitaj još" appends the next page.
+  // Each click is one API page (same size as before), so the cost per click
+  // is what one page of pagination used to be; photos stay lazy-loaded.
   var listRequest = 0;
+  var shownCount = 0;
+
+  function cardsHtml(items) {
+    return items.map(function (item) {
+      return '<div class="col-lg-4 col-md-6">' + PV.render.propertyCard(item) + '</div>';
+    }).join('');
+  }
+
+  function renderLoadMore(pg) {
+    if (!paginationWrap) return;
+    if (!pg || pg.page >= pg.totalPages) {
+      paginationWrap.innerHTML = '';
+      return;
+    }
+    paginationWrap.innerHTML =
+      '<div class="col-12 load-more">' +
+        '<p class="load-more-status">Prikazano ' + shownCount + ' od ' + pg.total + '</p>' +
+        '<button type="button" class="btn-load-more" id="btnLoadMore">' +
+          '<span class="btn-load-more-label">Učitaj još nekretnina</span>' +
+          '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>' +
+        '</button>' +
+      '</div>';
+    document.getElementById('btnLoadMore').addEventListener('click', loadMore);
+  }
 
   async function fetchAndRender() {
     var id = ++listRequest;
+    filters.page = 1;
+    shownCount = 0;
     if (grid) grid.innerHTML = PV.render.spinner();
     if (paginationWrap) paginationWrap.innerHTML = '';
     if (resultsCount) resultsCount.textContent = '…';
@@ -566,29 +597,50 @@ window.PV = window.PV || {};
       if (items.length === 0) {
         grid.innerHTML = PV.render.emptyState('Nema nekretnina za zadate filtere.');
       } else {
-        grid.innerHTML = items.map(function (item) {
-          return '<div class="col-lg-4 col-md-6">' + PV.render.propertyCard(item) + '</div>';
-        }).join('');
+        grid.innerHTML = cardsHtml(items);
       }
-
-      // Pagination
-      if (paginationWrap && pg) {
-        paginationWrap.innerHTML = PV.render.pagination(pg);
-        paginationWrap.querySelectorAll('[data-page]').forEach(function (link) {
-          link.addEventListener('click', function (e) {
-            e.preventDefault();
-            filters.page = Number(this.dataset.page);
-            fetchAndRender();
-            // Scroll to top of grid
-            var filterSection = document.querySelector('.filter-section');
-            if (filterSection) filterSection.scrollIntoView({ behavior: PV.render.prefersReducedMotion() ? 'auto' : 'smooth' });
-          });
-        });
-      }
+      shownCount = items.length;
+      renderLoadMore(pg);
     } catch (err) {
       if (id !== listRequest) return;
       if (grid) grid.innerHTML = PV.render.errorState(err.message);
       if (resultsCount) resultsCount.textContent = '-';
+    }
+  }
+
+  async function loadMore() {
+    var btn = document.getElementById('btnLoadMore');
+    if (!btn || btn.disabled) return;
+    var id = listRequest; // a filter change while loading cancels this append
+    btn.disabled = true;
+    btn.classList.add('is-loading');
+    btn.setAttribute('aria-busy', 'true');
+
+    try {
+      var res = await PV.api.get('/api/properties', toParams(Object.assign({}, filters, { page: filters.page + 1 })));
+      if (id !== listRequest) return;
+      var items = res.items || [];
+      filters.page += 1;
+      grid.insertAdjacentHTML('beforeend', cardsHtml(items));
+      shownCount += items.length;
+      var hadFocus = document.activeElement === btn;
+      renderLoadMore(res.pagination);
+      // Keyboard users stay on the button (or land on the first new card when it is gone)
+      var next = document.getElementById('btnLoadMore');
+      if (hadFocus) {
+        if (next) next.focus();
+        else if (items.length) {
+          var link = grid.children[grid.children.length - items.length].querySelector('.property-title a');
+          if (link) link.focus();
+        }
+      }
+    } catch (err) {
+      if (id !== listRequest) return;
+      btn.disabled = false;
+      btn.classList.remove('is-loading');
+      btn.removeAttribute('aria-busy');
+      var status = paginationWrap.querySelector('.load-more-status');
+      if (status) status.textContent = 'Učitavanje nije uspelo. Pokušajte ponovo.';
     }
   }
 
