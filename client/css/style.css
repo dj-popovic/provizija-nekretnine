@@ -2713,9 +2713,9 @@ img.agent-contact-avatar { outline: 1px solid var(--image-outline); outline-offs
 .form-step-header h3 { font-size: 19px; font-weight: 700; color: var(--primary); margin: 0; }
 
 /* Sticky benefits sidebar */
+/* Stays put, aligned with the top of the form (no longer follows the scroll) */
 .oglasite-benefits-wrap {
-    position: sticky;
-    top: 90px;
+    position: static;
 }
 .oglasite-benefits { background: linear-gradient(135deg, var(--primary), var(--primary-light)); border-radius: 16px; padding: 36px; color: var(--white); }
 .oglasite-benefits h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 800; margin-bottom: 6px; }
@@ -2762,7 +2762,7 @@ textarea.field-input { resize: none; }
     .about-img-badge { right: 0; }
     .kontakt-form-card { padding: 28px; }
     .oglasite-form-card { padding: 28px; }
-    .oglasite-benefits-wrap { position: static; margin-top: 32px; }
+    .oglasite-benefits-wrap { margin-top: 32px; }
     .filter-section { position: static; }
 
     /* Agent detail – sidebar on top on tablet */
