@@ -3274,38 +3274,39 @@ textarea.field-input { resize: none; }
 /* ===========================
    Scrollbar in the site's colors
    =========================== */
-/* Chrome, Edge, Safari: gold pill on a light track. The track-colored border
-   insets the thumb so it floats; on hover the thumb gets darker and a bit wider. */
+/* Chrome, Edge, Safari: only a gold pill, no visible track. A transparent border
+   (with background-clip) insets the thumb so it floats; on hover it gets darker and wider. */
+/* 8px: narrow enough that the empty gutter beside the dark hero barely shows */
 ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track,
 ::-webkit-scrollbar-corner {
-    background: #EEF0F4;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, #E2C15A 0%, var(--accent) 50%, #A6851A 100%);
-    border: 3px solid #EEF0F4;
+    background: linear-gradient(180deg, #E2C15A 0%, var(--accent) 50%, #A6851A 100%) padding-box;
+    border: 2px solid transparent;
     border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(180deg, #D4AF3A 0%, #B8931F 50%, #8F7210 100%);
-    border-width: 2px;
+    background: linear-gradient(180deg, #D4AF3A 0%, #B8931F 50%, #8F7210 100%) padding-box;
+    border-width: 1px;
 }
 
 ::-webkit-scrollbar-thumb:active {
-    background: var(--accent-dark);
+    background: var(--accent-dark) padding-box;
 }
 
-/* Firefox has no ::-webkit-scrollbar: solid gold thumb on the same track.
+/* Firefox has no ::-webkit-scrollbar: solid gold thumb, transparent track.
    (Chrome would ignore the rules above if it saw scrollbar-color here.) */
 @supports not selector(::-webkit-scrollbar) {
     html {
-        scrollbar-color: var(--accent) #EEF0F4;
+        scrollbar-color: var(--accent) transparent;
     }
 }
 
