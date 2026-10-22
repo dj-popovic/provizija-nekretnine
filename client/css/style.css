@@ -2012,6 +2012,7 @@ p, li,
     overflow-y: auto;
     overscroll-behavior: contain;
     scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
     outline: none;
 }
 
@@ -2446,6 +2447,7 @@ p, li,
     overflow-x: auto;
     padding: 8px 16px 20px;
     scrollbar-width: thin;
+    scrollbar-color: rgba(201, 162, 39, 0.7) transparent;
 }
 .lb-thumb {
     flex: 0 0 auto;
@@ -3266,6 +3268,44 @@ textarea.field-input { resize: none; }
         overflow: hidden;
         clip-path: inset(50%);
         white-space: nowrap;
+    }
+}
+
+/* ===========================
+   Scrollbar in the site's colors
+   =========================== */
+/* Chrome, Edge, Safari: gold pill on a light track. The track-colored border
+   insets the thumb so it floats; on hover the thumb gets darker and a bit wider. */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+    background: #EEF0F4;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #E2C15A 0%, var(--accent) 50%, #A6851A 100%);
+    border: 3px solid #EEF0F4;
+    border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #D4AF3A 0%, #B8931F 50%, #8F7210 100%);
+    border-width: 2px;
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: var(--accent-dark);
+}
+
+/* Firefox has no ::-webkit-scrollbar: solid gold thumb on the same track.
+   (Chrome would ignore the rules above if it saw scrollbar-color here.) */
+@supports not selector(::-webkit-scrollbar) {
+    html {
+        scrollbar-color: var(--accent) #EEF0F4;
     }
 }
 
