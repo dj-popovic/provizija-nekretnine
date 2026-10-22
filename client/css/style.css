@@ -3275,11 +3275,11 @@ textarea.field-input { resize: none; }
    Scrollbar in the site's colors
    =========================== */
 /* Chrome, Edge, Safari: only a gold pill, no visible track. A transparent border
-   (with background-clip) insets the thumb so it floats; on hover it gets darker and wider. */
-/* 8px: narrow enough that the empty gutter beside the dark hero barely shows */
+   (with background-clip) insets the thumb so it floats. On hover it only darkens:
+   browsers can't animate scrollbar parts, so a size change would jump. */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 12px;
+    height: 12px;
 }
 
 ::-webkit-scrollbar-track,
@@ -3289,13 +3289,12 @@ textarea.field-input { resize: none; }
 
 ::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg, #E2C15A 0%, var(--accent) 50%, #A6851A 100%) padding-box;
-    border: 2px solid transparent;
+    border: 3px solid transparent;
     border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(180deg, #D4AF3A 0%, #B8931F 50%, #8F7210 100%) padding-box;
-    border-width: 1px;
 }
 
 ::-webkit-scrollbar-thumb:active {
