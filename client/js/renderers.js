@@ -162,7 +162,7 @@ window.PV = window.PV || {};
   }
 
   function formatLandArea(landArea) {
-    return landArea + ' ar';
+    return formatNumber(landArea) + ' ar'; // "6,29 ar", like "2,5 sobe"
   }
 
   // --- Rooms / bathrooms / floor ---
@@ -298,11 +298,19 @@ window.PV = window.PV || {};
     var price = priceParts(item.price, item.transactionType);
     var priceHtml = price
       ? '<p class="property-price"><span class="property-price-amount">' + esc(price.amount) + '</span><span class="property-price-unit">' + price.unit + '</span></p>'
-      : '<p class="property-price is-on-request">Cena na upit</p>';
+      : '<p class="property-price is-on-request"><span class="property-price-amount">Cena na upit</span><i class="bi bi-chat-dots" aria-hidden="true"></i></p>';
 
     var area = item.area != null ? formatArea(item.area)
       : item.landArea != null ? formatLandArea(item.landArea)
       : null;
+
+    // Third stat: the floor of an apartment; a house has no floor, so it shows its plot
+    // (ares) there instead. A plot already shows its ares in the first slot.
+    var third = item.floor != null
+      ? stat('bi-building', 'Sprat', formatFloor(item.floor))
+      : item.area != null && item.landArea != null
+        ? stat('bi-bounding-box', 'Plac', formatLandArea(item.landArea))
+        : stat('bi-building', 'Sprat', null);
 
     return (
       '<article class="property-card">' +
@@ -319,8 +327,7 @@ window.PV = window.PV || {};
           '<ul class="property-stats">' +
             stat('bi-grid-3x3', 'Kvadratura', area) +
             stat('bi-door-open', 'Sobe', formatRooms(item.rooms)) +
-            // The listing API does not send `floor` yet; the slot fills in once it does
-            stat('bi-building', 'Sprat', formatFloor(item.floor)) +
+            third +
           '</ul>' +
         '</div>' +
       '</article>'

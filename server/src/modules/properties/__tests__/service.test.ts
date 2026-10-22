@@ -349,8 +349,15 @@ describe("toListItem", () => {
     expect(item.area).toBe(75);
     expect(item.landArea).toBeNull();
     expect(item.rooms).toBe(3);
+    expect(item.floor).toBe("3");
     expect(item.images.length).toBe(2);
     expect(item.images[0].alt).toBe("Trosoban stan na Vračaru");
+  });
+
+  it("sends the floor for apartments only (prizemlje as 'ground')", () => {
+    expect(toListItem(makeProperty({ floor: "ground" })).floor).toBe("ground");
+    expect(toListItem(makeProperty({ floor: null })).floor).toBeNull();
+    expect(toListItem(makeProperty({ propertyTypeKey: "house", floor: "1" })).floor).toBeNull();
   });
 
   it("exposes plots in ares (landArea), never as m² (area)", () => {

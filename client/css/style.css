@@ -845,6 +845,8 @@ p, li,
     font-weight: 700;
     color: var(--text-dark);
     line-height: 1.35;
+    /* Always two lines tall (a one-line title too), so every card's price sits at the same height */
+    min-height: calc(2em * 1.35);
     margin-bottom: 1rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -890,14 +892,21 @@ p, li,
     font-size: 1rem;
 }
 
+/* "Cena na upit": the same gold as a price (it takes the price's place), a step smaller,
+   followed by a chat icon in solid gold */
 .property-price.is-on-request {
-    color: var(--text-light);
-    background: none;
-    -webkit-text-fill-color: currentColor;
-    filter: none;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 700;
+    align-items: center;
+    gap: 0.5rem;
+}
+.property-price.is-on-request .property-price-amount {
+    font-size: 1.35rem;
+}
+.property-price.is-on-request i,
+.detail-price-tag.is-on-request i {
+    -webkit-text-fill-color: var(--accent);
+    color: var(--accent);
+    font-size: 0.8em;
+    line-height: 1;
 }
 
 /* Area · rooms · floor, pinned to the card bottom so rows line up across the grid */
@@ -2493,13 +2502,10 @@ p, li,
 }
 .detail-price-unit { font-size: 22px; }
 .detail-price-tag.is-on-request {
-    color: var(--text-light);
-    background: none;
-    -webkit-text-fill-color: currentColor;
-    filter: none;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 30px;
 }
 .detail-commission { margin-top: 2px; font-size: 14px; font-weight: 500; color: var(--text-light); }
 .detail-commission strong { color: var(--accent-dark); font-weight: 700; }
@@ -2864,6 +2870,7 @@ textarea.field-input { resize: none; }
     .detail-summary-head { gap: 4px; }
     .detail-price { text-align: left; }
     .detail-price-tag { font-size: 28px; }
+    .detail-price-tag.is-on-request { font-size: 24px; }
     .detail-price-unit { font-size: 18px; }
     .gallery-stage { height: 260px; }
     .detail-gallery-placeholder { height: 260px; }

@@ -476,7 +476,7 @@ window.PV = window.PV || {};
   function buildPrice(p) {
     var price = PV.render.priceParts(p.price, p.transactionType);
     if (!price) {
-      return '<div class="detail-price"><div class="detail-price-tag is-on-request">Cena na upit</div></div>';
+      return '<div class="detail-price"><div class="detail-price-tag is-on-request">Cena na upit<i class="bi bi-chat-dots" aria-hidden="true"></i></div></div>';
     }
     return (
       '<div class="detail-price">' +

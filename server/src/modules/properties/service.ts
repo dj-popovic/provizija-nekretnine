@@ -33,6 +33,7 @@ export interface PropertyListItem {
   area: number | null; // m²
   landArea: number | null; // ares
   rooms: number | null;
+  floor: string | null; // apartments only: "ground" (prizemlje) or the floor number ("3")
   highlights: string[];
 }
 
@@ -140,6 +141,8 @@ function toListItem(property: Property): PropertyListItem {
     area: property.surface,
     landArea: publicLandArea(property),
     rooms: property.roomStructure,
+    // Same rule as the spec panel: a floor only means something for an apartment
+    floor: property.propertyTypeKey === "apartment" ? property.floor : null,
     highlights: buildHighlights(property),
   };
 }

@@ -306,6 +306,7 @@ None.
       "area": 52,
       "landArea": null,
       "rooms": 2,
+      "floor": "3",
       "highlights": ["Terasa", "Lift", "Parking"]
     }
   ],
@@ -334,6 +335,7 @@ None.
 - `area` — building area in m²; `null` for plots / farmland
 - `landArea` — plot area in **ares**; `null` for apartments or when not provided
 - `rooms`
+- `floor` — apartments only: `"ground"` (prizemlje) or the floor number as a string (`"3"`); `null` for every other type or when unknown (same rule as `specs.floor`)
 
 Optional / when available:
 
