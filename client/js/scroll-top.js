@@ -9,7 +9,7 @@
   var btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'scroll-top';
-  btn.setAttribute('aria-label', 'Nazad na vrh stranice');
+  btn.setAttribute('aria-label', PV.i18n.t('common.backToTop'));
   btn.innerHTML = '<i class="bi bi-chevron-up" aria-hidden="true"></i>';
   // Hidden from keyboard and screen readers until it is shown
   btn.tabIndex = -1;

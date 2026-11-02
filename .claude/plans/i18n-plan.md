@@ -53,6 +53,12 @@ Work one phase at a time. After each phase: verify, give a short summary, and co
 - Phase 1 also translated the 5 header nav links + burger aria-label (smoke test for the flash check). The rest of header/footer = phase 2.
 - Headless test: scratchpad `domtest/i18n-phase1.js` (70 checks).
 
+## Phase 2 — as built (2026-11-02)
+
+- Footer on all 8 pages: 13 `data-i18n` keys under `footer.*`. The "about" text has 3 variants: `textLong` (index), `textShort` (6 pages), `textSell` (oglasite). The address, phone, e-mail and "ProVizija" brand stay as they are.
+- `scroll-top.js` aria-label → `t('common.backToTop')`.
+- Headless test: scratchpad `domtest/i18n-phase2.js <client> [scope]`. It checks that every HTML key exists in en + ru, that no Serbian is left in the scope for en/ru (č ć š ž đ + common words, with an allowlist for proper nouns), that sr is identical to the HTML, and that each page has the same number of texts per language. Reuse it in phase 4 with the scope `body`.
+
 ## Phases (verify after each one)
 
 1. **Infrastructure:** `i18n.js`, the 3 dictionary skeletons, the anti-flash, the flag switcher in the header (all 8 pages + mobile menu), the Cyrillic font. Verify: switching works and the choice persists, `?lang` works, no flash, RU font OK.

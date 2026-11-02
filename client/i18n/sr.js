@@ -4,6 +4,9 @@ PV.i18n.add('sr', {
   lang: {
     choose: 'Jezik',
   },
+  common: {
+    backToTop: 'Nazad na vrh stranice',
+  },
   nav: {
     toggle: 'Otvori navigaciju',
     properties: 'Nekretnine',
