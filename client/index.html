@@ -72,33 +72,33 @@
                     <div class="search-container">
 
                         <!-- Tab buttons -->
-                        <div class="search-tabs" role="tablist" aria-label="Tip oglasa">
-                            <button class="nav-link active" id="tab-btn-kupovina" data-tab="kupovina" role="tab" aria-selected="true" aria-controls="tab-kupovina" type="button">Kupovina</button>
-                            <button class="nav-link" id="tab-btn-izdavanje" data-tab="izdavanje" role="tab" aria-selected="false" aria-controls="tab-izdavanje" type="button">Izdavanje</button>
+                        <div class="search-tabs" role="tablist" aria-label="Tip oglasa" data-i18n-attr="aria-label:list.dealType">
+                            <button class="nav-link active" id="tab-btn-kupovina" data-tab="kupovina" role="tab" aria-selected="true" aria-controls="tab-kupovina" type="button" data-i18n="home.tabBuy">Kupovina</button>
+                            <button class="nav-link" id="tab-btn-izdavanje" data-tab="izdavanje" role="tab" aria-selected="false" aria-controls="tab-izdavanje" type="button" data-i18n="home.tabRent">Izdavanje</button>
                         </div>
 
                         <!-- Kupovina form (Lokacija / Tip are PV.ui dropdowns, filled by page-home.js) -->
                         <div class="search-tab-content" id="tab-kupovina" role="tabpanel" aria-labelledby="tab-btn-kupovina">
-                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za kupovinu" data-transaction="sale">
+                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za kupovinu" data-i18n-attr="aria-label:home.searchBuyAria" data-transaction="sale">
                                 <div class="row g-3">
                                     <div class="col-12 col-md-4">
-                                        <span class="form-label">Lokacija</span>
+                                        <span class="form-label" data-i18n="home.location">Lokacija</span>
                                         <div class="js-location"></div>
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <span class="form-label">Tip</span>
+                                        <span class="form-label" data-i18n="home.type">Tip</span>
                                         <div class="js-type"></div>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label for="kup-cena-od" class="form-label">Cena (€)</label>
+                                        <label for="kup-cena-od" class="form-label" data-i18n="list.price">Cena (€)</label>
                                         <div class="price-range">
-                                            <input type="number" class="form-control" id="kup-cena-od" name="priceMin" placeholder="Od" min="0" step="1000" inputmode="numeric" aria-label="Cena od (€)">
+                                            <input type="number" class="form-control" id="kup-cena-od" name="priceMin" placeholder="Od" min="0" step="1000" inputmode="numeric" aria-label="Cena od (€)" data-i18n-attr="placeholder:list.from; aria-label:home.priceFrom">
                                             <span class="price-range-sep" aria-hidden="true">–</span>
-                                            <input type="number" class="form-control" id="kup-cena-do" name="priceMax" placeholder="Do" min="0" step="1000" inputmode="numeric" aria-label="Cena do (€)">
+                                            <input type="number" class="form-control" id="kup-cena-do" name="priceMax" placeholder="Do" min="0" step="1000" inputmode="numeric" aria-label="Cena do (€)" data-i18n-attr="placeholder:list.to; aria-label:home.priceTo">
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-1 d-flex align-items-end">
-                                        <button type="submit" class="btn-search w-100" aria-label="Pretraži"><i class="bi bi-search" aria-hidden="true"></i></button>
+                                        <button type="submit" class="btn-search w-100" aria-label="Pretraži" data-i18n-attr="aria-label:list.search"><i class="bi bi-search" aria-hidden="true"></i></button>
                                     </div>
                                 </div>
                             </form>
@@ -106,26 +106,26 @@
 
                         <!-- Izdavanje form -->
                         <div class="search-tab-content" id="tab-izdavanje" role="tabpanel" aria-labelledby="tab-btn-izdavanje" hidden>
-                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za izdavanje" data-transaction="rent">
+                            <form class="search-form" action="nekretnine.html" method="get" aria-label="Pretraga nekretnina za izdavanje" data-i18n-attr="aria-label:home.searchRentAria" data-transaction="rent">
                                 <div class="row g-3">
                                     <div class="col-12 col-md-4">
-                                        <span class="form-label">Lokacija</span>
+                                        <span class="form-label" data-i18n="home.location">Lokacija</span>
                                         <div class="js-location"></div>
                                     </div>
                                     <div class="col-12 col-md-3">
-                                        <span class="form-label">Tip</span>
+                                        <span class="form-label" data-i18n="home.type">Tip</span>
                                         <div class="js-type"></div>
                                     </div>
                                     <div class="col-12 col-md-4">
-                                        <label for="izd-cena-od" class="form-label">Cena (€/mes.)</label>
+                                        <label for="izd-cena-od" class="form-label" data-i18n="home.priceRent">Cena (€/mes.)</label>
                                         <div class="price-range">
-                                            <input type="number" class="form-control" id="izd-cena-od" name="priceMin" placeholder="Od" min="0" step="50" inputmode="numeric" aria-label="Cena od (€ mesečno)">
+                                            <input type="number" class="form-control" id="izd-cena-od" name="priceMin" placeholder="Od" min="0" step="50" inputmode="numeric" aria-label="Cena od (€ mesečno)" data-i18n-attr="placeholder:list.from; aria-label:home.priceFromRent">
                                             <span class="price-range-sep" aria-hidden="true">–</span>
-                                            <input type="number" class="form-control" id="izd-cena-do" name="priceMax" placeholder="Do" min="0" step="50" inputmode="numeric" aria-label="Cena do (€ mesečno)">
+                                            <input type="number" class="form-control" id="izd-cena-do" name="priceMax" placeholder="Do" min="0" step="50" inputmode="numeric" aria-label="Cena do (€ mesečno)" data-i18n-attr="placeholder:list.to; aria-label:home.priceToRent">
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-1 d-flex align-items-end">
-                                        <button type="submit" class="btn-search w-100" aria-label="Pretraži"><i class="bi bi-search" aria-hidden="true"></i></button>
+                                        <button type="submit" class="btn-search w-100" aria-label="Pretraži" data-i18n-attr="aria-label:list.search"><i class="bi bi-search" aria-hidden="true"></i></button>
                                     </div>
                                 </div>
                             </form>
@@ -151,7 +151,7 @@
                 <!-- Populated by page-home.js -->
             </div>
             <div class="text-center mt-5">
-                <a href="nekretnine.html" class="btn-view-all">Pogledaj sve nekretnine <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+                <a href="nekretnine.html" class="btn-view-all"><span data-i18n="home.viewAll">Pogledaj sve nekretnine</span> <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
             </div>
         </div>
     </section>

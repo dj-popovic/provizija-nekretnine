@@ -155,6 +155,23 @@ PV.i18n.add('en', {
     breadcrumb: 'Breadcrumb',
   },
 
+  home: {
+    tabBuy: 'Buy',
+    tabRent: 'Rent',
+    searchBuyAria: 'Search properties to buy',
+    searchRentAria: 'Search properties to rent',
+    location: 'Location',
+    locationPlaceholder: 'City or district',
+    type: 'Type',
+    priceRent: 'Price (€/month)',
+    priceFrom: 'Price from (€)',
+    priceTo: 'Price to (€)',
+    priceFromRent: 'Price from (€ per month)',
+    priceToRent: 'Price to (€ per month)',
+    viewAll: 'View all properties',
+    noFeatured: 'There are no featured properties at the moment.',
+  },
+
   dd: {
     clear: 'Clear',
     done: 'Done',

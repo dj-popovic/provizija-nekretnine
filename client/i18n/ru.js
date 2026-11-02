@@ -157,6 +157,23 @@ PV.i18n.add('ru', {
     breadcrumb: 'Навигационная цепочка',
   },
 
+  home: {
+    tabBuy: 'Покупка',
+    tabRent: 'Аренда',
+    searchBuyAria: 'Поиск недвижимости для покупки',
+    searchRentAria: 'Поиск недвижимости в аренду',
+    location: 'Локация',
+    locationPlaceholder: 'Город или район',
+    type: 'Тип',
+    priceRent: 'Цена (€/мес.)',
+    priceFrom: 'Цена от (€)',
+    priceTo: 'Цена до (€)',
+    priceFromRent: 'Цена от (€ в месяц)',
+    priceToRent: 'Цена до (€ в месяц)',
+    viewAll: 'Смотреть все объекты',
+    noFeatured: 'Сейчас нет избранных объектов.',
+  },
+
   dd: {
     clear: 'Очистить',
     done: 'Готово',

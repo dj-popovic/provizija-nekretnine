@@ -80,7 +80,7 @@ function animateStats() {
     stats.forEach(stat => {
         const target = parseInt(stat.getAttribute('data-target'), 10);
         const suffix = stat.textContent.includes('+') ? '+' : stat.textContent.includes('%') ? '%' : '';
-        const format = (n) => n.toLocaleString('sr-RS') + suffix;
+        const format = (n) => n.toLocaleString(window.PV && PV.i18n ? PV.i18n.locale : 'sr-RS') + suffix;
 
         // Lock the box to the final value's width so the row doesn't shift while counting.
         // (Neither site font has tabular figures, so tabular-nums alone can't do this.)

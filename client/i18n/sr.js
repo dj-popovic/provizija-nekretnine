@@ -127,6 +127,14 @@ PV.i18n.add('sr', {
     empty: 'Nema rezultata.',
   },
 
+  // Home page (page-home.js); the marketing copy waits for the client's final texts
+  home: {
+    location: 'Lokacija',
+    locationPlaceholder: 'Grad ili deo grada',
+    type: 'Tip',
+    noFeatured: 'Trenutno nema istaknutih nekretnina.',
+  },
+
   // Custom dropdowns (dropdown.js)
   dd: {
     clear: 'Očisti',
@@ -144,6 +152,16 @@ PV.i18n.add('sr', {
 
   // Listing page (page-properties.js); its static text is in nekretnine.html
   list: {
+    // Type chips (static in nekretnine.html; the home search uses them from JS)
+    chip: {
+      all: 'Sve',
+      apartment: 'Stan',
+      house: 'Kuća',
+      plot: 'Plac',
+      land: 'Zemljište',
+      commercial: 'Poslovni prostor',
+      garage: 'Garaža',
+    },
     city: 'Grad',
     allCities: 'Svi gradovi',
     searchCity: 'Pretraži grad',

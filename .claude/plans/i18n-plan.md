@@ -87,6 +87,14 @@ Each step translates a page's JS strings AND its static HTML: 3a shared (rendere
 - Generated EN/RU titles are ALL CAPS like the agency's RELPER titles (Relja).
 - Test harness: `i18n-page.js` now stubs Bootstrap, skips `lang="sr"` text in en/ru, allows agent initials, compares place names case-insensitively, and checks that every literal `t('key')` in the JS exists in sr. `DUMP_DIR=… node i18n-page.js` saves the sr texts; diffing against a `git archive HEAD client` copy proved sr output identical.
 
+### DECISION 2026-11-02: marketing copy waits for the client
+About half of the static text will change; the client still sends the final copy. So every step from 3d on translates only the **functional** part (search, filters, buttons, form labels / validation / alerts, everything JS renders, number formats). The **marketing copy** (hero titles/subtitles, section tags/titles/descriptions, steps, FAQ, CTA, stats labels, O nama, descriptive text on Oglasite / Agenti / Kontakt) is translated in ONE pass when the final Serbian texts arrive ("static content" phase).
+- Already translated before the decision: footer about texts, nekretnine.html hero. Re-check them when the new copy arrives.
+- `node tools/i18n-check.js` (repo, no deps): every HTML key in en/ru, every JS key in sr, every sr key in en/ru, and **stale translations** — `tools/i18n-sr-snapshot.json` stores the Serbian text each HTML key had when translated; a changed Serbian text is reported until en/ru are updated and `--update` refreshes the snapshot. Run it after every i18n change and whenever someone edits page text.
+
+### 3d — as built (2026-11-02, functional part)
+- index.html: search widget (tabs, Lokacija/Tip/Cena labels, placeholders, aria), "Pogledaj sve nekretnine". page-home.js: picker/select labels, type labels = `list.chip.*` (now also in sr.js), "no featured". script.js: the stats counter formats numbers by locale (one line).
+
 ## Phases (verify after each one)
 
 1. **Infrastructure:** `i18n.js`, the 3 dictionary skeletons, the anti-flash, the flag switcher in the header (all 8 pages + mobile menu), the Cyrillic font. Verify: switching works and the choice persists, `?lang` works, no flash, RU font OK.

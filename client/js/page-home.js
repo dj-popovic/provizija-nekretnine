@@ -6,6 +6,7 @@ window.PV = window.PV || {};
 (function () {
   'use strict';
 
+  var t = PV.i18n.t;
   var featuredGrid = document.getElementById('featuredGrid');
   var teamGrid = document.getElementById('teamGrid');
 
@@ -24,7 +25,7 @@ window.PV = window.PV || {};
       if (featuredGrid) {
         var props = data.featuredProperties || [];
         if (props.length === 0) {
-          featuredGrid.innerHTML = PV.render.emptyState('Trenutno nema istaknutih nekretnina.');
+          featuredGrid.innerHTML = PV.render.emptyState(t('home.noFeatured'));
         } else {
           featuredGrid.innerHTML = props.map(function (item) {
             return '<div class="col-lg-4 col-md-6">' + PV.render.propertyCard(item) + '</div>';
@@ -58,7 +59,8 @@ window.PV = window.PV || {};
   // --- Hero search: Lokacija (city → districts) + Tip dropdowns, then redirect ---
 
   var TYPE_CHIPS = PV.maps.propertyType.chips;
-  var TYPE_LABELS = { stan: 'Stan', kuca: 'Kuća', plac: 'Plac', zemljiste: 'Zemljište', poslovni: 'Poslovni prostor', garaza: 'Garaža' };
+  // Same labels as the type chips on the listing page
+  var TYPE_LABEL_KEYS = { stan: 'apartment', kuca: 'house', plac: 'plot', zemljiste: 'land', poslovni: 'commercial', garaza: 'garage' };
 
   // Same rule as the listing chips: these always, any other type only when the feed has it
   var CORE_TYPES = {
@@ -78,15 +80,15 @@ window.PV = window.PV || {};
     var presentTypes = [];
 
     var picker = PV.ui.locationPicker(form.querySelector('.js-location'), {
-      label: 'Lokacija',
-      placeholder: 'Grad ili deo grada',
+      label: t('home.location'),
+      placeholder: t('home.locationPlaceholder'),
       onChange: function (val) { state.location = val; },
     });
 
     var typeSelect = PV.ui.select(form.querySelector('.js-type'), {
-      label: 'Tip',
-      placeholder: 'Sve',
-      allOption: 'Sve',
+      label: t('home.type'),
+      placeholder: t('list.chip.all'),
+      allOption: t('list.chip.all'),
       searchFrom: 99,
       onChange: function (val) {
         state.type = val;
@@ -99,7 +101,7 @@ window.PV = window.PV || {};
         return CORE_TYPES[transactionType].indexOf(val) !== -1 ||
           TYPE_CHIPS[val].some(function (k) { return presentTypes.indexOf(k) !== -1; });
       }).map(function (val) {
-        return { value: val, label: TYPE_LABELS[val] };
+        return { value: val, label: t('list.chip.' + TYPE_LABEL_KEYS[val]) };
       });
     }
 
