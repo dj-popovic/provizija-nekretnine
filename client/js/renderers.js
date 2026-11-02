@@ -164,12 +164,13 @@ window.PV = window.PV || {};
   }
 
   // --- Property title ---
-  // Serbian keeps the agency's own title. English / Russian titles are built
-  // from the data, because the Serbian title is free text:
-  // "Four-room apartment, 101 m²" (+ " · Novi Sad, Telep" with withLocation).
+  // Serbian keeps the agency's own title. Until the titles are machine-translated
+  // (i18n phase 7), English / Russian titles are built from the data in the
+  // agency's order: places first (as written, "Okolina" left out), then the type
+  // and the area: "Novi Sad, Telep, three-room apartment, 90 m²", "Bač, house, 277 m²".
   // item: { title, propertyType (key), rooms, area, landArea, location }
 
-  function propertyTitle(item, withLocation) {
+  function propertyTitle(item) {
     if (i18n.lang === 'sr' || !item.propertyType) return item.title;
     var type = item.propertyType;
     var name;
@@ -179,8 +180,15 @@ window.PV = window.PV || {};
     var area = item.area != null ? formatArea(item.area)
       : item.landArea != null ? formatLandArea(item.landArea)
       : null;
-    var text = name + (area ? ', ' + area : '');
-    return withLocation && item.location ? text + ' · ' + item.location : text;
+    var places = String(item.location || '').split(',').map(function (s) { return s.trim(); })
+      .filter(function (s) { return s && s.toLowerCase() !== 'okolina'; });
+    var parts = places.concat(places.length ? lowerFirst(name) : name);
+    if (area) parts.push(area);
+    return parts.join(', ');
+  }
+
+  function lowerFirst(text) {
+    return text.charAt(0).toLocaleLowerCase(i18n.locale) + text.slice(1);
   }
 
   // 4 → "Four-room" / "Четырёхкомнатная"; values without their own word → "2.5-room"
@@ -255,7 +263,6 @@ window.PV = window.PV || {};
   var CARD_SLIDES = 5;
 
   function propertyCard(item) {
-    // The card shows the location right above the title, so no location in it
     var title = propertyTitle(item) || t('card.fallbackTitle');
     var images = item.images && item.images.length
       ? item.images
