@@ -59,6 +59,20 @@ Work one phase at a time. After each phase: verify, give a short summary, and co
 - `scroll-top.js` aria-label → `t('common.backToTop')`.
 - Headless test: scratchpad `domtest/i18n-phase2.js <client> [scope]`. It checks that every HTML key exists in en + ru, that no Serbian is left in the scope for en/ru (č ć š ž đ + common words, with an allowlist for proper nouns), that sr is identical to the HTML, and that each page has the same number of texts per language. Reuse it in phase 4 with the scope `body`.
 
+## Phase 3 — split per page, phases 3 + 4 merged (Relja OK'd 2026-11-02)
+
+Each step translates a page's JS strings AND its static HTML: 3a shared (renderers/api), 3b nekretnine, 3c nekretnina-detalj, 3d index, 3e agenti + agent-detalj, 3f kontakt + oglasite (forms), 3g o-nama.
+
+### 3a — as built (2026-11-02)
+- Backend: list `propertyType` is now the KEY (was the Serbian label; nothing on the frontend read it). Contract note updated. Detail flat `propertyType` is still legacy (phase 5).
+- `i18n.js` added `labels(prefix)` (enum group → {key: text}), `ordinal(n)`, `has(key)`, and a `fraction` plural form (sr "2,5 sobe").
+- `renderers.js`: every `PV.maps.*.toUi` = `i18n.labels('enum.*')`, so pages that use maps get translated labels automatically. Formatters use dictionary units/plurals + `Intl` numbers. `propertyTitle(item, withLocation)`: sr = the original title; en/ru = generated ("Four-room apartment, 180 m²"; unknown type `other` → "Property, 33 m²"). Cards use it without the location (it's shown right above).
+- `PV.render.plural(n, one, few, many)` (Serbian words) is still exported for page scripts until their step.
+- `api.js`: `ApiError.message` comes from `errors.<CODE>` (generic fallback); the server's English text is kept as `serverMessage`. This fixes English error texts that were shown on the Serbian site.
+- Russian floors: Serbian numbering kept ("3-й этаж" = 3. sprat); "Prizemlje" = "Партер".
+- Price stays "amount unit" in every language (en "650,000 €").
+- sr output verified identical to the old renderer on all 44 live listings (except the fixed decimal: "55,5 m²", was "55.5 m²"). Test: scratchpad `domtest/i18n-3a.js <client> <old renderers.js> <api>`.
+
 ## Phases (verify after each one)
 
 1. **Infrastructure:** `i18n.js`, the 3 dictionary skeletons, the anti-flash, the flag switcher in the header (all 8 pages + mobile menu), the Cyrillic font. Verify: switching works and the choice persists, `?lang` works, no flash, RU font OK.

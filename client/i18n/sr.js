@@ -1,5 +1,6 @@
 // Srpski (latinica) — reference dictionary and fallback for missing en/ru keys.
 // Static page text stays in the HTML itself; this file holds what JS needs.
+// The "enum" groups define which keys exist (PV.i18n.labels).
 PV.i18n.add('sr', {
   lang: {
     choose: 'Jezik',
@@ -14,5 +15,124 @@ PV.i18n.add('sr', {
     about: 'O Nama',
     advertise: 'Oglasite',
     contact: 'Kontaktirajte Nas',
+  },
+
+  // API keys → labels
+  enum: {
+    transactionType: { sale: 'Prodaja', rent: 'Izdavanje' },
+    propertyType: {
+      apartment: 'Stan',
+      house: 'Kuća',
+      commercial: 'Poslovni prostor',
+      plot: 'Plac',
+      land: 'Zemljište',
+      garage: 'Garaža',
+      office: 'Kancelarija',
+    },
+    furnished: { furnished: 'Namešteno', semi_furnished: 'Polunamešteno', empty: 'Prazno' },
+    heating: {
+      central: 'Centralno',
+      gas: 'Gas',
+      underfloor: 'Podno',
+      solid_fuel: 'Čvrsta goriva',
+      norwegian_radiators: 'Norveški radijatori',
+      storage_heater: 'TA peć',
+    },
+    registration: { registered: 'Da', in_progress: 'U fazi knjiženja', unregisterable: 'Ne', not_registered: 'Ne' },
+    floor: { ground: 'Prizemlje' },
+    construction: { new: 'Novogradnja', under_construction: 'U izgradnji', old: 'Stara gradnja' },
+    condition: { original: 'Izvorno stanje', renovated: 'Renovirano', needs_renovation: 'Za adaptaciju' },
+    equipment: {
+      air_conditioning: 'Klima',
+      internet: 'Internet',
+      cable_tv: 'Kablovska',
+      intercom: 'Interfon',
+      video_intercom: 'Video interfon',
+      video_surveillance: 'Video nadzor',
+    },
+    feature: {
+      penthouse: 'Penthouse',
+      villa: 'Vila',
+      duplex: 'Duplex',
+      luxury: 'Lux',
+      pool: 'Bazen',
+      pet_friendly: 'Pet friendly',
+      new_build: 'Novogradnja',
+      under_construction: 'U izgradnji',
+      salon: 'Salonski',
+      elevator: 'Lift',
+      terrace: 'Terasa',
+      garage_space: 'Garažno mesto',
+      parking: 'Parking',
+      basement: 'Podrum',
+      storage: 'Ostava',
+      paved_road: 'Asfaltni put',
+      city_water: 'Gradska voda',
+      city_sewage: 'Gradska kanalizacija',
+      building_permit: 'Građevinska dozvola',
+      location_permit: 'Lokacijska dozvola',
+      occupancy_permit: 'Upotrebna dozvola',
+      renovated: 'Renovirano',
+      move_in_ready: 'Odmah useljivo',
+      mortgage_eligible: 'Može na kredit',
+    },
+  },
+
+  // {n} = formatted number. Plural forms: one / few / other (+ fraction for decimals)
+  units: {
+    area: '{n} m²',
+    ares: { other: '{n} ar' },
+    studio: 'Garsonjera',
+    rooms: { one: '{n} soba', few: '{n} sobe', other: '{n} soba', fraction: '{n} sobe' },
+    bathrooms: { one: '{n} kupatilo', few: '{n} kupatila', other: '{n} kupatila' },
+    floor: '{n} sprat',
+  },
+  ordinal: { other: '{n}.' },
+  price: {
+    unitSale: '€',
+    unitRent: '€/mes.',
+    onRequest: 'Cena na upit',
+  },
+
+  card: {
+    area: 'Kvadratura',
+    rooms: 'Sobe',
+    floor: 'Sprat',
+    plot: 'Plac',
+    notListed: 'nije navedeno',
+    fallbackTitle: 'Nekretnina',
+    morePhotos: { one: '{n} fotografija', few: '{n} fotografije', other: '{n} fotografija' },
+    seeAll: 'Pogledajte sve',
+  },
+  media: {
+    prev: 'Prethodna slika',
+    next: 'Sledeća slika',
+  },
+  agent: {
+    viewProfile: 'Pogledaj profil – {name}',
+    call: 'Pozovi {name}',
+    email: 'Email {name}',
+  },
+  pagination: {
+    label: 'Stranice',
+    prev: 'Prethodna',
+    next: 'Sledeća',
+  },
+  state: {
+    loading: 'Učitavanje...',
+    empty: 'Nema rezultata.',
+  },
+
+  // By API error code (PV.ApiError); unknown codes get "generic"
+  errors: {
+    generic: 'Došlo je do greške. Pokušajte ponovo.',
+    NOT_FOUND: 'Traženi sadržaj nije pronađen.',
+    VALIDATION_ERROR: 'Molimo ispravite greške u formularu.',
+    EMAIL_SEND_FAILED: 'Poruka trenutno ne može da se pošalje. Pokušajte ponovo kasnije ili nas pozovite.',
+    RATE_LIMIT_EXCEEDED: 'Previše zahteva. Sačekajte malo pa pokušajte ponovo.',
+    PAYLOAD_TOO_LARGE: 'Poruka je predugačka.',
+    TIMEOUT: 'Zahtev je istekao. Pokušajte ponovo.',
+    NETWORK_ERROR: 'Nema internet konekcije.',
+    PARSE_ERROR: 'Neočekivan odgovor servera.',
   },
 });

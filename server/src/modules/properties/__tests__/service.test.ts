@@ -343,7 +343,7 @@ describe("toListItem", () => {
     expect(item.url).toBe("/nekretnine/trosoban-stan-na-vracaru-100");
     expect(item.title).toBe("Trosoban stan na Vračaru");
     expect(item.transactionType).toBe("sale");
-    expect(item.propertyType).toBe("Stan");
+    expect(item.propertyType).toBe("apartment");
     expect(item.location).toBe("Beograd, Vračar");
     expect(item.price).toBe(150000);
     expect(item.area).toBe(75);

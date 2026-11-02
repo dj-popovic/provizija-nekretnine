@@ -26,7 +26,7 @@ export interface PropertyListItem {
   url: string;
   title: string;
   transactionType: string;
-  propertyType: string;
+  propertyType: string; // key: apartment, house, plot, land, …
   location: string;
   price: number | null; // null = "cena na upit"
   images: ApiImage[];
@@ -134,7 +134,7 @@ function toListItem(property: Property): PropertyListItem {
     url: buildPropertyUrl(property.slug, property.id),
     title: property.title,
     transactionType: property.transactionType,
-    propertyType: property.propertyTypeLabel,
+    propertyType: property.propertyTypeKey, // stable key; the frontend translates it
     location: property.locationLabel,
     price: publicPrice(property),
     images: mapImages(property),

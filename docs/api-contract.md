@@ -341,7 +341,7 @@ Optional / when available:
 
 - `highlights`
 
-Note: `propertyType` in list items is currently the Serbian label (e.g. `"Stan"`), not the key shown in the examples. It switches to the stable key during the i18n migration.
+`propertyType` in list items is the stable type key (`apartment`, `house`, `commercial`, `office`, `plot`, `land`, `garage`); the frontend translates it (i18n, 2026-11-02). Before that it was the Serbian label (`"Stan"`). The flat `propertyType` on `PropertyDetail` is still the legacy Serbian label; use `specs.propertyType` there.
 
 Area rule: `area` (m²) and `landArea` (ares) are never mixed. A plot shows only `landArea`. A house can have both.
 

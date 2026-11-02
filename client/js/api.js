@@ -10,11 +10,16 @@ window.PV = window.PV || {};
   var TIMEOUT_MS = 15000;
 
   // --- Structured API error ---
-  function ApiError(status, code, message, details) {
+  // The message shown to visitors comes from the dictionary by error code
+  // (errors.NOT_FOUND …); the server's own English message is kept as
+  // serverMessage for debugging only.
+  function ApiError(status, code, serverMessage, details) {
+    var i18n = PV.i18n;
     this.name = 'ApiError';
     this.status = status;
     this.code = code || 'UNKNOWN_ERROR';
-    this.message = message || 'Došlo je do greške.';
+    this.message = i18n.has('errors.' + this.code) ? i18n.t('errors.' + this.code) : i18n.t('errors.generic');
+    this.serverMessage = serverMessage || null;
     this.details = details || null;
   }
   ApiError.prototype = Object.create(Error.prototype);
@@ -61,9 +66,9 @@ window.PV = window.PV || {};
     } catch (err) {
       clearTimeout(timeoutId);
       if (err.name === 'AbortError') {
-        throw new ApiError(0, 'TIMEOUT', 'Zahtev je istekao. Pokušajte ponovo.');
+        throw new ApiError(0, 'TIMEOUT');
       }
-      throw new ApiError(0, 'NETWORK_ERROR', 'Nema internet konekcije.');
+      throw new ApiError(0, 'NETWORK_ERROR');
     }
     clearTimeout(timeoutId);
 
@@ -71,7 +76,7 @@ window.PV = window.PV || {};
     try {
       data = await res.json();
     } catch (e) {
-      throw new ApiError(res.status, 'PARSE_ERROR', 'Neočekivan odgovor servera.');
+      throw new ApiError(res.status, 'PARSE_ERROR');
     }
 
     if (!res.ok) {

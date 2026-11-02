@@ -107,18 +107,52 @@ window.PV = window.PV || {};
     return fill(value, vars);
   }
 
-  // plural(3, 'units.room') with { one, few, many, other } entries
-  // (Intl.PluralRules: sr and ru use one/few/many|other, en one/other).
-  // {n} in the text is replaced by the formatted number.
-  function plural(n, key, vars) {
+  function pluralEntry(key) {
     var entry = lookup(lang, key);
     if (!entry || typeof entry !== 'object') entry = lookup(DEFAULT_LANG, key);
-    if (!entry || typeof entry !== 'object') return key;
-    var category = new Intl.PluralRules(LANGS[lang].locale).select(n);
-    var text = entry[category] || entry.other || '';
+    return entry && typeof entry === 'object' ? entry : null;
+  }
+
+  function withN(n, vars) {
     var allVars = { n: number(n) };
     if (vars) Object.keys(vars).forEach(function (name) { allVars[name] = vars[name]; });
-    return fill(text, allVars);
+    return allVars;
+  }
+
+  // plural(3, 'units.rooms') with { one, few, many, other } entries
+  // (Intl.PluralRules: sr one/few/other, ru one/few/many/other, en one/other).
+  // An optional `fraction` form wins for decimals: Serbian says "2,5 sobe",
+  // while the rules would give "2,5 soba". {n} becomes the formatted number.
+  function plural(n, key, vars) {
+    var entry = pluralEntry(key);
+    if (!entry) return key;
+    var category = new Intl.PluralRules(LANGS[lang].locale).select(n);
+    var text = (n % 1 !== 0 && entry.fraction) || entry[category] || entry.other || '';
+    return fill(text, withN(n, vars));
+  }
+
+  // ordinal(3) → sr "3.", en "3rd", ru "3-й" (dictionary key "ordinal")
+  function ordinal(n) {
+    var entry = pluralEntry('ordinal');
+    if (!entry) return String(n);
+    var category = new Intl.PluralRules(LANGS[lang].locale, { type: 'ordinal' }).select(n);
+    return fill(entry[category] || entry.other || '{n}', withN(n));
+  }
+
+  // labels('enum.heating') → { central: 'Centralno', … } in the current language.
+  // The keys come from the Serbian reference; a missing translation stays Serbian.
+  function labels(prefix) {
+    var ref = lookup(DEFAULT_LANG, prefix);
+    var out = {};
+    if (ref && typeof ref === 'object') {
+      Object.keys(ref).forEach(function (k) { out[k] = t(prefix + '.' + k); });
+    }
+    return out;
+  }
+
+  // has('errors.NOT_FOUND') → is there a text for this key (current language or Serbian)
+  function has(key) {
+    return typeof lookup(lang, key) === 'string' || typeof lookup(DEFAULT_LANG, key) === 'string';
   }
 
   // sr 270.000 · en 270,000 · ru 270 000
@@ -300,7 +334,10 @@ window.PV = window.PV || {};
     locale: LANGS[lang].locale,
     add: add,
     t: t,
+    has: has,
     plural: plural,
+    ordinal: ordinal,
+    labels: labels,
     number: number,
     apply: apply,
     setLang: setLang,

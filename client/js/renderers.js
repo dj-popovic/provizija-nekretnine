@@ -8,13 +8,18 @@ window.PV = window.PV || {};
 
   var PLACEHOLDER_PROPERTY = 'images/placeholder-property.svg';
 
-  // --- Value mappings (English API ↔ Serbian UI) ---
+  var i18n = PV.i18n;
+  var t = i18n.t;
+
+  // --- Value mappings (API keys ↔ UI text) ---
+  // toUi labels come from the dictionaries (i18n/*.js, "enum" section) in the
+  // current language; unknown keys are shown as-is by the pages.
 
   var maps = {
     transactionType: {
       // Hero tabs say "Kupovina" / "Izdavanje", the listing subnav "Prodaja" / "Izdavanje"
       toApi: { prodaja: 'sale', kupovina: 'sale', izdavanje: 'rent', iznajmljivanje: 'rent' },
-      toUi:  { sale: 'Prodaja', rent: 'Izdavanje' },
+      toUi: i18n.labels('enum.transactionType'),
     },
     propertyType: {
       // Type chip / select value → API type keys. "Poslovni prostor" covers
@@ -27,53 +32,31 @@ window.PV = window.PV || {};
         poslovni: ['commercial', 'office'],
         garaza: ['garage'],
       },
-      toUi: {
-        apartment: 'Stan',
-        house: 'Kuća',
-        commercial: 'Poslovni prostor',
-        plot: 'Plac',
-        land: 'Zemljište',
-        garage: 'Garaža',
-        office: 'Kancelarija',
-      },
+      toUi: i18n.labels('enum.propertyType'),
     },
-    // Spec value keys from the API → Serbian UI text.
+    // Spec value keys from the API.
     // Unknown keys are shown as-is (the API passes unmapped XML values through).
     furnished: {
-      toUi: { furnished: 'Namešteno', semi_furnished: 'Polunamešteno', empty: 'Prazno' },
+      toUi: i18n.labels('enum.furnished'),
     },
     heating: {
-      toUi: {
-        central: 'Centralno',
-        gas: 'Gas',
-        underfloor: 'Podno',
-        solid_fuel: 'Čvrsta goriva',
-        norwegian_radiators: 'Norveški radijatori',
-        storage_heater: 'TA peć',
-      },
+      toUi: i18n.labels('enum.heating'),
     },
     registration: {
-      toUi: { registered: 'Da', in_progress: 'U fazi knjiženja', unregisterable: 'Ne', not_registered: 'Ne' },
+      toUi: i18n.labels('enum.registration'),
     },
     floor: {
-      toUi: { ground: 'Prizemlje' },
+      toUi: i18n.labels('enum.floor'),
     },
     // "Više filtera" groups (#16)
     construction: {
-      toUi: { new: 'Novogradnja', under_construction: 'U izgradnji', old: 'Stara gradnja' },
+      toUi: i18n.labels('enum.construction'),
     },
     condition: {
-      toUi: { original: 'Izvorno stanje', renovated: 'Renovirano', needs_renovation: 'Za adaptaciju' },
+      toUi: i18n.labels('enum.condition'),
     },
     equipment: {
-      toUi: {
-        air_conditioning: 'Klima',
-        internet: 'Internet',
-        cable_tv: 'Kablovska',
-        intercom: 'Interfon',
-        video_intercom: 'Video interfon',
-        video_surveillance: 'Video nadzor',
-      },
+      toUi: i18n.labels('enum.equipment'),
       icon: {
         air_conditioning: 'bi-snow',
         internet: 'bi-wifi',
@@ -85,32 +68,7 @@ window.PV = window.PV || {};
     },
     // Feature chips (kvadratići) — keys arrive from the API already in display order
     feature: {
-      toUi: {
-        penthouse: 'Penthouse',
-        villa: 'Vila',
-        duplex: 'Duplex',
-        luxury: 'Lux',
-        pool: 'Bazen',
-        pet_friendly: 'Pet friendly',
-        new_build: 'Novogradnja',
-        under_construction: 'U izgradnji',
-        salon: 'Salonski',
-        elevator: 'Lift',
-        terrace: 'Terasa',
-        garage_space: 'Garažno mesto',
-        parking: 'Parking',
-        basement: 'Podrum',
-        storage: 'Ostava',
-        paved_road: 'Asfaltni put',
-        city_water: 'Gradska voda',
-        city_sewage: 'Gradska kanalizacija',
-        building_permit: 'Građevinska dozvola',
-        location_permit: 'Lokacijska dozvola',
-        occupancy_permit: 'Upotrebna dozvola',
-        renovated: 'Renovirano',
-        move_in_ready: 'Odmah useljivo',
-        mortgage_eligible: 'Može na kredit',
-      },
+      toUi: i18n.labels('enum.feature'),
       icon: {
         penthouse: 'bi-building-up',
         villa: 'bi-house-heart',
@@ -141,6 +99,8 @@ window.PV = window.PV || {};
   };
 
   // --- Serbian plural forms: 1 soba, 2–4 sobe, 5+ soba (11–14 take the last form) ---
+  // Kept for page scripts that still pass Serbian words; new code uses
+  // PV.i18n.plural(n, key) with the dictionary forms.
 
   function plural(n, one, few, many) {
     if (n % 1 !== 0) return few; // decimals: "2,5 sobe"
@@ -151,36 +111,40 @@ window.PV = window.PV || {};
     return many;
   }
 
+  // sr 2,5 · en 2.5 · ru 2,5 (thousands: 1.200 / 1,200 / 1 200)
   function formatNumber(n) {
-    return String(n).replace('.', ',');
+    return i18n.number(n);
   }
 
   // --- Area formatters (area is m², landArea is ares) ---
 
   function formatArea(area) {
-    return area + ' m²';
+    return t('units.area', { n: formatNumber(area) });
   }
 
+  // sr "6,29 ar", en "6.29 ares", ru "6,29 сот." (1 ar = 1 sotka)
   function formatLandArea(landArea) {
-    return formatNumber(landArea) + ' ar'; // "6,29 ar", like "2,5 sobe"
+    return i18n.plural(landArea, 'units.ares');
   }
 
   // --- Rooms / bathrooms / floor ---
 
   function formatRooms(rooms) {
     if (rooms == null) return null;
-    if (rooms === 0.5) return 'Garsonjera';
-    return formatNumber(rooms) + ' ' + plural(rooms, 'soba', 'sobe', 'soba');
+    if (rooms === 0.5) return t('units.studio');
+    return i18n.plural(rooms, 'units.rooms');
   }
 
   function formatBathrooms(bathrooms) {
-    return formatNumber(bathrooms) + ' ' + plural(bathrooms, 'kupatilo', 'kupatila', 'kupatila');
+    return i18n.plural(bathrooms, 'units.bathrooms');
   }
 
+  // "3" → sr "3. sprat", en "3rd floor", ru "3-й этаж" (Serbian numbering kept:
+  // the ground floor is "Prizemlje", "1" is the first floor above it)
   function formatFloor(floor) {
     if (floor == null || floor === '') return null;
     if (maps.floor.toUi[floor]) return maps.floor.toUi[floor];
-    if (/^\d+$/.test(String(floor))) return floor + '. sprat';
+    if (/^\d+$/.test(String(floor))) return t('units.floor', { n: i18n.ordinal(Number(floor)) });
     return String(floor);
   }
 
@@ -189,14 +153,40 @@ window.PV = window.PV || {};
   function priceParts(price, transactionType) {
     if (price == null) return null;
     return {
-      amount: Number(price).toLocaleString('de-DE'),
-      unit: transactionType === 'rent' ? '€/mes.' : '€',
+      amount: formatNumber(Number(price)),
+      unit: t(transactionType === 'rent' ? 'price.unitRent' : 'price.unitSale'),
     };
   }
 
   function formatPrice(price, transactionType) {
     var parts = priceParts(price, transactionType);
-    return parts ? parts.amount + ' ' + parts.unit : 'Cena na upit';
+    return parts ? parts.amount + ' ' + parts.unit : t('price.onRequest');
+  }
+
+  // --- Property title ---
+  // Serbian keeps the agency's own title. English / Russian titles are built
+  // from the data, because the Serbian title is free text:
+  // "Four-room apartment, 101 m²" (+ " · Novi Sad, Telep" with withLocation).
+  // item: { title, propertyType (key), rooms, area, landArea, location }
+
+  function propertyTitle(item, withLocation) {
+    if (i18n.lang === 'sr' || !item.propertyType) return item.title;
+    var type = item.propertyType;
+    var name;
+    if (type === 'apartment' && item.rooms === 0.5) name = t('title.studio');
+    else if (type === 'apartment' && item.rooms != null) name = t('title.apartmentRooms', { rooms: roomsAdjective(item.rooms) });
+    else name = maps.propertyType.toUi[type] || t('card.fallbackTitle'); // "other": types not mapped yet (Lokal…)
+    var area = item.area != null ? formatArea(item.area)
+      : item.landArea != null ? formatLandArea(item.landArea)
+      : null;
+    var text = name + (area ? ', ' + area : '');
+    return withLocation && item.location ? text + ' · ' + item.location : text;
+  }
+
+  // 4 → "Four-room" / "Четырёхкомнатная"; values without their own word → "2.5-room"
+  function roomsAdjective(rooms) {
+    var key = 'title.roomsAdj.r' + String(rooms).replace('.', '_');
+    return i18n.has(key) ? t(key) : t('title.roomsAdj.other', { n: formatNumber(rooms) });
   }
 
   // --- Build detail page URL ---
@@ -240,7 +230,7 @@ window.PV = window.PV || {};
   function stat(icon, label, value) {
     var shown = value
       ? esc(value)
-      : '<span aria-hidden="true">—</span><span class="visually-hidden">nije navedeno</span>';
+      : '<span aria-hidden="true">—</span><span class="visually-hidden">' + t('card.notListed') + '</span>';
     return (
       '<li class="property-stat' + (value ? '' : ' is-empty') + '" title="' + label + '">' +
         '<i class="bi ' + icon + '" aria-hidden="true"></i>' +
@@ -256,8 +246,8 @@ window.PV = window.PV || {};
   // the detail gallery and lightbox go round in a circle.
   function mediaNav(count, edges) {
     return (
-      '<button type="button" class="media-nav media-nav--prev' + (edges ? ' is-off" disabled' : '"') + ' data-dir="-1" aria-label="Prethodna slika"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>' +
-      '<button type="button" class="media-nav media-nav--next" data-dir="1" aria-label="Sledeća slika"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>' +
+      '<button type="button" class="media-nav media-nav--prev' + (edges ? ' is-off" disabled' : '"') + ' data-dir="-1" aria-label="' + t('media.prev') + '"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>' +
+      '<button type="button" class="media-nav media-nav--next" data-dir="1" aria-label="' + t('media.next') + '"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>' +
       (count ? '<span class="media-count" aria-hidden="true"><span class="media-count-current">1</span> / ' + count + '</span>' : '')
     );
   }
@@ -265,9 +255,15 @@ window.PV = window.PV || {};
   var CARD_SLIDES = 5;
 
   function propertyCard(item) {
+    // The card shows the location right above the title, so no location in it
+    var title = propertyTitle(item) || t('card.fallbackTitle');
     var images = item.images && item.images.length
       ? item.images
-      : [{ url: PLACEHOLDER_PROPERTY, alt: item.title || 'Nekretnina' }];
+      : [{ url: PLACEHOLDER_PROPERTY, alt: title }];
+    // Photo alt texts from the feed are Serbian (the agency's title)
+    function altOf(img) {
+      return i18n.lang === 'sr' ? img.alt || title : title;
+    }
 
     var href = esc(propertyHref(item));
     var isRent = item.transactionType === 'rent';
@@ -279,7 +275,7 @@ window.PV = window.PV || {};
     var more = images.length > CARD_SLIDES ? images.length - (CARD_SLIDES - 1) : 0;
     var photos = more ? images.slice(0, CARD_SLIDES - 1) : images;
     var slides = photos.map(function (img, i) {
-      return '<img ' + (i === 0 ? 'src' : 'data-src') + '="' + esc(img.url) + '" alt="' + esc(img.alt || item.title) + '" loading="lazy" decoding="async" draggable="false" width="600" height="400">';
+      return '<img ' + (i === 0 ? 'src' : 'data-src') + '="' + esc(img.url) + '" alt="' + esc(altOf(img)) + '" loading="lazy" decoding="async" draggable="false" width="600" height="400">';
     }).join('');
     if (more) {
       slides +=
@@ -287,8 +283,8 @@ window.PV = window.PV || {};
           '<img class="slide-more-bg" data-src="' + esc(images[CARD_SLIDES - 1].url) + '" alt="" loading="lazy" decoding="async" draggable="false" width="600" height="400">' +
           '<span class="slide-more-content">' +
             '<img class="slide-more-mark" src="images/pro-vizija-mark-white.svg" alt="" width="88" height="41">' +
-            '<span class="slide-more-count"><span class="slide-more-plus">+</span>' + more + ' ' + plural(more, 'fotografija', 'fotografije', 'fotografija') + '</span>' +
-            '<span class="slide-more-cta">Pogledajte sve <i class="bi bi-chevron-right" aria-hidden="true"></i></span>' +
+            '<span class="slide-more-count"><span class="slide-more-plus">+</span>' + i18n.plural(more, 'card.morePhotos') + '</span>' +
+            '<span class="slide-more-cta">' + t('card.seeAll') + ' <i class="bi bi-chevron-right" aria-hidden="true"></i></span>' +
           '</span>' +
         '</span>';
     }
@@ -298,7 +294,7 @@ window.PV = window.PV || {};
     var price = priceParts(item.price, item.transactionType);
     var priceHtml = price
       ? '<p class="property-price"><span class="property-price-amount">' + esc(price.amount) + '</span><span class="property-price-unit">' + price.unit + '</span></p>'
-      : '<p class="property-price is-on-request"><span class="property-price-amount">Cena na upit</span><i class="bi bi-chat-dots" aria-hidden="true"></i></p>';
+      : '<p class="property-price is-on-request"><span class="property-price-amount">' + t('price.onRequest') + '</span><i class="bi bi-chat-dots" aria-hidden="true"></i></p>';
 
     var area = item.area != null ? formatArea(item.area)
       : item.landArea != null ? formatLandArea(item.landArea)
@@ -307,10 +303,10 @@ window.PV = window.PV || {};
     // Third stat: the floor of an apartment; a house has no floor, so it shows its plot
     // (ares) there instead. A plot already shows its ares in the first slot.
     var third = item.floor != null
-      ? stat('bi-building', 'Sprat', formatFloor(item.floor))
+      ? stat('bi-building', t('card.floor'), formatFloor(item.floor))
       : item.area != null && item.landArea != null
-        ? stat('bi-bounding-box', 'Plac', formatLandArea(item.landArea))
-        : stat('bi-building', 'Sprat', null);
+        ? stat('bi-bounding-box', t('card.plot'), formatLandArea(item.landArea))
+        : stat('bi-building', t('card.floor'), null);
 
     return (
       '<article class="property-card">' +
@@ -322,11 +318,11 @@ window.PV = window.PV || {};
         '</div>' +
         '<div class="property-details">' +
           '<div class="property-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> ' + esc(item.location) + '</div>' +
-          '<h3 class="property-title"><a class="stretched-link" href="' + href + '">' + esc(item.title) + '</a></h3>' +
+          '<h3 class="property-title"><a class="stretched-link" href="' + href + '">' + esc(title) + '</a></h3>' +
           priceHtml +
           '<ul class="property-stats">' +
-            stat('bi-grid-3x3', 'Kvadratura', area) +
-            stat('bi-door-open', 'Sobe', formatRooms(item.rooms)) +
+            stat('bi-grid-3x3', t('card.area'), area) +
+            stat('bi-door-open', t('card.rooms'), formatRooms(item.rooms)) +
             third +
           '</ul>' +
         '</div>' +
@@ -340,12 +336,12 @@ window.PV = window.PV || {};
     var href = esc(agentHref(agent));
 
     var contactLinks =
-      '<a href="' + href + '" aria-label="Pogledaj profil – ' + esc(agent.fullName) + '"><i class="bi bi-person" aria-hidden="true"></i></a>';
+      '<a href="' + href + '" aria-label="' + esc(t('agent.viewProfile', { name: agent.fullName })) + '"><i class="bi bi-person" aria-hidden="true"></i></a>';
     if (agent.phone) {
-      contactLinks += '<a href="tel:' + esc(agent.phone) + '" aria-label="Pozovi ' + esc(agent.fullName) + '"><i class="bi bi-telephone" aria-hidden="true"></i></a>';
+      contactLinks += '<a href="tel:' + esc(agent.phone) + '" aria-label="' + esc(t('agent.call', { name: agent.fullName })) + '"><i class="bi bi-telephone" aria-hidden="true"></i></a>';
     }
     if (agent.email) {
-      contactLinks += '<a href="mailto:' + esc(agent.email) + '" aria-label="Email ' + esc(agent.fullName) + '"><i class="bi bi-envelope" aria-hidden="true"></i></a>';
+      contactLinks += '<a href="mailto:' + esc(agent.email) + '" aria-label="' + esc(t('agent.email', { name: agent.fullName })) + '"><i class="bi bi-envelope" aria-hidden="true"></i></a>';
     }
 
     return (
@@ -365,12 +361,12 @@ window.PV = window.PV || {};
   function pagination(pg) {
     if (!pg || pg.totalPages <= 1) return '';
 
-    var html = '<nav class="pv-pagination" aria-label="Stranice">';
+    var html = '<nav class="pv-pagination" aria-label="' + t('pagination.label') + '">';
     html += '<ul class="pagination justify-content-center">';
 
     // Previous
     if (pg.page > 1) {
-      html += '<li class="page-item"><a class="page-link" href="#" data-page="' + (pg.page - 1) + '" aria-label="Prethodna"><i class="bi bi-chevron-left" aria-hidden="true"></i></a></li>';
+      html += '<li class="page-item"><a class="page-link" href="#" data-page="' + (pg.page - 1) + '" aria-label="' + t('pagination.prev') + '"><i class="bi bi-chevron-left" aria-hidden="true"></i></a></li>';
     }
 
     // Page numbers — show max 5 centered around current
@@ -385,7 +381,7 @@ window.PV = window.PV || {};
 
     // Next
     if (pg.page < pg.totalPages) {
-      html += '<li class="page-item"><a class="page-link" href="#" data-page="' + (pg.page + 1) + '" aria-label="Sledeća"><i class="bi bi-chevron-right" aria-hidden="true"></i></a></li>';
+      html += '<li class="page-item"><a class="page-link" href="#" data-page="' + (pg.page + 1) + '" aria-label="' + t('pagination.next') + '"><i class="bi bi-chevron-right" aria-hidden="true"></i></a></li>';
     }
 
     html += '</ul></nav>';
@@ -398,7 +394,7 @@ window.PV = window.PV || {};
     return (
       '<div class="pv-spinner text-center py-5">' +
         '<div class="spinner-border text-secondary" role="status">' +
-          '<span class="visually-hidden">Učitavanje...</span>' +
+          '<span class="visually-hidden">' + t('state.loading') + '</span>' +
         '</div>' +
       '</div>'
     );
@@ -408,7 +404,7 @@ window.PV = window.PV || {};
     return (
       '<div class="pv-empty text-center py-5">' +
         '<i class="bi bi-inbox" style="font-size:3rem;color:#ccc;" aria-hidden="true"></i>' +
-        '<p class="mt-3 text-muted">' + esc(msg || 'Nema rezultata.') + '</p>' +
+        '<p class="mt-3 text-muted">' + esc(msg || t('state.empty')) + '</p>' +
       '</div>'
     );
   }
@@ -417,7 +413,7 @@ window.PV = window.PV || {};
     return (
       '<div class="pv-error text-center py-5">' +
         '<i class="bi bi-exclamation-triangle" style="font-size:3rem;color:#dc3545;" aria-hidden="true"></i>' +
-        '<p class="mt-3 text-danger">' + esc(msg || 'Došlo je do greške. Pokušajte ponovo.') + '</p>' +
+        '<p class="mt-3 text-danger">' + esc(msg || t('errors.generic')) + '</p>' +
       '</div>'
     );
   }
@@ -541,6 +537,8 @@ window.PV = window.PV || {};
     formatRooms: formatRooms,
     formatBathrooms: formatBathrooms,
     formatFloor: formatFloor,
+    formatNumber: formatNumber,
+    propertyTitle: propertyTitle,
     plural: plural,
     propertyHref: propertyHref,
     agentHref: agentHref,
