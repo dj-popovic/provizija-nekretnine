@@ -7,6 +7,8 @@ PV.i18n.add('sr', {
   },
   common: {
     backToTop: 'Nazad na vrh stranice',
+    home: 'Početna',
+    breadcrumb: 'Breadcrumb',
   },
   nav: {
     toggle: 'Otvori navigaciju',
@@ -193,6 +195,79 @@ PV.i18n.add('sr', {
     shownOf: 'Prikazano {shown} od {total}',
     loadMore: 'Učitaj još nekretnina',
     loadMoreFailed: 'Učitavanje nije uspelo. Pokušajte ponovo.',
+  },
+
+  // Property detail page (page-property.js)
+  detail: {
+    code: 'Šifra nekretnine: {code}',
+    commission: 'posrednička provizija',
+    description: 'Opis nekretnine',
+    descriptionInSerbian: 'Opis je na srpskom jeziku.',
+    readMore: 'Vidi više',
+    readLess: 'Prikaži manje',
+    gallery: {
+      open: 'Otvori galeriju preko celog ekrana',
+      showMore: { one: 'Prikaži još {n} fotografiju', few: 'Prikaži još {n} fotografije', other: 'Prikaži još {n} fotografija' },
+      photoOf: 'Slika {n} od {total}',
+      label: 'Galerija fotografija',
+      close: 'Zatvori galeriju',
+    },
+    spec: {
+      title: 'Specifikacije',
+      none: 'Nema dostupnih specifikacija.',
+      type: 'Tip',
+      area: 'Površina',
+      plotArea: 'Površina placa',
+      location: 'Lokacija',
+      rooms: 'Sobe',
+      bathrooms: 'Kupatila',
+      floor: 'Sprat',
+      totalFloors: 'Ukupno spratova',
+      furnished: 'Opremljenost',
+      heating: 'Grejanje',
+      registration: 'Uknjiženost',
+      year: 'Godina gradnje',
+    },
+    features: {
+      prev: 'Prethodne karakteristike',
+      label: 'Karakteristike nekretnine',
+      next: 'Sledeće karakteristike',
+    },
+    agent: {
+      profile: 'Pogledaj profil',
+      inquiryTitle: 'Pošaljite upit za ovu nekretninu',
+      formLabel: 'Kontakt forma za nekretninu',
+      send: 'Pošaljite Upit',
+    },
+    related: {
+      tag: 'Slične nekretnine',
+      title: 'Možda vas zanima',
+    },
+    share: {
+      share: 'Podeli',
+      call: 'Pozovite',
+      callAgency: 'Pozovite agenciju',
+      whatsapp: 'Pišite agenciji na WhatsApp',
+      viber: 'Pišite agenciji na Viber',
+      copied: 'Link kopiran',
+      copyManually: 'Kopirajte link iz adrese',
+      message: 'Zdravo, zanima me nekretnina: {property}',
+    },
+    notFound: {
+      title: 'Nekretnina nije pronađena',
+      text: 'Tražena nekretnina ne postoji ili je uklonjena.',
+      cta: 'Pogledajte sve nekretnine',
+    },
+  },
+
+  // Form fields shared by the forms (inquiry, contact, advertise)
+  form: {
+    fullName: 'Ime i prezime',
+    phone: 'Telefon',
+    email: 'Email',
+    emailPlaceholder: 'Email adresa',
+    message: 'Poruka',
+    messageOptional: 'Poruka (opciono)...',
   },
 
   // By API error code (PV.ApiError); unknown codes get "generic"

@@ -671,7 +671,7 @@ window.PV = window.PV || {};
       applyReturnPoint();
     } catch (err) {
       if (id !== listRequest) return;
-      if (grid) grid.innerHTML = PV.render.errorState(err.message);
+      if (grid) grid.innerHTML = PV.render.errorState(err);
       if (resultsCount) resultsCount.textContent = '-';
     }
   }

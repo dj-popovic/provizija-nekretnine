@@ -27,7 +27,7 @@ window.PV = window.PV || {};
       }).join('');
 
     } catch (err) {
-      grid.innerHTML = PV.render.errorState(err.message);
+      grid.innerHTML = PV.render.errorState(err);
     }
   }
 

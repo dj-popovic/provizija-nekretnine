@@ -167,7 +167,8 @@ window.PV = window.PV || {};
   // Serbian keeps the agency's own title. Until the titles are machine-translated
   // (i18n phase 7), English / Russian titles are built from the data in the
   // agency's order: places first (as written, "Okolina" left out), then the type
-  // and the area: "Novi Sad, Telep, three-room apartment, 90 m²", "Bač, house, 277 m²".
+  // and the area, in capitals like the agency's titles in RELPER (Relja, 2026-11-02):
+  // "NOVI SAD, TELEP, THREE-ROOM APARTMENT, 90 M²", "BAČ, HOUSE, 277 M²".
   // item: { title, propertyType (key), rooms, area, landArea, location }
 
   function propertyTitle(item) {
@@ -182,13 +183,9 @@ window.PV = window.PV || {};
       : null;
     var places = String(item.location || '').split(',').map(function (s) { return s.trim(); })
       .filter(function (s) { return s && s.toLowerCase() !== 'okolina'; });
-    var parts = places.concat(places.length ? lowerFirst(name) : name);
+    var parts = places.concat(name);
     if (area) parts.push(area);
-    return parts.join(', ');
-  }
-
-  function lowerFirst(text) {
-    return text.charAt(0).toLocaleLowerCase(i18n.locale) + text.slice(1);
+    return parts.join(', ').toLocaleUpperCase(i18n.locale);
   }
 
   // 4 → "Four-room" / "Четырёхкомнатная"; values without their own word → "2.5-room"
@@ -416,7 +413,10 @@ window.PV = window.PV || {};
     );
   }
 
+  // msg: a text, or the caught error — an API error carries a translated
+  // message; any other error (a bug) shows the generic text, never its own
   function errorState(msg) {
+    if (msg && typeof msg === 'object') msg = msg instanceof PV.ApiError ? msg.message : null;
     return (
       '<div class="pv-error text-center py-5">' +
         '<i class="bi bi-exclamation-triangle" style="font-size:3rem;color:#dc3545;" aria-hidden="true"></i>' +

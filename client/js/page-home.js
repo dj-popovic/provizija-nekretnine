@@ -50,8 +50,8 @@ window.PV = window.PV || {};
         }
       }
     } catch (err) {
-      if (featuredGrid) featuredGrid.innerHTML = PV.render.errorState(err.message);
-      if (teamGrid) teamGrid.innerHTML = PV.render.errorState(err.message);
+      if (featuredGrid) featuredGrid.innerHTML = PV.render.errorState(err);
+      if (teamGrid) teamGrid.innerHTML = PV.render.errorState(err);
     }
   }
 

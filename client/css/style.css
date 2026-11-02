@@ -2774,6 +2774,9 @@ p, li,
 
 .detail-description { margin-top: 32px; }
 .detail-description h2 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; color: var(--primary); margin-bottom: 16px; }
+/* EN/RU: the description is still the agency's Serbian text (i18n.js / page-property.js) */
+.detail-description .detail-description-note { display: flex; align-items: center; gap: 8px; margin: -8px 0 14px; font-size: 13px; color: var(--text-light); }
+.detail-description-note .bi { color: var(--accent); }
 .detail-description p { color: var(--text-light); font-size: 16px; line-height: 1.8; margin-bottom: 14px; }
 /* Long descriptions start clamped with a fade; "Vidi više" opens them */
 .detail-description-body { overflow: hidden; transition: max-height .3s var(--ease-out); }

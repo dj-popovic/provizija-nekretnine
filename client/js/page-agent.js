@@ -183,7 +183,7 @@ window.PV = window.PV || {};
         hideHero();
         contentWrap.innerHTML = build404();
       } else {
-        contentWrap.innerHTML = PV.render.errorState(err.message);
+        contentWrap.innerHTML = PV.render.errorState(err);
       }
     }
   }
