@@ -83,6 +83,11 @@ const HEATING: Record<string, string> = {
   "Čvrsta goriva": "solid_fuel",
   "Norveški radijatori": "norwegian_radiators",
   TA: "storage_heater",
+  // Seen in the feed on 2026-11-02 (i18n needs a key for every value)
+  EG: "individual_central", // etažno grejanje
+  "Etažno": "individual_central",
+  "Toplotne pumpe": "heat_pump",
+  "Toplotna pumpa": "heat_pump",
 };
 
 function mapHeating(values: string[]): string[] {

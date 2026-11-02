@@ -590,7 +590,7 @@ The following may be `null` or omitted if not available or not reliably mapped f
 | `floor` | string \| null | `"ground"` (prizemlje) or a floor number as string. Apartments only |
 | `totalFloors` | number \| null | Apartments only |
 | `furnished` | string \| null | key: `furnished`, `semi_furnished`, `empty` |
-| `heating` | string[] | keys: `central`, `gas`, `underfloor`, `solid_fuel`, `norwegian_radiators`, `storage_heater` |
+| `heating` | string[] | keys: `central`, `gas`, `underfloor`, `solid_fuel`, `norwegian_radiators`, `storage_heater`, `individual_central` (etažno), `heat_pump`; unknown values pass through |
 | `registration` | string | `registered`, `in_progress`, `unregisterable`, `not_registered`. **Never null:** a missing value means `not_registered` |
 | `constructionYear` | number \| null | |
 

@@ -14,6 +14,7 @@ window.PV = window.PV || {};
   'use strict';
 
   var esc = PV.render.esc;
+  var t = PV.i18n.t;
   var sheetQuery = window.matchMedia('(max-width: 575.98px)');
   var uid = 0;
   var openShell = null;
@@ -44,8 +45,8 @@ window.PV = window.PV || {};
 
   function footerHtml() {
     return '<div class="pv-dd-footer">' +
-      '<button type="button" class="pv-dd-clear">Očisti</button>' +
-      '<button type="button" class="pv-dd-done">Gotovo</button>' +
+      '<button type="button" class="pv-dd-clear">' + t('dd.clear') + '</button>' +
+      '<button type="button" class="pv-dd-done">' + t('dd.done') + '</button>' +
       '</div>';
   }
 
@@ -71,7 +72,7 @@ window.PV = window.PV || {};
       '<div class="pv-dd-panel" id="' + panelId + '">' +
         '<div class="pv-dd-sheet-head">' +
           '<span class="pv-dd-sheet-title">' + esc(opts.label) + '</span>' +
-          '<button type="button" class="pv-dd-close" aria-label="Zatvori"><i class="bi bi-x-lg" aria-hidden="true"></i></button>' +
+          '<button type="button" class="pv-dd-close" aria-label="' + t('dd.close') + '"><i class="bi bi-x-lg" aria-hidden="true"></i></button>' +
         '</div>' +
         '<div class="pv-dd-body"></div>' +
       '</div>';
@@ -322,14 +323,14 @@ window.PV = window.PV || {};
       all.forEach(function (item, i) {
         if (!q || fold(item.label).indexOf(q) !== -1) html += optionHtml(item, i);
       });
-      list.innerHTML = html || '<li class="pv-dd-empty">' + esc(opts.emptyText || 'Nema rezultata') + '</li>';
+      list.innerHTML = html || '<li class="pv-dd-empty">' + esc(opts.emptyText || t('dd.noResults')) + '</li>';
       shell.activateSelected();
     }
 
     function renderPanel() {
       var searchable = allItems().length >= searchFrom;
       shell.body.innerHTML =
-        (searchable ? searchHtml(listId + '-search', opts.searchPlaceholder || 'Pretraži', query) : '') +
+        (searchable ? searchHtml(listId + '-search', opts.searchPlaceholder || t('dd.search'), query) : '') +
         '<ul class="pv-dd-list" id="' + listId + '" role="listbox" tabindex="-1" aria-label="' + esc(opts.label) + '"' +
         (multiple ? ' aria-multiselectable="true"' : '') + '></ul>' +
         (multiple ? footerHtml() : '');
@@ -481,7 +482,7 @@ window.PV = window.PV || {};
       viewCity = null;
       query = '';
       var html = '<li class="pv-dd-option" role="option" id="' + listId + '-all" data-city="" aria-selected="' + !value.city + '">' +
-        '<span class="pv-dd-label">Sve lokacije</span><i class="bi bi-check2 pv-dd-tick" aria-hidden="true"></i></li>';
+        '<span class="pv-dd-label">' + t('dd.allLocations') + '</span><i class="bi bi-check2 pv-dd-tick" aria-hidden="true"></i></li>';
       cities.forEach(function (city, i) {
         var selected = value.city.toLowerCase() === city.name.toLowerCase();
         html += '<li class="pv-dd-option' + (city.count === 0 && !selected ? ' is-muted" aria-disabled="true' : '') + '" role="option" id="' + listId + '-c' + i +
@@ -492,7 +493,7 @@ window.PV = window.PV || {};
           (city.hoods.length ? '<i class="bi bi-chevron-right pv-dd-next" aria-hidden="true"></i>' : '<i class="bi bi-check2 pv-dd-tick" aria-hidden="true"></i>') +
           '</li>';
       });
-      setView('<ul class="pv-dd-list" id="' + listId + '" role="listbox" tabindex="-1" aria-label="Grad">' + html + '</ul>', animate, 'back');
+      setView('<ul class="pv-dd-list" id="' + listId + '" role="listbox" tabindex="-1" aria-label="' + t('dd.city') + '">' + html + '</ul>', animate, 'back');
     }
 
     function hoodListHtml() {
@@ -502,7 +503,7 @@ window.PV = window.PV || {};
       var html = '';
       if (!q) {
         html += '<li class="pv-dd-option pv-dd-option--whole" role="option" id="' + listId + '-whole" data-whole="1" aria-selected="' + (sameCity && !value.hoods.length) + '">' +
-          '<span class="pv-dd-label">Ceo grad<span class="pv-dd-hint">' + esc(city.name) + '</span></span>' + countHtml(city.count) +
+          '<span class="pv-dd-label">' + t('dd.wholeCity') + '<span class="pv-dd-hint">' + esc(city.name) + '</span></span>' + countHtml(city.count) +
           '<i class="bi bi-check2 pv-dd-tick" aria-hidden="true"></i></li>';
       }
       city.hoods.forEach(function (hood, i) {
@@ -513,7 +514,7 @@ window.PV = window.PV || {};
           '<span class="pv-dd-check" aria-hidden="true"><i class="bi bi-check-lg"></i></span>' +
           '<span class="pv-dd-label">' + esc(hood.name) + '</span>' + countHtml(hood.count) + '</li>';
       });
-      return html || '<li class="pv-dd-empty">Nema rezultata</li>';
+      return html || '<li class="pv-dd-empty">' + t('dd.noResults') + '</li>';
     }
 
     function renderHoodList() {
@@ -527,11 +528,11 @@ window.PV = window.PV || {};
       query = '';
       setView(
         '<div class="pv-dd-subhead">' +
-          '<button type="button" class="pv-dd-back"><i class="bi bi-chevron-left" aria-hidden="true"></i> Gradovi</button>' +
+          '<button type="button" class="pv-dd-back"><i class="bi bi-chevron-left" aria-hidden="true"></i> ' + t('dd.cities') + '</button>' +
           '<span class="pv-dd-subtitle">' + esc(city.name) + '</span>' +
         '</div>' +
-        (city.hoods.length >= 8 ? searchHtml(listId + '-search', 'Pretraži deo grada', '') : '') +
-        '<ul class="pv-dd-list" id="' + listId + '" role="listbox" tabindex="-1" aria-multiselectable="true" aria-label="Deo grada – ' + esc(city.name) + '">' +
+        (city.hoods.length >= 8 ? searchHtml(listId + '-search', t('dd.searchHood'), '') : '') +
+        '<ul class="pv-dd-list" id="' + listId + '" role="listbox" tabindex="-1" aria-multiselectable="true" aria-label="' + esc(t('dd.hoodOf', { city: city.name })) + '">' +
           hoodListHtml() +
         '</ul>' +
         footerHtml(),

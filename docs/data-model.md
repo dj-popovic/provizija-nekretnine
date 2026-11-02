@@ -233,7 +233,7 @@ It represents a valid property record that has passed mapping and validation and
 - `furnishedKey: string | null` — unknown XML values pass through as their own key
 - `furnishedLabel: string | null`
 - `heating: string[]` — raw XML labels
-- `heatingKeys: string[]` — stable keys for translation (`Centralno` → `central`, `Gas` → `gas`, `Podno` → `underfloor`, `Čvrsta goriva` → `solid_fuel`, `Norveški radijatori` → `norwegian_radiators`, `TA` → `storage_heater`); unknown values pass through unchanged
+- `heatingKeys: string[]` — stable keys for translation (`Centralno` → `central`, `Gas` → `gas`, `Podno` → `underfloor`, `Čvrsta goriva` → `solid_fuel`, `Norveški radijatori` → `norwegian_radiators`, `TA` → `storage_heater`, `EG` / `Etažno` → `individual_central`, `Toplotne pumpe` / `Toplotna pumpa` → `heat_pump`); unknown values pass through unchanged
 - `equipment: string[]`
 - `equipmentKeys: string[]` — stable keys mapped from `equipment` (case-insensitive): `Klima` → `air_conditioning`, `Internet` → `internet`, `Kablovska` → `cable_tv`, `Interfon` → `intercom`, `Video interfon` → `video_intercom`, `Video nadzor` → `video_surveillance`; unmapped values are dropped (they stay in `equipment`). Used by the `equipment` filter (#16)
 - `otherFeatures: string[]`

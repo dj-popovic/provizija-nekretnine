@@ -73,6 +73,12 @@ Each step translates a page's JS strings AND its static HTML: 3a shared (rendere
 - Price stays "amount unit" in every language (en "650,000 €").
 - sr output verified identical to the old renderer on all 44 live listings (except the fixed decimal: "55,5 m²", was "55.5 m²"). Test: scratchpad `domtest/i18n-3a.js <client> <old renderers.js> <api>`.
 
+### 3b — as built (2026-11-02)
+- nekretnine.html: every static text has `data-i18n` / `data-i18n-html` / `data-i18n-attr` (keys `list.*`, `common.home`, `common.breadcrumb`). Texts next to an icon are wrapped in a `<span>` so the icon survives.
+- page-properties.js + dropdown.js: every string goes through `t()` (`list.*`, `dd.*`). Room hints are `list.roomHint.r2_5`; the "N aktivnih" badge is now a proper plural.
+- Backend: heating `EG` / `Etažno` → `individual_central`, `Toplotne pumpe` / `Toplotna pumpa` → `heat_pump` (both were in the feed as raw Serbian). Docs updated.
+- Test: scratchpad `domtest/i18n-page.js <client> <api> <pages…>` loads a page with real API data in sr/en/ru, opens every dropdown + "Više filtera", reports Serbian left in en/ru (proper nouns from the API allowed), and checks that every sr key exists in en + ru. Reuse it for every next page.
+
 ## Phases (verify after each one)
 
 1. **Infrastructure:** `i18n.js`, the 3 dictionary skeletons, the anti-flash, the flag switcher in the header (all 8 pages + mobile menu), the Cyrillic font. Verify: switching works and the choice persists, `?lang` works, no flash, RU font OK.

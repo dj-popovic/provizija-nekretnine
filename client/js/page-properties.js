@@ -7,6 +7,8 @@ window.PV = window.PV || {};
   'use strict';
 
   var esc = PV.render.esc;
+  var i18n = PV.i18n;
+  var t = i18n.t;
 
   // --- DOM refs ---
   var grid = document.getElementById('propertiesGrid');
@@ -43,28 +45,25 @@ window.PV = window.PV || {};
   var LAND_TYPES = ['plot', 'land'];
 
   // --- Rooms: the feed stores a studio (garsonjera) as 0.5 rooms ---
-  var ROOM_WORDS = {
-    1: 'jednosoban', 1.5: 'jednoiposoban', 2: 'dvosoban', 2.5: 'dvoiposoban',
-    3: 'trosoban', 3.5: 'troiposoban', 4: 'četvorosoban', 4.5: 'četvoroiposoban', 5: 'petosoban',
-  };
+  // Hints under the numbers: list.roomHint.r2_5 = "dvoiposoban"
 
   function roomOptions(isMax) {
     var steps = [0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
     return steps.map(function (n) {
-      if (n === 0.5) return { value: '0.5', label: 'Garsonjera' };
+      if (n === 0.5) return { value: '0.5', label: t('units.studio') };
       // "Od 5+" also finds the big houses (7, 8, 10 rooms)
       var open = n === 5 && !isMax;
       return {
         value: String(n),
-        label: String(n).replace('.', ',') + (open ? '+' : ''),
-        hint: open ? 'petosoban i više' : ROOM_WORDS[n],
+        label: PV.render.formatNumber(n) + (open ? '+' : ''),
+        hint: t(open ? 'list.roomHint.r5plus' : 'list.roomHint.r' + String(n).replace('.', '_')),
       };
     });
   }
 
   // Floor 0 = prizemlje; "Od 10+" reaches the towers
   function floorOptions(isMax) {
-    var list = [{ value: '0', label: 'Prizemlje' }];
+    var list = [{ value: '0', label: PV.maps.floor.toUi.ground }];
     for (var n = 1; n <= 10; n++) {
       list.push({ value: String(n), label: n === 10 && !isMax ? '10+' : String(n) });
     }
@@ -72,13 +71,13 @@ window.PV = window.PV || {};
   }
 
   var BATH_OPTIONS = [1, 2, 3, 4].map(function (n) {
-    return { value: String(n), label: n + '+', hint: n === 1 ? 'kupatilo' : 'kupatila' };
+    return { value: String(n), label: n + '+', hint: t(n === 1 ? 'list.bathHintOne' : 'list.bathHintMany') };
   });
 
   var SORT_OPTIONS = [
-    { value: 'newest', label: 'Najnovije' },
-    { value: 'priceAsc', label: 'Cena: od najniže' },
-    { value: 'priceDesc', label: 'Cena: od najviše' },
+    { value: 'newest', label: t('list.sort.newest') },
+    { value: 'priceAsc', label: t('list.sort.priceAsc') },
+    { value: 'priceDesc', label: t('list.sort.priceDesc') },
   ];
 
   // --- "Više filtera" chip groups (#16) ---
@@ -92,7 +91,7 @@ window.PV = window.PV || {};
   var CHIP_GROUPS = {
     heating: {
       state: 'heating', counts: 'heating', labels: PV.maps.heating.toUi, extraFromCounts: true,
-      keys: ['central', 'gas', 'underfloor', 'solid_fuel', 'norwegian_radiators', 'storage_heater'],
+      keys: ['central', 'individual_central', 'gas', 'heat_pump', 'underfloor', 'solid_fuel', 'norwegian_radiators', 'storage_heater'],
     },
     furnished: {
       state: 'furnished', counts: 'furnished', labels: PV.maps.furnished.toUi,
@@ -310,10 +309,10 @@ window.PV = window.PV || {};
   // Plots / farmland: rooms off, area in ares
   function syncLandMode() {
     var land = isLandMode();
-    if (areaLabel) areaLabel.textContent = land ? 'Površina (ari)' : 'Kvadratura (m²)';
-    if (areaUnit) areaUnit.textContent = land ? 'ar' : 'm²';
-    if (sqmMinEl) { sqmMinEl.step = land ? '1' : '5'; sqmMinEl.setAttribute('aria-label', land ? 'Površina od (ari)' : 'Kvadratura od'); }
-    if (sqmMaxEl) { sqmMaxEl.step = land ? '1' : '5'; sqmMaxEl.setAttribute('aria-label', land ? 'Površina do (ari)' : 'Kvadratura do'); }
+    if (areaLabel) areaLabel.textContent = t(land ? 'list.areaLand' : 'list.area');
+    if (areaUnit) areaUnit.textContent = t(land ? 'list.unitAres' : 'list.unitM2');
+    if (sqmMinEl) { sqmMinEl.step = land ? '1' : '5'; sqmMinEl.setAttribute('aria-label', t(land ? 'list.areaLandFrom' : 'list.areaFrom')); }
+    if (sqmMaxEl) { sqmMaxEl.step = land ? '1' : '5'; sqmMaxEl.setAttribute('aria-label', t(land ? 'list.areaLandTo' : 'list.areaTo')); }
     ui.roomsMin.setDisabled(land, '—');
     ui.roomsMax.setDisabled(land, '—');
   }
@@ -333,7 +332,7 @@ window.PV = window.PV || {};
     if (!filters.city) {
       ui.hood.setOptions([]);
       ui.hood.setValue([]);
-      ui.hood.setDisabled(true, 'Prvo izaberite grad');
+      ui.hood.setDisabled(true, t('list.pickCityFirst'));
       return;
     }
     var hoodItems = (city ? city.hoods : []).map(function (h) {
@@ -346,7 +345,7 @@ window.PV = window.PV || {};
     ui.hood.setOptions(hoodItems);
     ui.hood.setValue(filters.hoods);
     if (hoodItems.length) ui.hood.setDisabled(false);
-    else ui.hood.setDisabled(true, optionsLoaded ? 'Nema delova grada' : 'Učitavanje…');
+    else ui.hood.setDisabled(true, t(optionsLoaded ? 'list.noHoods' : 'list.loadingShort'));
   }
 
   // ===========================
@@ -418,11 +417,11 @@ window.PV = window.PV || {};
 
     var registeredCount = (counts.registration || {}).registered;
     moreWrap.querySelector('.filter-chips[data-group="registered"]').innerHTML =
-      chipHtml('registered', 'registered', 'Samo uknjižene', 'bi-patch-check', filters.registered, optionsLoaded && !registeredCount && !filters.registered);
+      chipHtml('registered', 'registered', t('list.onlyRegistered'), 'bi-patch-check', filters.registered, optionsLoaded && !registeredCount && !filters.registered);
 
     document.getElementById('floorChips').innerHTML =
-      chipHtml('floor', 'notGroundFloor', 'Nije prizemlje', '', filters.notGroundFloor, false) +
-      chipHtml('floor', 'notTopFloor', 'Nije poslednji sprat', '', filters.notTopFloor, false);
+      chipHtml('floor', 'notGroundFloor', t('list.notGroundFloor'), '', filters.notGroundFloor, false) +
+      chipHtml('floor', 'notTopFloor', t('list.notTopFloor'), '', filters.notTopFloor, false);
   }
 
   // How many extra filters are set — the gold badge on "Više filtera"
@@ -443,7 +442,7 @@ window.PV = window.PV || {};
     var n = moreCount();
     moreBadge.hidden = n === 0;
     moreBadge.textContent = n;
-    moreBadge.setAttribute('aria-label', n + ' aktivnih');
+    moreBadge.setAttribute('aria-label', i18n.plural(n, 'list.activeFilters'));
   }
 
   function syncMoreFilters() {
@@ -471,7 +470,7 @@ window.PV = window.PV || {};
     moreOpen = open;
     clearTimeout(settleTimer);
     btnMore.setAttribute('aria-expanded', open ? 'true' : 'false');
-    btnMore.querySelector('.btn-more-filters-text').textContent = open ? 'Manje filtera' : 'Više filtera';
+    btnMore.querySelector('.btn-more-filters-text').textContent = t(open ? 'list.lessFilters' : 'list.moreFilters');
     moreWrap.classList.remove('is-settled');
     moreWrap.classList.toggle('is-instant', !!instant);
     moreWrap.classList.toggle('is-open', open);
@@ -621,9 +620,9 @@ window.PV = window.PV || {};
     }
     paginationWrap.innerHTML =
       '<div class="col-12 load-more">' +
-        '<p class="load-more-status">Prikazano ' + shownCount + ' od ' + pg.total + '</p>' +
+        '<p class="load-more-status">' + t('list.shownOf', { shown: shownCount, total: pg.total }) + '</p>' +
         '<button type="button" class="btn-load-more" id="btnLoadMore">' +
-          '<span class="btn-load-more-label">Učitaj još nekretnina<i class="bi bi-chevron-down" aria-hidden="true"></i></span>' +
+          '<span class="btn-load-more-label">' + t('list.loadMore') + '<i class="bi bi-chevron-down" aria-hidden="true"></i></span>' +
           '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>' +
         '</button>' +
       '</div>';
@@ -659,11 +658,11 @@ window.PV = window.PV || {};
       // Results count
       var total = pg ? pg.total : items.length;
       if (resultsCount) resultsCount.textContent = total;
-      if (resultsNoun) resultsNoun.textContent = PV.render.plural(total, 'nekretnina', 'nekretnine', 'nekretnina');
+      if (resultsNoun) resultsNoun.textContent = i18n.plural(total, 'list.resultsNoun');
 
       // Cards
       if (items.length === 0) {
-        grid.innerHTML = PV.render.emptyState('Nema nekretnina za zadate filtere.');
+        grid.innerHTML = PV.render.emptyState(t('list.noMatches'));
       } else {
         grid.innerHTML = cardsHtml(items);
       }
@@ -709,17 +708,17 @@ window.PV = window.PV || {};
       btn.classList.remove('is-loading');
       btn.removeAttribute('aria-busy');
       var status = paginationWrap.querySelector('.load-more-status');
-      if (status) status.textContent = 'Učitavanje nije uspelo. Pokušajte ponovo.';
+      if (status) status.textContent = t('list.loadMoreFailed');
     }
   }
 
   // --- Dropdowns ---
   function setupDropdowns() {
     ui.city = PV.ui.select(document.getElementById('citySelect'), {
-      label: 'Grad',
-      placeholder: 'Svi gradovi',
-      allOption: 'Svi gradovi',
-      searchPlaceholder: 'Pretraži grad',
+      label: t('list.city'),
+      placeholder: t('list.allCities'),
+      allOption: t('list.allCities'),
+      searchPlaceholder: t('list.searchCity'),
       onChange: function (val) {
         filters.city = val || undefined;
         filters.hoods = [];
@@ -729,11 +728,11 @@ window.PV = window.PV || {};
     });
 
     ui.hood = PV.ui.select(document.getElementById('hoodSelect'), {
-      label: 'Deo grada',
-      placeholder: 'Svi delovi grada',
+      label: t('list.hood'),
+      placeholder: t('list.allHoods'),
       multiple: true,
       searchFrom: 8,
-      searchPlaceholder: 'Pretraži deo grada',
+      searchPlaceholder: t('dd.searchHood'),
       onChange: function (val) {
         filters.hoods = val;
         scheduleOptions();
@@ -744,7 +743,7 @@ window.PV = window.PV || {};
       ui[opts.name] = PV.ui.select(document.getElementById(id), {
         label: opts.label,
         placeholder: opts.placeholder,
-        allOption: 'Svejedno',
+        allOption: t('list.any'),
         searchFrom: 99,
         onChange: function (val) {
           filters[key] = val ? Number(val) : undefined;
@@ -755,15 +754,15 @@ window.PV = window.PV || {};
       ui[opts.name].setOptions(items);
     }
 
-    numberSelect('roomsMinSelect', { name: 'roomsMin', label: 'Broj soba od', placeholder: 'Od' }, 'roomsMin', roomOptions(false));
-    numberSelect('roomsMaxSelect', { name: 'roomsMax', label: 'Broj soba do', placeholder: 'Do' }, 'roomsMax', roomOptions(true));
-    numberSelect('bathSelect', { name: 'bath', label: 'Kupatila', placeholder: 'Svejedno' }, 'bathroomsMin', BATH_OPTIONS);
-    numberSelect('floorMinSelect', { name: 'floorMin', label: 'Sprat od', placeholder: 'Od' }, 'floorMin', floorOptions(false));
-    numberSelect('floorMaxSelect', { name: 'floorMax', label: 'Sprat do', placeholder: 'Do' }, 'floorMax', floorOptions(true));
+    numberSelect('roomsMinSelect', { name: 'roomsMin', label: t('list.roomsFrom'), placeholder: t('list.from') }, 'roomsMin', roomOptions(false));
+    numberSelect('roomsMaxSelect', { name: 'roomsMax', label: t('list.roomsTo'), placeholder: t('list.to') }, 'roomsMax', roomOptions(true));
+    numberSelect('bathSelect', { name: 'bath', label: t('list.bathrooms'), placeholder: t('list.any') }, 'bathroomsMin', BATH_OPTIONS);
+    numberSelect('floorMinSelect', { name: 'floorMin', label: t('list.floorFrom'), placeholder: t('list.from') }, 'floorMin', floorOptions(false));
+    numberSelect('floorMaxSelect', { name: 'floorMax', label: t('list.floorTo'), placeholder: t('list.to') }, 'floorMax', floorOptions(true));
 
     ui.sort = PV.ui.select(document.getElementById('sortSelect'), {
-      label: 'Sortiraj',
-      placeholder: 'Najnovije',
+      label: t('list.sortLabel'),
+      placeholder: t('list.sort.newest'),
       searchFrom: 99,
       onChange: function (val) {
         filters.sort = val || 'newest';

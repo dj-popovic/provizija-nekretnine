@@ -438,10 +438,10 @@ describe("normalizeProperty", () => {
 
   it("maps heating values to keys and passes unknown ones through", () => {
     const p = normalizeProperty(
-      makeRawListing({ heating: ["Centralno", "Podno", "TA", "Toplotna pumpa"] }),
+      makeRawListing({ heating: ["Centralno", "Podno", "TA", "EG", "Toplotne pumpe", "Kamin"] }),
     );
-    expect(p!.heatingKeys).toEqual(["central", "underfloor", "storage_heater", "Toplotna pumpa"]);
-    expect(p!.heating).toEqual(["Centralno", "Podno", "TA", "Toplotna pumpa"]);
+    expect(p!.heatingKeys).toEqual(["central", "underfloor", "storage_heater", "individual_central", "heat_pump", "Kamin"]);
+    expect(p!.heating).toEqual(["Centralno", "Podno", "TA", "EG", "Toplotne pumpe", "Kamin"]);
   });
 
   // -----------------------------------------------------------------------
