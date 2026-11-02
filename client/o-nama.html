@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="js/i18n.js"></script>
+    <script src="i18n/sr.js"></script>
+    <script src="i18n/en.js"></script>
+    <script src="i18n/ru.js"></script>
     <link rel="icon" href="favicon.ico" sizes="48x48">
     <link rel="icon" href="images/favicon-192.png" type="image/png" sizes="192x192">
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
@@ -17,7 +21,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -30,14 +34,26 @@
                 <img src="images/pro-vizija-logo-white.svg" alt="ProVizija Nekretnine" class="navbar-logo navbar-logo--light" width="83" height="54">
                 <img src="images/pro-vizija-logo.svg" alt="" class="navbar-logo navbar-logo--dark" width="83" height="54">
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Otvori navigaciju"><span class="navbar-toggler-icon"></span></button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Otvori navigaciju" data-i18n-attr="aria-label:nav.toggle"><span class="navbar-toggler-icon"></span></button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item"><a class="nav-link" href="nekretnine.html">Nekretnine</a></li>
-                    <li class="nav-item"><a class="nav-link" href="agenti.html">Agenti</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="o-nama.html" aria-current="page">O Nama</a></li>
-                    <li class="nav-item"><a class="nav-link" href="oglasite-nekretninu.html">Oglasite</a></li>
-                    <li class="nav-item"><a class="nav-link btn-contact" href="kontakt.html">Kontaktirajte Nas</a></li>
+                    <li class="nav-item"><a class="nav-link" href="nekretnine.html" data-i18n="nav.properties">Nekretnine</a></li>
+                    <li class="nav-item"><a class="nav-link" href="agenti.html" data-i18n="nav.agents">Agenti</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="o-nama.html" aria-current="page" data-i18n="nav.about">O Nama</a></li>
+                    <li class="nav-item"><a class="nav-link" href="oglasite-nekretninu.html" data-i18n="nav.advertise">Oglasite</a></li>
+                    <li class="nav-item"><a class="nav-link btn-contact" href="kontakt.html" data-i18n="nav.contact">Kontaktirajte Nas</a></li>
+                    <li class="nav-item lang-switch" data-lang-switch>
+                        <button type="button" class="nav-link lang-switch-toggle" aria-expanded="false" aria-controls="langMenu" aria-label="Jezik: Srpski">
+                            <img src="images/flags/rs.png" alt="" class="lang-flag" width="24" height="18">
+                            <span class="lang-code">SRB</span>
+                            <i class="bi bi-chevron-down lang-caret" aria-hidden="true"></i>
+                        </button>
+                        <div class="lang-switch-menu" id="langMenu">
+                            <button type="button" class="lang-option" data-lang="sr" lang="sr" aria-label="Srpski"><img src="images/flags/rs.png" alt="" class="lang-flag" width="24" height="18"><span>SRB</span></button>
+                            <button type="button" class="lang-option" data-lang="en" lang="en" aria-label="English"><img src="images/flags/gb.svg" alt="" class="lang-flag" width="24" height="18"><span>ENG</span></button>
+                            <button type="button" class="lang-option" data-lang="ru" lang="ru" aria-label="Русский"><img src="images/flags/ru.svg" alt="" class="lang-flag" width="24" height="18"><span>RUS</span></button>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
