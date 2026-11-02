@@ -1,122 +1,139 @@
-# i18n plan — Serbian / English / Russian (agreed with Relja 2026-10-22)
+# i18n — Serbian / English / Russian (handoff, updated 2026-11-02)
 
-Work one phase at a time. After each phase: verify, give a short summary, and commit only when Relja says so (Serbian ASCII commit messages + Co-Authored-By line).
+Read this whole file before any i18n work. Sections: 0 status · 1 decisions · 2 how it works · 3 rules for every step · 4 verification tools · 5 what's left (detailed) · 6 pitfalls · 7 open questions.
 
-## Decisions (confirmed)
+## 0. Status at a glance
+
+All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: `9b23a12`.
+
+| Step | What | Status | Commit |
+|---|---|---|---|
+| 1 | Infrastructure: `i18n.js`, dictionaries, anti-flash, flag switcher, Cyrillic font | done | c318d26 |
+| 2 | Header + footer on all 8 pages, back-to-top | done | 1d614f5 |
+| 3a | Shared: cards, prices, units, plurals, generated titles, API errors by code | done | 6ec323f, a93bdbf |
+| 3b | Listing page `nekretnine.html` (filters, dropdowns, sort, load more) | done | cd807a8 |
+| 3c | Property detail page (specs, gallery, features, share, inquiry form fields, related, 404) | done | 95d0ae8 |
+| 3d | Home page — functional part (hero search, "view all", stats number format) | done | 9b23a12 |
+| 3e | Agents list + agent profile — functional part | **NEXT** | |
+| 3f | Forms: kontakt, oglasite, inquiry forms (labels, options, validation, alerts) | todo | |
+| 5 | Backend cleanup + `lang` in forms + "Jezik posetioca" in e-mails | todo | |
+| 6 | Meta: `<title>` per page per language (+ descriptions with the static content) | todo | |
+| S | **Static marketing copy** on all pages | **waits for the client's final texts** | |
+| 7 | Machine translation of property descriptions + titles (Claude API) | **waits for the client's API key + model choice** | |
+| 8 | Final QA + Relja's browser check (desktop + phone) | todo, last | |
+
+## 1. Decisions (confirmed by Relja)
 
 | Topic | Decision |
 |---|---|
 | Languages | `sr` (default, Latin script), `en`, `ru` |
-| URLs | **Same URLs** for every language. The choice is saved in localStorage. `?lang=en` / `?lang=ru` in a link overrides it (for sharing). No `/en/` paths, no hreflang: the site is used inside Serbia only. |
-| Auto-detect | **None** (Relja, 2026-11-02): the site always opens in Serbian (~90% of visitors are Serbs). Only an explicit choice (saved) or `?lang=` changes it. |
-| Switcher | Header, **right of "Kontaktirajte nas"**. Closed state: a small flag + `SRB`. Hover (desktop) or tap (touch) opens a dropdown with the 🇬🇧 `ENG` and 🇷🇺 `RUS` flags (the current one is marked). Also in the mobile menu. Flags are **SVG files** in `client/images/flags/`, NOT emoji (Windows shows "RS" letters instead of emoji flags). Keyboard accessible. |
-| Translated | All UI text, static page content, field labels, enum values (types, heating, furnishing, features, equipment, construction, condition…), meta title/description, **property titles** and **property descriptions** |
-| NOT translated | City names, district (hood) names, agent names |
-| Property titles (EN/RU) | Relja (2026-11-02): the title must follow the agency's ORIGINAL title — place names exactly as written (e.g. "Ruma, Voganj"), only the rest translated ("family house – ranch, 196 m²"). That needs **machine translation of the title (phase 7)**, because titles are free text and their places often differ from the city/hood fields. Until then (and as the fallback): generated from the data in the same order, places first, "Okolina" left out: "NOVI SAD, TELEP, THREE-ROOM APARTMENT, 90 M²", "BAČ, HOUSE, 277 M²" — ALL CAPS like the agency writes them in RELPER. Serbian keeps the original title. |
-| Property descriptions | **Machine translation** (phase 7). Until it exists, or when a translation is missing, EN/RU show the Serbian text with a small note ("Description in Serbian"). |
-| Russian review | Nobody will review it: Claude's translation is final. Write it carefully, in a natural real-estate tone. |
-| Emails to the agency | Stay in Serbian, plus a "Jezik posetioca: engleski/ruski" row so the agent replies in the right language. |
+| URLs | Same URLs for every language. Choice saved in localStorage (`pv-lang`). `?lang=en` / `?lang=ru` overrides and is saved too (shareable links). No `/en/` paths, no hreflang. |
+| Auto-detect | **None.** The site always opens in Serbian (~90% of visitors are Serbs); only an explicit choice or `?lang=` changes it. |
+| Switcher | Right of "Kontaktirajte nas": flag + `SRB`; hover/click opens a dark glass dropdown with the other two (`ENG`, `RUS`). Mobile menu: all three in a row. Flags are files in `client/images/flags/` (Serbian = PNG with coat of arms), never emoji. Changing language = save + page reload. |
+| Font | DM Sans has no Cyrillic → on `ru` the whole body font switches to **Inter** (`--font-body`). Playfair Display (headings) has Cyrillic. |
+| NOT translated | City names, district names, agent names, the agency address. |
+| Property titles EN/RU | Final goal (phase 7): machine-translate the agency's own title, keep every place name exactly as written ("RUMA, VOGANJ"), translate the rest, **ALL CAPS** like RELPER. Until then (and as the fallback): generated from data, places first, "Okolina" left out, ALL CAPS: `NOVI SAD, TELEP, THREE-ROOM APARTMENT, 90 M²`, `BAČ, HOUSE, 277 M²`. Serbian keeps the original title. |
+| Property descriptions | Phase 7 machine translation. Until then EN/RU show the Serbian text (`lang="sr"`) with a small note. |
+| Russian | Nobody reviews it: Claude's translation is final. Natural real-estate tone. Russian floor numbers keep the Serbian numbering ("3-й этаж" = 3. sprat), "Prizemlje" = "Партер". Ares = "сот.". |
+| E-mails to the agency | Stay Serbian + a "Jezik posetioca" row (phase 5). Form option values sent to the backend stay Serbian. |
+| Marketing copy | ~50% of the static text will change; **translate it only when the client's final texts arrive**, in one pass. Until then the functional UI only. |
 
-## Facts found in the code (2026-10-22)
+## 2. How it works (as built)
 
-- Static text: ~1,600 words in 8 HTML pages. Biggest: index ~380, o-nama ~300, oglasite ~280, agenti ~240, kontakt ~160, nekretnine ~120, the two detail pages ~50 each.
-- JS strings: ~125, mostly in `renderers.js` (31), `page-properties.js` (26), `page-property.js` (26), `forms.js` (17), `dropdown.js` (9).
-- Enum values already arrive as stable keys and are rendered through `PV.maps` in `client/js/renderers.js`. That is the seed of the dictionaries.
-- **Font:** DM Sans (the body font) has **no Cyrillic**. Playfair Display does. Fix: add a Cyrillic-capable sans that is only used for Cyrillic glyphs (Google Fonts `cyrillic` subset, so the font stack falls back per glyph; e.g. Manrope / Inter / Golos Text, whichever sits closest to DM Sans). Check it visually.
-- CSP: no inline `<script>` and no `onclick=`. Dictionaries must be external JS files (`client/i18n/*.js`). fonts.googleapis / gstatic are already allowed. Any new CDN must go into `CSP_DIRECTIVES` in `server/src/app/app.ts`.
-- The backend sends English error messages ("Property not found.") and the UI sometimes shows them. Translate by `error.code` on the frontend instead.
-- Legacy Serbian fields in the API that are still to be removed: list `propertyType` (Serbian label → switch to key), `highlights`, detail flat `heating` / `furnished` / `floor` / `elevator` / `registrationStatus`. Only `page-property.js:125` still reads `p.propertyType` as a fallback.
-- There are no agent bios in the data (the enrichment file doesn't exist), so there is nothing to translate there.
+**Loading (every page, in `<head>` right after the viewport meta, before the CSS):** `js/i18n.js`, then `i18n/sr.js`, `i18n/en.js`, `i18n/ru.js` — all synchronous. CSP forbids inline scripts, so everything is an external file.
 
-## Architecture
+**`client/js/i18n.js` → `PV.i18n`:**
+- `lang`, `locale` (sr-Latn-RS / en-GB / ru-RU), `langs`, `setLang(code)`.
+- `t(key, vars)` — current language → Serbian fallback → the key itself (a visible bug). `{name}` placeholders.
+- `plural(n, key, vars)` — entry `{ one, few, many, other, fraction? }`, `Intl.PluralRules`; `{n}` = formatted number; `fraction` wins for decimals (sr "2,5 sobe").
+- `ordinal(n)` (sr "3.", en "3rd", ru "3-й"), `number(n, opts)` (Intl), `labels('enum.heating')` → `{key: text}`, `has(key)`.
+- `apply(root)` fills `data-i18n` (textContent), `data-i18n-html` (innerHTML, only our own dictionary markup like `<br>`), `data-i18n-attr="placeholder:key; aria-label:key2"`. **For `sr` it writes nothing** — the Serbian text lives in the HTML.
+- Anti-flash: for en/ru `html.i18n-pending` hides the body until `apply()` ran on DOMContentLoaded (3 s safety timeout).
+- Also builds the language switcher (`li.lang-switch[data-lang-switch]` — static markup in each page).
 
-- `client/js/i18n.js` loads **synchronously in `<head>`** (external file):
-  - decides the language (`?lang` → localStorage → `sr`), sets `<html lang>`;
-  - adds an `i18n-pending` class that hides the body for a moment, so no Serbian text flashes;
-  - exposes `PV.i18n.t(key, vars)`, `PV.i18n.plural(n, key)` (`Intl.PluralRules`: ru has one/few/many like sr), `PV.i18n.lang`, number/price formatting (`Intl.NumberFormat`: sr "270.000 €", en "€270,000", ru "270 000 €"), and `PV.i18n.apply(root)`, which fills `data-i18n` / `data-i18n-attr` (placeholder, aria-label, title, alt).
-- Dictionaries: `client/i18n/sr.js`, `en.js`, `ru.js`, each `PV.i18n.add('en', { ... })`. Use the same key tree in all three; `sr` is the reference. Move `PV.maps.*.toUi` labels into them.
-- Static HTML: elements get `data-i18n="section.key"`. The Serbian text stays in the HTML as-is (the fallback for no-JS / crawlers).
-- JS-built UI calls `t()`. Changing the language at runtime: simplest is a page reload after saving the choice (fine for this site); re-render only if cheap.
-- Units: m² everywhere; ares → en "ares", ru "сот." (1 ar = 1 сотка). Rooms: garsonjera → en "Studio", ru "Студия".
-- Generated EN/RU title: `{roomsWord} {type}, {area} · {location}`, with pieces dropped when missing (plot: "Plot, 21.06 ares · Beočin, Okolina").
+**Dictionaries `client/i18n/{sr,en,ru}.js`** — `PV.i18n.add('en', {...})`, same key tree:
+- `sr.js` holds only what **JS** needs (+ `enum.*`, the reference list of keys). Static HTML keys need entries in `en.js` + `ru.js` only (Serbian = the HTML).
+- Top-level groups so far: `lang`, `common`, `nav`, `footer`, `enum` (transactionType, propertyType, furnished, heating, registration, floor, construction, condition, equipment, feature), `units`, `ordinal`, `price`, `title`, `card`, `media`, `agent`, `pagination`, `state`, `home`, `dd` (dropdown.js), `list` (listing page), `detail`, `form`, `errors` (by API error code).
 
-## Phase 1 — as built (2026-11-02)
+**JS:**
+- `renderers.js`: every `PV.maps.*.toUi` = `i18n.labels('enum.*')` → pages using the maps are translated automatically. Formatters (`formatArea`, `formatLandArea`, `formatRooms`, `formatBathrooms`, `formatFloor`, `priceParts`, `formatPrice`, `formatNumber`) use the dictionaries. `propertyTitle(item)` (see decisions). `errorState(err)` takes the caught error: ApiError → its translated message, anything else → generic text. `PV.render.plural(n, one, few, many)` (Serbian words) still exists for old callers — don't use it in new code.
+- `api.js`: `ApiError.message` = `errors.<CODE>` from the dictionary (generic fallback); the server's English text is in `serverMessage`.
+- Pages translated: `page-properties.js`, `dropdown.js`, `page-property.js`, `page-home.js`, `scroll-top.js`, `script.js` (stats counter locale only).
 
-- `client/js/i18n.js` + `client/i18n/{sr,en,ru}.js`, all four as sync scripts right after the viewport meta on every page (before the stylesheets).
-- No browser detection (Relja changed this on 2026-11-02): `?lang=` → saved choice → sr. Only an explicit choice or `?lang=` is saved.
-- Static Serbian text lives only in the HTML: `apply()` writes en/ru texts and leaves missing keys Serbian. `sr.js` holds only what JS needs via `t()` (and is the `t()` fallback). So `data-i18n` keys need en + ru entries; sr entries are needed only for JS strings.
-- Also `data-i18n-html` (innerHTML, for our own markup like `<strong>`) and `data-i18n-attr="attr:key; attr2:key2"`.
-- Anti-flash: `html.i18n-pending body { visibility: hidden }`, removed on DOMContentLoaded (3 s safety timeout).
-- Switcher markup is static in each page (`li.lang-switch[data-lang-switch]` after the btn-contact item); `i18n.js` sets the flag/code/aria-current. Desktop: hover (mouse) / click / ArrowDown, the dropdown shows only the other two. < 992px: all three in a row inside the burger menu.
-- Flags: `images/flags/rs.png` (coat of arms; flag-icons rs.svg is 184 KB, so it's rasterized to 72×54 px, 2.7 KB), `gb.svg`, `ru.svg` (flag-icons 7.2.3, MIT).
-- Font: `--font-body` CSS variable (all 15 `'DM Sans'` uses); `html[lang="ru"]` switches the whole body font to the Cyrillic one (Relja: uniform look). Google Fonts downloads it only when used. Relja picked **Inter** from a test page (vs Manrope, Golos Text, Onest).
-- Phase 1 also translated the 5 header nav links + burger aria-label (smoke test for the flash check). The rest of header/footer = phase 2.
-- Headless test: scratchpad `domtest/i18n-phase1.js` (70 checks).
+**Backend changes made for i18n:** list `propertyType` = key (was the Serbian label); heating `EG`/`Etažno` → `individual_central`, `Toplotne pumpe`/`Toplotna pumpa` → `heat_pump`. Contract + data-model docs updated, 294 tests green.
 
-## Phase 2 — as built (2026-11-02)
+**CSS:** `--font-body`, `html[lang="ru"]` → Inter, `html.i18n-pending body {visibility:hidden}`, `.lang-switch*`, `.lang-option`, `.detail-description-note`.
 
-- Footer on all 8 pages: 13 `data-i18n` keys under `footer.*`. The "about" text has 3 variants: `textLong` (index), `textShort` (6 pages), `textSell` (oglasite). The address, phone, e-mail and "ProVizija" brand stay as they are.
-- `scroll-top.js` aria-label → `t('common.backToTop')`.
-- Headless test: scratchpad `domtest/i18n-phase2.js <client> [scope]`. It checks that every HTML key exists in en + ru, that no Serbian is left in the scope for en/ru (č ć š ž đ + common words, with an allowlist for proper nouns), that sr is identical to the HTML, and that each page has the same number of texts per language. Reuse it in phase 4 with the scope `body`.
+## 3. Rules for every step (Relja's way of working)
 
-## Phase 3 — split per page, phases 3 + 4 merged (Relja OK'd 2026-11-02)
+1. One step at a time. First a short plan + questions (with a recommendation), wait for OK, then implement, verify, summarize. Relja writes Serbian — answer in Serbian.
+2. **Serbian output must not change** (except agreed fixes). Prove it with the DUMP diff (section 4).
+3. Static HTML: add `data-i18n…` attributes, keep the Serbian text in the HTML. A text next to an icon goes into a `<span data-i18n>` so the icon survives. Duplicate markup on several pages must be patched identically on all pages.
+4. JS strings: `var t = PV.i18n.t;` and `t('group.key')`; plurals via `PV.i18n.plural`. Every key used in JS must exist in `sr.js` **and** `en.js` + `ru.js`. Attribute values built from dictionary text go through `esc()`.
+5. Keep keys grouped per page (`agents.*`, `agent.*` already exists for card aria labels, `contact.*`, `advertise.*`, `form.*` for shared fields).
+6. Only functional text now; marketing copy waits (section 5, "S").
+7. After each step: `node tools/i18n-check.js` (must say "All good." — run `--update` after translating new HTML keys), the page test, the sr DUMP diff, then update this file (status table + notes) and the memory handoff.
+8. Commits: local, logical, Serbian ASCII message + `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`, author `git -c user.name="Relja Opacic" -c user.email="opacicrelja@gmail.com" commit -F <file>`. Don't push unless Relja asks.
+9. Big UI/visual changes are Đorđe's area — ask first. Small i18n-related CSS is OK.
 
-Each step translates a page's JS strings AND its static HTML: 3a shared (renderers/api), 3b nekretnine, 3c nekretnina-detalj, 3d index, 3e agenti + agent-detalj, 3f kontakt + oglasite (forms), 3g o-nama.
+## 4. Verification tools (in the repo)
 
-### 3a — as built (2026-11-02)
-- Backend: list `propertyType` is now the KEY (was the Serbian label; nothing on the frontend read it). Contract note updated. Detail flat `propertyType` is still legacy (phase 5).
-- `i18n.js` added `labels(prefix)` (enum group → {key: text}), `ordinal(n)`, `has(key)`, and a `fraction` plural form (sr "2,5 sobe").
-- `renderers.js`: every `PV.maps.*.toUi` = `i18n.labels('enum.*')`, so pages that use maps get translated labels automatically. Formatters use dictionary units/plurals + `Intl` numbers. `propertyTitle(item, withLocation)`: sr = the original title; en/ru = generated ("Four-room apartment, 180 m²"; unknown type `other` → "Property, 33 m²"). Cards use it without the location (it's shown right above).
-- `PV.render.plural(n, one, few, many)` (Serbian words) is still exported for page scripts until their step.
-- `api.js`: `ApiError.message` comes from `errors.<CODE>` (generic fallback); the server's English text is kept as `serverMessage`. This fixes English error texts that were shown on the Serbian site.
-- Russian floors: Serbian numbering kept ("3-й этаж" = 3. sprat); "Prizemlje" = "Партер".
-- Price stays "amount unit" in every language (en "650,000 €").
-- sr output verified identical to the old renderer on all 44 live listings (except the fixed decimal: "55,5 m²", was "55.5 m²"). Test: scratchpad `domtest/i18n-3a.js <client> <old renderers.js> <api>`.
+- **`node tools/i18n-check.js [--update]`** (no dependencies): every HTML key exists in en/ru; every literal `t('key')` in `client/js` exists in sr; every sr key exists in en/ru; the HTML text = sr.js where both exist; **stale translations** — `tools/i18n-sr-snapshot.json` remembers the Serbian text of each HTML key at translation time and reports any later change. After translating new/changed keys run with `--update`.
+- **`tools/i18n-page-test.js`** (jsdom, real API data): loads pages in sr/en/ru, opens all dropdowns, lists Serbian left in en/ru (allows API proper nouns + `lang="sr"`), reports JS errors, checks dictionaries. Setup + usage in the file header (jsdom 26.1.0 installed in a scratch folder, `NODE_PATH`). Stubs: fetch → real backend, Bootstrap, matchMedia, IntersectionObserver, canvas.
+- **sr unchanged proof:** `git archive HEAD client | tar -x -C <scratch>/head`, run the page test with `DUMP_DIR=<scratch>/old` on `<scratch>/head/client` and `DUMP_DIR=<scratch>/new` on `client`, `diff` the JSON files.
+- **Backend:** `cd server && npx vitest run && npx tsc --noEmit && npx eslint src`.
+- **Running a test backend:** in `server/`: `$env:PORT='3001'; npx tsx src/server.ts` (background). Relja's own server is usually on 3000 and may run OLD backend code — restart it after backend changes or use 3001. Wait until `/api/status` answers.
+- Useful IDs (live feed 2026-11-02): `novi-sad-grbavica-lux-cetvorosoban-stan-180m2-dva-garazna-mesta-606` (apartment), `novi-sad-klisa-lokacija-gradjevinska-parcela-356m2-116` (plot), `bac-ugostiteljski-0bjekat-salas-359-m2-88` (type `other`), `ruma-voganj-porodicna-kuca-ranc-196-m2-91` (house, Okolina). Agents: `nada-atanaskovic`, `marija-ranisavljevic`. Feed IDs change over time — fetch `/api/properties?pageSize=100` for current ones.
 
-### 3b — as built (2026-11-02)
-- nekretnine.html: every static text has `data-i18n` / `data-i18n-html` / `data-i18n-attr` (keys `list.*`, `common.home`, `common.breadcrumb`). Texts next to an icon are wrapped in a `<span>` so the icon survives.
-- page-properties.js + dropdown.js: every string goes through `t()` (`list.*`, `dd.*`). Room hints are `list.roomHint.r2_5`; the "N aktivnih" badge is now a proper plural.
-- Backend: heating `EG` / `Etažno` → `individual_central`, `Toplotne pumpe` / `Toplotna pumpa` → `heat_pump` (both were in the feed as raw Serbian). Docs updated.
-- Test: scratchpad `domtest/i18n-page.js <client> <api> <pages…>` loads a page with real API data in sr/en/ru, opens every dropdown + "Više filtera", reports Serbian left in en/ru (proper nouns from the API allowed), and checks that every sr key exists in en + ru. Reuse it for every next page.
+## 5. What's left — step by step
 
-### 3c — as built (2026-11-02)
-- page-property.js: every string via `t()` (`detail.*`, `form.*` — the latter is shared with the forms in 3f). `titleOf(p)` feeds `propertyTitle` from `specs` (h1, breadcrumb, document.title, share text, photo alt in en/ru).
-- EN/RU: the description stays the agency's Serbian text, marked `lang="sr"`, with a small note (`detail.descriptionInSerbian`) until phase 7.
-- The WhatsApp message to the agency is in the visitor's language (tells the agent which language to answer in).
-- `PV.render.errorState(err)` takes the caught error: an ApiError shows its translated message, any other error the generic text (before, a JS bug showed e.g. "bootstrap is not defined" to visitors).
-- Generated EN/RU titles are ALL CAPS like the agency's RELPER titles (Relja).
-- Test harness: `i18n-page.js` now stubs Bootstrap, skips `lang="sr"` text in en/ru, allows agent initials, compares place names case-insensitively, and checks that every literal `t('key')` in the JS exists in sr. `DUMP_DIR=… node i18n-page.js` saves the sr texts; diffing against a `git archive HEAD client` copy proved sr output identical.
+### 3e — Agents (`agenti.html`, `agent-detalj.html`, `page-agents.js`, `page-agent.js`) — functional only
+- `page-agent.js`: hero tag "Profil agenta", breadcrumb (`common.home`, `nav.agents`, `common.breadcrumb`), "Pošaljite upit – {name}", form aria, field placeholders/aria (reuse `form.*`; "Kratka poruka..." needs a new `form.messageShort`), "Pošaljite Upit", "Portfolio", "Nekretnine – {name}", "Aktivni oglasi", contact buttons (call/email/WhatsApp… check the code), stats labels if any, 404 texts, `document.title`. `agent.stats.label` comes from data (check what it is).
+- `page-agents.js`: empty/error states.
+- Static HTML: only functional bits (breadcrumb, aria labels of lists). Section titles/intro/benefits = marketing → later.
+- Agent names never translated.
 
-### DECISION 2026-11-02: marketing copy waits for the client
-About half of the static text will change; the client still sends the final copy. So every step from 3d on translates only the **functional** part (search, filters, buttons, form labels / validation / alerts, everything JS renders, number formats). The **marketing copy** (hero titles/subtitles, section tags/titles/descriptions, steps, FAQ, CTA, stats labels, O nama, descriptive text on Oglasite / Agenti / Kontakt) is translated in ONE pass when the final Serbian texts arrive ("static content" phase).
-- Already translated before the decision: footer about texts, nekretnine.html hero. Re-check them when the new copy arrives.
-- `node tools/i18n-check.js` (repo, no deps): every HTML key in en/ru, every JS key in sr, every sr key in en/ru, and **stale translations** — `tools/i18n-sr-snapshot.json` stores the Serbian text each HTML key had when translated; a changed Serbian text is reported until en/ru are updated and `--update` refreshes the snapshot. Run it after every i18n change and whenever someone edits page text.
+### 3f — Forms (`forms.js`, `kontakt.html`, `oglasite-nekretninu.html`, inquiry forms on detail + agent pages)
+- **Trap:** `forms.js` maps the selected `<option>` **text** to API values (`transactionTypeMap`, `propertyTypeMap`, `priceTypeMap`, `parseRooms('Garsonjera')`), and e-mails contain option texts. Before translating options: give every `<option>` an explicit `value="<current Serbian text>"` (or a key) and read `.value` in `forms.js`, so the submitted data and the e-mails stay Serbian while only the label is translated. Check every select: og-namena, og-tip, og-grad, og-opstina, og-sobe, og-sprat, og-grejanje, og-pregovaranje, k-tema.
+- City/district options in og-grad / og-opstina are proper nouns — don't translate (only "Odaberite...").
+- Labels, placeholders, required-field messages, checkboxes (features: lift, parking…), submit buttons, success screens ("Hvala vam…", "Nazad na početnu"), error alerts (`showAlert`), 429 message (use `errors.RATE_LIMIT_EXCEEDED`), validation messages.
+- Backend field errors (`details[].message`) are English → show a translated message per field (e.g. `form.errors.<field>` or a generic "invalid field" text), never the English one.
+- The long descriptive texts on Oglasite/Kontakt (benefits, intro) = marketing → later.
 
-### 3d — as built (2026-11-02, functional part)
-- index.html: search widget (tabs, Lokacija/Tip/Cena labels, placeholders, aria), "Pogledaj sve nekretnine". page-home.js: picker/select labels, type labels = `list.chip.*` (now also in sr.js), "no featured". script.js: the stats counter formats numbers by locale (one line).
+### 5 — Backend cleanup
+- Forms accept an optional `lang` (`sr|en|ru`); the frontend sends `PV.i18n.lang`; the agency e-mail gets a row "Jezik posetioca: srpski / engleski / ruski". Validate strictly, tests, update `docs/api-contract.md`.
+- Remove legacy Serbian fields once nothing reads them: list `highlights`; detail flat `propertyType` (label), `heating` (joined string), `furnished` label, raw `floor`, `elevator`, `registrationStatus`. `page-property.js` still falls back to `p.propertyType` in the spec "Tip" row — switch it to the key first. Update contract + tests; bump nothing unless the internal model changes (`DATASET_SCHEMA_VERSION` only for Property/Agent model changes).
 
-## Phases (verify after each one)
+### 6 — Meta
+- `<title>` per page per language (dictionary keys, set by `apply` — add support for `<title data-i18n>` or set `document.title` in i18n.js). `<html lang>` is already set. Meta descriptions / og tags: with the static content (they're marketing text).
 
-1. **Infrastructure:** `i18n.js`, the 3 dictionary skeletons, the anti-flash, the flag switcher in the header (all 8 pages + mobile menu), the Cyrillic font. Verify: switching works and the choice persists, `?lang` works, no flash, RU font OK.
-2. **Header + footer** on all 8 pages (nav, footer links, CTA buttons, copyright).
-3. **JS-built UI:** cards, price/"Cena na upit", spec panel, feature chips, related properties, gallery labels, filters page (labels, dropdowns, chips, badge, sort, empty/error states), `dropdown.js` texts, home hero search, agents pages, forms (labels, placeholders, validation, alerts), error states by `error.code`, plurals, number formats, generated EN/RU titles.
-4. **Static page content:** index, o-nama, kontakt, oglasite, agenti, nekretnine, detail pages. Claude writes EN + RU.
-5. **Backend cleanup:** list `propertyType` → key (update the frontend + `api-contract.md`); remove the legacy Serbian fields from list/detail once nothing reads them; forms accept an optional `lang` and the email shows "Jezik posetioca"; tests.
-6. **Meta:** `<title>` and meta description per page per language, `<html lang>`, og tags if present.
-7. **Description machine translation** (new backend module):
-   - after each sync, translate only new/changed descriptions (keyed by property id + text hash) into en/ru;
-   - store them in a cache file next to `properties-cache.json`;
-   - never block or fail the sync; on failure keep the Serbian text;
-   - the detail API exposes the translations, the frontend picks by language and falls back to Serbian + the note.
-   - Provider: DeepL or the Claude API. **Needs a paid API key from the client: ask Relja first.** Keep proper nouns (cities, districts, agent names) untranslated. If the Claude API is used, read the `claude-api` skill before writing code. Add the key to config/.env and never log it (like `XML_FEED_URL`).
-   - Discussed with Relja on 2026-10-22: Claude is recommended (instruction-following for proper nouns, all-caps titles, real-estate tone). **The model is the client's choice** (Opus 5.5 by default; Sonnet 5.5 / Haiku 5.5 are cheaper). Before choosing, run a side-by-side test on 3–4 real descriptions with each model so Relja can compare the Russian. Estimated cost for ~40 new listings/month: Opus ≈ $1.80, Sonnet ≈ $0.90, Haiku ≈ $0.05. The one-time backfill of ~300 listings is ≈ $13 / $7 / $0.35. The Batch API halves this (async is fine). Also translate the TITLE in the same call: keep every place name / street exactly as written (Ruma, Voganj, Bulevar Evrope…), translate the rest, keep it in ALL CAPS like the Serbian titles (Relja, 2026-11-02), write areas as "196 M²". The frontend then prefers the translated title over the generated one.
-   - Setup for the client: console.anthropic.com → billing with **prepaid credit** + a monthly spend limit → create an API key → `ANTHROPIC_API_KEY` in `server/.env` and in Render → Environment.
-   - Show the number of pending/failed translations in `/api/status`, so the job is fully hands-off yet still checkable.
-8. **QA:** a headless jsdom test per language that scans every page for leftover Serbian (č ć š ž đ + a list of common words) in EN/RU, checks the switcher, `?lang`, the forms and the filters; plus Relja's browser check on desktop + phone.
+### S — Static marketing copy (when the client's texts arrive)
+- Pages: index (hero title/subtitle, section tags/titles/descriptions, stats labels, "Kako funkcionišemo" steps, team intro, FAQ ×6, CTA), o-nama (almost everything), agenti (intro, benefits), kontakt (intro, info blocks), oglasite (intro, benefits), nekretnine hero (already translated — re-check), footer about texts (already translated — re-check).
+- Flow: Relja gives the final Serbian texts → put them into the HTML → `data-i18n` keys → EN + RU → `node tools/i18n-check.js --update`.
+- Question to raise then: the FAQ says "pružamo usluge na engleskom jeziku" — now that the site is also Russian, maybe "na engleskom i ruskom".
 
-## Pitfalls to remember
+### 7 — Machine translation (needs the client's API key + model choice; ask Relja first)
+- New backend module: after each sync, translate only new/changed descriptions AND titles (keyed by property id + text hash) into en/ru; cache file next to `properties-cache.json`; never block or fail the sync; on failure keep Serbian; `/api/status` shows pending/failed counts.
+- Prompt rules: keep place names / streets / agent names exactly as written; titles in ALL CAPS ("RUMA, VOGANJ, FAMILY HOUSE – RANCH, 196 M²"); natural real-estate tone.
+- Detail API exposes `translations`; the frontend prefers the translated title/description, falls back to the generated title / Serbian description + note.
+- Provider: Claude API (recommended). Model is the client's choice: Opus 5.5 (default) / Sonnet 5.5 / Haiku 5.5. Before choosing: side-by-side test on 3–4 real descriptions. Cost estimate (~40 new listings/month): Opus ≈ $1.80, Sonnet ≈ $0.90, Haiku ≈ $0.05; one-time backfill of ~300 ≈ $13 / $7 / $0.35; Batch API halves it. **Read the `claude-api` skill before writing code.** Key in `server/.env` + Render env as `ANTHROPIC_API_KEY`, never logged.
+- Client setup: console.anthropic.com → prepaid credit + monthly limit → API key.
 
-- Windows / PowerShell 5.1: write multi-line files with the Write tool, not bash heredocs (they hang here). PowerShell strips `"` from native-exe arguments.
-- Client files are CRLF; git normalizes, so whole-file rewrites are fine.
-- Restart the server after backend changes (`npx tsx src/server.ts` in `server/`, port 3000); frontend changes only need Ctrl+F5.
-- The jsdom headless test harness lives in the session scratchpad (`domtest/`); recreate it in the new session if needed (`npm i jsdom@26.1.0` in a scratch folder, stub `fetch` / `matchMedia` / `IntersectionObserver`).
+### 8 — QA
+- Page test on all 8 pages × 3 languages (after S, everything must be clean), `i18n-check`, forms submitted in en/ru (e-mail stays Serbian + language row), switcher + `?lang`, mobile menu. Relja checks desktop + phone; especially Russian line lengths (buttons, nav at 992–1200 px, footer columns).
+
+## 6. Pitfalls (this machine: Windows, PowerShell 5.1 + Git Bash)
+
+- **Bash heredocs and `node -e` with quotes/backslashes mangle `\` (regexes!) and can hang.** Write scripts with the Write tool into the session scratchpad and run them. For exact multi-line replacements use a small "patch" script with `[from, to]` pairs that must each match exactly once (that's how steps 3b–3d were done).
+- The Edit tool can fail on lines containing `²` in client JS — use a patch script for those.
+- Client files are CRLF in git (autocrlf); LF in the working copy is fine, git normalizes. "LF will be replaced by CRLF" warnings are harmless.
+- `sed -i` on Git Bash may convert CRLF→LF — harmless, but prefer the patch scripts.
+- A command waiting for a permission prompt looks "stuck" to Relja — keep commands small and plain.
+- Fastify serves `client/` statically: new files under `client/` need no server change; any new external resource needs a CSP entry in `server/src/app/app.ts`.
+- jsdom has no Bootstrap/canvas/layout: stub them (the page test does); `offsetParent` is always null there.
+- Russian text is longer — check buttons and the nav in a real browser.
+
+## 7. Open questions
+
+- "EG" heating was assumed = etažno grejanje (Relja didn't object; confirm with the client if unsure).
+- New RELPER types seen in the feed ("Lokal", "Ugostiteljski objekat") are `other` for now → after-i18n backlog (with Garaža, Hala, Zemljište group, rent types, "Cena po m²").
