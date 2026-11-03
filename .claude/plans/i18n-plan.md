@@ -4,7 +4,7 @@ Read this whole file before any i18n work. Sections: 0 status · 1 decisions · 
 
 ## 0. Status at a glance
 
-All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: "i18n 5: …" (after `b3d535c` = 3g, `ad8107c` = required inquiry message, `0ff5330` = 3f, `3d04dd9` = 3e).
+All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: "i18n 6: …" (after `c072518` = 5, `b3d535c` = 3g, `ad8107c` = required inquiry message, `0ff5330` = 3f, `3d04dd9` = 3e).
 
 | Step | What | Status | Commit |
 |---|---|---|---|
@@ -18,7 +18,7 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 | 3f | Forms: kontakt, oglasite, inquiry forms + `lang` / "Jezik posetioca" in e-mails (moved here from 5) + form bug fixes | done | see git log |
 | 3g | O nama — functional part = breadcrumb only; the rest is marketing → S | done | see git log |
 | 5 | Backend cleanup (legacy fields) | done (detail `propertyType` label kept on purpose, see 5) | see git log |
-| 6 | Meta: `<title>` per page per language (+ descriptions with the static content) | **NEXT** | |
+| 6 | Meta: `<title>` per page per language (descriptions / og tags go with S) | done | see git log |
 | S | **Static marketing copy** on all pages | **waits for the client's final texts** | |
 | 7 | Machine translation of property descriptions + titles (Claude API) | **waits for the client's API key + model choice** | |
 | 8 | Final QA + Relja's browser check (desktop + phone) | todo, last | |
@@ -128,7 +128,11 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 - (`lang` in the forms + "Jezik posetioca" was done in 3f.)
 - Remove legacy Serbian fields once nothing reads them: list `highlights`; detail flat `propertyType` (label), `heating` (joined string), `furnished` label, raw `floor`, `elevator`, `registrationStatus`. `page-property.js` still falls back to `p.propertyType` in the spec "Tip" row — switch it to the key first. Update contract + tests; bump nothing unless the internal model changes (`DATASET_SCHEMA_VERSION` only for Property/Agent model changes).
 
-### 6 — Meta
+### 6 — Meta — DONE
+- Every `<title>` has `data-i18n="meta.title.<page>"`; `apply()` already covers `<head>`. Relja chose **short en/ru titles** ("About Us | ProVizija Nekretnine", "О нас | ProVizija Nekretnine"); the long Serbian SEO titles stay as they are (Google only sees Serbian: same URL, no hreflang). "ProVizija Nekretnine" is never translated.
+- Agent profile / property detail still set `document.title` from JS after load (agent name / generated title); the static title only shows for the 404 cases.
+- Meta description + og tags → step S (marketing copy).
+- Original notes (kept for reference):
 - `<title>` per page per language (dictionary keys, set by `apply` — add support for `<title data-i18n>` or set `document.title` in i18n.js). `<html lang>` is already set. Meta descriptions / og tags: with the static content (they're marketing text).
 
 ### S — Static marketing copy (when the client's texts arrive)
@@ -157,6 +161,7 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 - Fastify serves `client/` statically: new files under `client/` need no server change; any new external resource needs a CSP entry in `server/src/app/app.ts`.
 - jsdom has no Bootstrap/canvas/layout: stub them (the page test does); `offsetParent` is always null there.
 - Russian text is longer — check buttons and the nav in a real browser.
+- A scratch jsdom script that loads index.html / nekretnine.html never exits on its own (hero particles / timers keep it alive) → call `dom.window.close()` and `process.exit()` at the end, and keep each run to a few pages, or Relja sees it "spinning".
 
 ## 7. Open questions
 

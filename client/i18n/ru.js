@@ -3,6 +3,19 @@ PV.i18n.add('ru', {
   lang: {
     choose: 'Язык',
   },
+  // <title> of each page (short; the Serbian SEO titles stay in the HTML)
+  meta: {
+    title: {
+      home: 'ProVizija Nekretnine – агентство недвижимости в Нови-Саде',
+      properties: 'Недвижимость | ProVizija Nekretnine',
+      property: 'Объект | ProVizija Nekretnine',
+      agents: 'Наши агенты | ProVizija Nekretnine',
+      agent: 'Агент | ProVizija Nekretnine',
+      about: 'О нас | ProVizija Nekretnine',
+      contact: 'Контакты | ProVizija Nekretnine',
+      advertise: 'Разместить объявление | ProVizija Nekretnine',
+    },
+  },
   nav: {
     toggle: 'Открыть меню',
     properties: 'Недвижимость',
