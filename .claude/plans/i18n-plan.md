@@ -4,7 +4,7 @@ Read this whole file before any i18n work. Sections: 0 status · 1 decisions · 
 
 ## 0. Status at a glance
 
-All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: "i18n 3g: o-nama…" (after `ad8107c` = required inquiry message, `0ff5330` = 3f, `3d04dd9` = 3e).
+All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: "i18n 5: …" (after `b3d535c` = 3g, `ad8107c` = required inquiry message, `0ff5330` = 3f, `3d04dd9` = 3e).
 
 | Step | What | Status | Commit |
 |---|---|---|---|
@@ -17,8 +17,8 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 | 3e | Agents list + agent profile — functional part (+ agent phones normalized to `+381…` in the backend) | done | see git log |
 | 3f | Forms: kontakt, oglasite, inquiry forms + `lang` / "Jezik posetioca" in e-mails (moved here from 5) + form bug fixes | done | see git log |
 | 3g | O nama — functional part = breadcrumb only; the rest is marketing → S | done | see git log |
-| 5 | Backend cleanup (legacy fields) | **NEXT** | |
-| 6 | Meta: `<title>` per page per language (+ descriptions with the static content) | todo | |
+| 5 | Backend cleanup (legacy fields) | done (detail `propertyType` label kept on purpose, see 5) | see git log |
+| 6 | Meta: `<title>` per page per language (+ descriptions with the static content) | **NEXT** | |
 | S | **Static marketing copy** on all pages | **waits for the client's final texts** | |
 | 7 | Machine translation of property descriptions + titles (Claude API) | **waits for the client's API key + model choice** | |
 | 8 | Final QA + Relja's browser check (desktop + phone) | todo, last | |
@@ -120,7 +120,11 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 - Backend field errors (`details[].message`) are English → show a translated message per field (e.g. `form.errors.<field>` or a generic "invalid field" text), never the English one.
 - The long descriptive texts on Oglasite/Kontakt (benefits, intro) = marketing → later.
 
-### 5 — Backend cleanup
+### 5 — Backend cleanup — DONE
+- Removed from the public API: `highlights` (list + detail + home + agent portfolio — all via `toListItem`), detail `floor` (raw), `heating` (joined Serbian), `furnished` (label), `elevator`, `registrationStatus`. `buildHighlights` + its tests gone. Internal model unchanged → no `DATASET_SCHEMA_VERSION` bump. Contract + data-model updated. 305 tests.
+- **Kept on purpose:** detail flat `propertyType` (the agency's Serbian label). Type `other` (today "Lokal" id 81, "Ugostiteljski objekat" id 88) has no key yet: Serbian shows that label in the "Tip" row, en/ru show `detail.spec.otherType` ("Other property" / "Другая недвижимость") — before, en/ru showed the Serbian word (the page test can't catch it: no č/ć/š/ž/đ). Relja (2026-11-03): these two must NOT stay "Ostalo" — they get real named types in the after-i18n types work (with Garaža, the Zemljište group…); remove the flat `propertyType` then.
+- Flat `area` / `rooms` / `bathrooms` stay (numbers).
+- Original notes (kept for reference):
 - (`lang` in the forms + "Jezik posetioca" was done in 3f.)
 - Remove legacy Serbian fields once nothing reads them: list `highlights`; detail flat `propertyType` (label), `heating` (joined string), `furnished` label, raw `floor`, `elevator`, `registrationStatus`. `page-property.js` still falls back to `p.propertyType` in the spec "Tip" row — switch it to the key first. Update contract + tests; bump nothing unless the internal model changes (`DATASET_SCHEMA_VERSION` only for Property/Agent model changes).
 

@@ -6,7 +6,6 @@ import {
   getPropertyDetail,
   matchesFilters,
   sortProperties,
-  buildHighlights,
   toListItem,
   buildSpecs,
   buildFeatureList,
@@ -289,47 +288,6 @@ describe("sortProperties", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Highlights
-// ---------------------------------------------------------------------------
-
-describe("buildHighlights", () => {
-  it("includes boolean flag labels", () => {
-    const p = makeProperty({ hasTerrace: true, hasElevator: true, hasParking: true });
-    const h = buildHighlights(p);
-    expect(h).toContain("Terasa");
-    expect(h).toContain("Lift");
-    expect(h).toContain("Parking");
-  });
-
-  it("fills from otherFeatures after flags", () => {
-    const p = makeProperty({
-      hasTerrace: false,
-      hasElevator: false,
-      hasParking: false,
-      hasGarage: false,
-      isNewConstruction: false,
-      otherFeatures: ["Klima", "Bazen"],
-    });
-    const h = buildHighlights(p);
-    expect(h).toContain("Klima");
-    expect(h).toContain("Bazen");
-  });
-
-  it("caps at 5 highlights", () => {
-    const p = makeProperty({
-      hasTerrace: true,
-      hasElevator: true,
-      hasParking: true,
-      hasGarage: true,
-      isNewConstruction: true,
-      otherFeatures: ["Extra1", "Extra2"],
-    });
-    const h = buildHighlights(p);
-    expect(h.length).toBeLessThanOrEqual(5);
-  });
-});
-
-// ---------------------------------------------------------------------------
 // toListItem shaping
 // ---------------------------------------------------------------------------
 
@@ -352,6 +310,8 @@ describe("toListItem", () => {
     expect(item.floor).toBe("3");
     expect(item.images.length).toBe(2);
     expect(item.images[0].alt).toBe("Trosoban stan na Vračaru");
+    // Legacy Serbian highlights were removed (i18n phase 5)
+    expect(item).not.toHaveProperty("highlights");
   });
 
   it("sends the floor for apartments only (prizemlje as 'ground')", () => {
@@ -603,6 +563,13 @@ describe("getPropertyDetail", () => {
     expect(detail!.url).toBe("/nekretnine/trosoban-stan-na-vracaru-100");
     expect(detail!.code).toBe("100100");
     expect(detail!.specs.propertyType).toBe("apartment");
+  });
+
+  it("has no legacy Serbian / raw fields (i18n phase 5)", () => {
+    const detail = getPropertyDetail("100")!;
+    for (const field of ["highlights", "floor", "heating", "furnished", "elevator", "registrationStatus"]) {
+      expect(detail).not.toHaveProperty(field);
+    }
   });
 
   it("does not expose the street address", () => {

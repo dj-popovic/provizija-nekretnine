@@ -315,6 +315,7 @@ PV.i18n.add('en', {
       title: 'Specifications',
       none: 'No specifications available.',
       type: 'Type',
+      otherType: 'Other property',
       area: 'Area',
       plotArea: 'Plot area',
       location: 'Location',

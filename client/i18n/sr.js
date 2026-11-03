@@ -252,6 +252,7 @@ PV.i18n.add('sr', {
       title: 'Specifikacije',
       none: 'Nema dostupnih specifikacija.',
       type: 'Tip',
+      otherType: 'Druga nekretnina',
       area: 'Površina',
       plotArea: 'Površina placa',
       location: 'Lokacija',

@@ -322,14 +322,13 @@ The snapshot `schemaVersion` is 5 since these three fields were added (2026-10-2
 - `roomStructure`
 - `images` — array of `PropertyImage`, supports frontend slider cards
 - `primaryImage`
-- `highlights` — derived from `<other>` XML elements (curated subset, TBD during implementation)
 - `agentId`
 
 ### Notes
 
 - This model is intentionally lighter than the full `Property`.
 - It contains only the data needed for property card presentation and list-based browsing.
-- `url`, `highlights`, and image `alt` text (in the API layer) are derived fields, not stored in the internal model directly.
+- `url` and image `alt` text (in the API layer) are derived fields, not stored in the internal model directly. (The Serbian `highlights` list was removed from the API in i18n phase 5, 2026-11-03.)
 
 ---
 
