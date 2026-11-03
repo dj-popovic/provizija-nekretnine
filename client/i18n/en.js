@@ -138,6 +138,22 @@ PV.i18n.add('en', {
     viewProfile: 'View profile – {name}',
     call: 'Call {name}',
     email: 'Email {name}',
+    tag: 'Agent profile',
+    inquiryTitle: 'Send an inquiry – {name}',
+    formLabel: 'Contact form for the agent',
+    aboutTag: 'About the agent',
+    aboutTitle: 'Short bio',
+    portfolioTag: 'Portfolio',
+    portfolioTitle: 'Properties – {name}',
+    activeListings: 'Active listings',
+    notFound: {
+      title: 'Agent not found',
+      text: 'The agent you are looking for does not exist.',
+      cta: 'View all agents',
+    },
+  },
+  agents: {
+    empty: 'There are no agents at the moment.',
   },
   pagination: {
     label: 'Pages',
@@ -320,7 +336,6 @@ PV.i18n.add('en', {
       profile: 'View profile',
       inquiryTitle: 'Send an inquiry about this property',
       formLabel: 'Property inquiry form',
-      send: 'Send Inquiry',
     },
     related: {
       tag: 'Similar properties',
@@ -350,6 +365,8 @@ PV.i18n.add('en', {
     emailPlaceholder: 'Email address',
     message: 'Message',
     messageOptional: 'Message (optional)...',
+    messageShort: 'Short message...',
+    send: 'Send Inquiry',
   },
 
   errors: {

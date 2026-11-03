@@ -116,6 +116,24 @@ PV.i18n.add('sr', {
     viewProfile: 'Pogledaj profil – {name}',
     call: 'Pozovi {name}',
     email: 'Email {name}',
+    // Agent profile page (page-agent.js)
+    tag: 'Profil agenta',
+    inquiryTitle: 'Pošaljite upit – {name}',
+    formLabel: 'Kontakt forma za agenta',
+    aboutTag: 'O agentu',
+    aboutTitle: 'Kratki opis',
+    portfolioTag: 'Portfolio',
+    portfolioTitle: 'Nekretnine – {name}',
+    activeListings: 'Aktivni oglasi',
+    notFound: {
+      title: 'Agent nije pronađen',
+      text: 'Traženi agent ne postoji.',
+      cta: 'Pogledajte sve agente',
+    },
+  },
+  // Agents list page (page-agents.js)
+  agents: {
+    empty: 'Trenutno nema agenata.',
   },
   pagination: {
     label: 'Stranice',
@@ -255,7 +273,6 @@ PV.i18n.add('sr', {
       profile: 'Pogledaj profil',
       inquiryTitle: 'Pošaljite upit za ovu nekretninu',
       formLabel: 'Kontakt forma za nekretninu',
-      send: 'Pošaljite Upit',
     },
     related: {
       tag: 'Slične nekretnine',
@@ -286,6 +303,8 @@ PV.i18n.add('sr', {
     emailPlaceholder: 'Email adresa',
     message: 'Poruka',
     messageOptional: 'Poruka (opciono)...',
+    messageShort: 'Kratka poruka...',
+    send: 'Pošaljite Upit',
   },
 
   // By API error code (PV.ApiError); unknown codes get "generic"

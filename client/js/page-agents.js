@@ -18,7 +18,7 @@ window.PV = window.PV || {};
       var agents = res.items || [];
 
       if (agents.length === 0) {
-        grid.innerHTML = PV.render.emptyState('Trenutno nema agenata.');
+        grid.innerHTML = PV.render.emptyState(PV.i18n.t('agents.empty'));
         return;
       }
 

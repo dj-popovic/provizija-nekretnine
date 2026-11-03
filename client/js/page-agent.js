@@ -7,6 +7,7 @@ window.PV = window.PV || {};
   'use strict';
 
   var esc = PV.render.esc;
+  var t = PV.i18n.t;
   var heroWrap = document.getElementById('agentHero');
   var contentWrap = document.getElementById('agentContent');
 
@@ -20,12 +21,12 @@ window.PV = window.PV || {};
   function buildHero(agent) {
     return (
       '<div class="container">' +
-        '<div class="page-hero-tag">Profil agenta</div>' +
+        '<div class="page-hero-tag">' + t('agent.tag') + '</div>' +
         '<h1 class="page-hero-title">' + esc(agent.fullName) + '</h1>' +
         (agent.shortBio ? '<p class="page-hero-subtitle">' + esc(agent.shortBio) + '</p>' : '') +
-        '<nav class="breadcrumb-nav" aria-label="Breadcrumb">' +
-          '<a href="index.html">Početna</a><span class="separator">/</span>' +
-          '<a href="agenti.html">Agenti</a><span class="separator">/</span>' +
+        '<nav class="breadcrumb-nav" aria-label="' + esc(t('common.breadcrumb')) + '">' +
+          '<a href="index.html">' + t('common.home') + '</a><span class="separator">/</span>' +
+          '<a href="agenti.html">' + t('nav.agents') + '</a><span class="separator">/</span>' +
           '<span class="current">' + esc(agent.fullName) + '</span>' +
         '</nav>' +
       '</div>'
@@ -65,15 +66,15 @@ window.PV = window.PV || {};
   function buildForm(agent) {
     return (
       '<div class="agent-quick-contact">' +
-        '<h4>Pošaljite upit – ' + esc(agent.fullName) + '</h4>' +
-        '<form id="agentInquiryForm" class="needs-validation" novalidate aria-label="Kontakt forma za agenta">' +
+        '<h4>' + esc(t('agent.inquiryTitle', { name: agent.fullName })) + '</h4>' +
+        '<form id="agentInquiryForm" class="needs-validation" novalidate aria-label="' + esc(t('agent.formLabel')) + '">' +
           '<input type="hidden" name="agentId" value="' + esc(agent.agentId) + '">' +
           '<div class="row g-3">' +
-            '<div class="col-md-6"><input type="text" class="form-control" name="fullName" placeholder="Ime i prezime" required aria-label="Ime i prezime"></div>' +
-            '<div class="col-md-6"><input type="tel" class="form-control" name="phone" placeholder="Telefon" required aria-label="Telefon"></div>' +
-            '<div class="col-12"><input type="email" class="form-control" name="email" placeholder="Email adresa" required aria-label="Email"></div>' +
-            '<div class="col-12"><textarea class="form-control" name="message" placeholder="Kratka poruka..." aria-label="Poruka"></textarea></div>' +
-            '<div class="col-12"><button type="submit" class="btn-submit-full"><i class="bi bi-send" aria-hidden="true"></i> Pošaljite Upit</button></div>' +
+            '<div class="col-md-6"><input type="text" class="form-control" name="fullName" placeholder="' + esc(t('form.fullName')) + '" required aria-label="' + esc(t('form.fullName')) + '"></div>' +
+            '<div class="col-md-6"><input type="tel" class="form-control" name="phone" placeholder="' + esc(t('form.phone')) + '" required aria-label="' + esc(t('form.phone')) + '"></div>' +
+            '<div class="col-12"><input type="email" class="form-control" name="email" placeholder="' + esc(t('form.emailPlaceholder')) + '" required aria-label="' + esc(t('form.email')) + '"></div>' +
+            '<div class="col-12"><textarea class="form-control" name="message" placeholder="' + esc(t('form.messageShort')) + '" aria-label="' + esc(t('form.message')) + '"></textarea></div>' +
+            '<div class="col-12"><button type="submit" class="btn-submit-full"><i class="bi bi-send" aria-hidden="true"></i> ' + t('form.send') + '</button></div>' +
           '</div>' +
         '</form>' +
       '</div>'
@@ -91,9 +92,9 @@ window.PV = window.PV || {};
 
     return (
       '<div>' +
-        '<div class="section-tag">Portfolio</div>' +
-        '<h2 class="section-title" style="font-size:30px;text-align:left;">Nekretnine – ' + esc(agent.fullName) + '</h2>' +
-        '<p style="color:var(--text-light);margin-bottom:28px;">Aktivni oglasi</p>' +
+        '<div class="section-tag">' + t('agent.portfolioTag') + '</div>' +
+        '<h2 class="section-title" style="font-size:30px;text-align:left;">' + esc(t('agent.portfolioTitle', { name: agent.fullName })) + '</h2>' +
+        '<p style="color:var(--text-light);margin-bottom:28px;">' + t('agent.activeListings') + '</p>' +
         '<div class="row g-4">' + cards + '</div>' +
       '</div>'
     );
@@ -112,8 +113,8 @@ window.PV = window.PV || {};
     // Bio
     if (agent.shortBio) {
       html += '<div class="mb-5">';
-      html += '<div class="section-tag">O agentu</div>';
-      html += '<h2 class="section-title" style="font-size:30px;text-align:left;">Kratki opis</h2>';
+      html += '<div class="section-tag">' + t('agent.aboutTag') + '</div>';
+      html += '<h2 class="section-title" style="font-size:30px;text-align:left;">' + t('agent.aboutTitle') + '</h2>';
       html += '<p style="color:var(--text-light);font-size:17px;line-height:1.8;">' + esc(agent.shortBio) + '</p>';
       html += '</div>';
     }
@@ -134,9 +135,9 @@ window.PV = window.PV || {};
     return (
       '<div class="text-center py-5">' +
         '<i class="bi bi-person-slash" style="font-size:4rem;color:#ccc;" aria-hidden="true"></i>' +
-        '<h2 class="mt-3" style="color:var(--primary);">Agent nije pronađen</h2>' +
-        '<p class="text-muted">Traženi agent ne postoji.</p>' +
-        '<a href="agenti.html" class="btn-submit-full" style="display:inline-block;width:auto;padding:12px 32px;margin-top:16px;">Pogledajte sve agente</a>' +
+        '<h2 class="mt-3" style="color:var(--primary);">' + t('agent.notFound.title') + '</h2>' +
+        '<p class="text-muted">' + t('agent.notFound.text') + '</p>' +
+        '<a href="agenti.html" class="btn-submit-full" style="display:inline-block;width:auto;padding:12px 32px;margin-top:16px;">' + t('agent.notFound.cta') + '</a>' +
       '</div>'
     );
   }

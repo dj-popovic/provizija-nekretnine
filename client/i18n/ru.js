@@ -140,6 +140,22 @@ PV.i18n.add('ru', {
     viewProfile: 'Профиль – {name}',
     call: 'Позвонить: {name}',
     email: 'Написать: {name}',
+    tag: 'Профиль агента',
+    inquiryTitle: 'Отправить запрос – {name}',
+    formLabel: 'Форма связи с агентом',
+    aboutTag: 'Об агенте',
+    aboutTitle: 'Кратко о себе',
+    portfolioTag: 'Портфолио',
+    portfolioTitle: 'Объекты – {name}',
+    activeListings: 'Активные объявления',
+    notFound: {
+      title: 'Агент не найден',
+      text: 'Запрашиваемый агент не существует.',
+      cta: 'Смотреть всех агентов',
+    },
+  },
+  agents: {
+    empty: 'На данный момент агентов нет.',
   },
   pagination: {
     label: 'Страницы',
@@ -322,7 +338,6 @@ PV.i18n.add('ru', {
       profile: 'Профиль агента',
       inquiryTitle: 'Отправьте запрос по этому объекту',
       formLabel: 'Форма запроса по объекту',
-      send: 'Отправить запрос',
     },
     related: {
       tag: 'Похожие объекты',
@@ -352,6 +367,8 @@ PV.i18n.add('ru', {
     emailPlaceholder: 'Адрес электронной почты',
     message: 'Сообщение',
     messageOptional: 'Сообщение (необязательно)...',
+    messageShort: 'Короткое сообщение...',
+    send: 'Отправить запрос',
   },
 
   errors: {

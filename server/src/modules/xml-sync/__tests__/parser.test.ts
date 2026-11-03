@@ -52,6 +52,6 @@ describe("parseXmlFeed", () => {
     expect(property.roomStructure).toBe(4.5);
 
     const [agent] = extractAgents([raw]);
-    expect(agent.phone).toBe("0691822652");
+    expect(agent.phone).toBe("+381691822652");
   });
 });

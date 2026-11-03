@@ -1,5 +1,5 @@
 import { logger } from "../shared/logger.js";
-import { normalizeString, slugify } from "../shared/utils.js";
+import { normalizePhone, normalizeString, slugify } from "../shared/utils.js";
 import type { RawXmlListing } from "./raw-listing.js";
 import type { Agent } from "../shared/models.js";
 
@@ -43,7 +43,7 @@ export function extractAgents(raws: RawXmlListing[]): Agent[] {
       slug: slugify(name),
       name,
       email: normalizeString(raw.agent_email) ?? null,
-      phone: normalizeString(raw.agent_phone) ?? null,
+      phone: normalizePhone(raw.agent_phone) ?? null,
       imageUrl: null,
       bio: null,
     });

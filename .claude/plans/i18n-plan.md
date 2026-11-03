@@ -4,7 +4,7 @@ Read this whole file before any i18n work. Sections: 0 status · 1 decisions · 
 
 ## 0. Status at a glance
 
-All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: `9b23a12`.
+All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: the 3e commit ("i18n 3e: agenti…", after `0a490b4`).
 
 | Step | What | Status | Commit |
 |---|---|---|---|
@@ -14,8 +14,8 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 | 3b | Listing page `nekretnine.html` (filters, dropdowns, sort, load more) | done | cd807a8 |
 | 3c | Property detail page (specs, gallery, features, share, inquiry form fields, related, 404) | done | 95d0ae8 |
 | 3d | Home page — functional part (hero search, "view all", stats number format) | done | 9b23a12 |
-| 3e | Agents list + agent profile — functional part | **NEXT** | |
-| 3f | Forms: kontakt, oglasite, inquiry forms (labels, options, validation, alerts) | todo | |
+| 3e | Agents list + agent profile — functional part (+ agent phones normalized to `+381…` in the backend) | done | see git log |
+| 3f | Forms: kontakt, oglasite, inquiry forms (labels, options, validation, alerts) | **NEXT** | |
 | 5 | Backend cleanup + `lang` in forms + "Jezik posetioca" in e-mails | todo | |
 | 6 | Meta: `<title>` per page per language (+ descriptions with the static content) | todo | |
 | S | **Static marketing copy** on all pages | **waits for the client's final texts** | |
@@ -58,9 +58,9 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 **JS:**
 - `renderers.js`: every `PV.maps.*.toUi` = `i18n.labels('enum.*')` → pages using the maps are translated automatically. Formatters (`formatArea`, `formatLandArea`, `formatRooms`, `formatBathrooms`, `formatFloor`, `priceParts`, `formatPrice`, `formatNumber`) use the dictionaries. `propertyTitle(item)` (see decisions). `errorState(err)` takes the caught error: ApiError → its translated message, anything else → generic text. `PV.render.plural(n, one, few, many)` (Serbian words) still exists for old callers — don't use it in new code.
 - `api.js`: `ApiError.message` = `errors.<CODE>` from the dictionary (generic fallback); the server's English text is in `serverMessage`.
-- Pages translated: `page-properties.js`, `dropdown.js`, `page-property.js`, `page-home.js`, `scroll-top.js`, `script.js` (stats counter locale only).
+- Pages translated: `page-properties.js`, `dropdown.js`, `page-property.js`, `page-home.js`, `page-agent.js`, `page-agents.js`, `scroll-top.js`, `script.js` (stats counter locale only).
 
-**Backend changes made for i18n:** list `propertyType` = key (was the Serbian label); heating `EG`/`Etažno` → `individual_central`, `Toplotne pumpe`/`Toplotna pumpa` → `heat_pump`. Contract + data-model docs updated, 294 tests green.
+**Backend changes made for i18n:** list `propertyType` = key (was the Serbian label); heating `EG`/`Etažno` → `individual_central`, `Toplotne pumpe`/`Toplotna pumpa` → `heat_pump`. Contract + data-model docs updated. Step 3e: agent `phone` is normalized in `agent-extractor.ts` via `normalizePhone` (`shared/utils.ts`): `069…` → `+38169…`, `00381…`/`381…` → `+381…`, other shapes kept; data-model doc updated, 298 tests green.
 
 **CSS:** `--font-body`, `html[lang="ru"]` → Inter, `html.i18n-pending body {visibility:hidden}`, `.lang-switch*`, `.lang-option`, `.detail-description-note`.
 
@@ -80,20 +80,26 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 
 - **`node tools/i18n-check.js [--update]`** (no dependencies): every HTML key exists in en/ru; every literal `t('key')` in `client/js` exists in sr; every sr key exists in en/ru; the HTML text = sr.js where both exist; **stale translations** — `tools/i18n-sr-snapshot.json` remembers the Serbian text of each HTML key at translation time and reports any later change. After translating new/changed keys run with `--update`.
 - **`tools/i18n-page-test.js`** (jsdom, real API data): loads pages in sr/en/ru, opens all dropdowns, lists Serbian left in en/ru (allows API proper nouns + `lang="sr"`), reports JS errors, checks dictionaries. Setup + usage in the file header (jsdom 26.1.0 installed in a scratch folder, `NODE_PATH`). Stubs: fetch → real backend, Bootstrap, matchMedia, IntersectionObserver, canvas.
-- **sr unchanged proof:** `git archive HEAD client | tar -x -C <scratch>/head`, run the page test with `DUMP_DIR=<scratch>/old` on `<scratch>/head/client` and `DUMP_DIR=<scratch>/new` on `client`, `diff` the JSON files.
+- **sr unchanged proof:** `git archive HEAD client | tar -x -C <scratch>/head`, run the page test with `DUMP_DIR=<scratch>/old` on `<scratch>/head/client` and `DUMP_DIR=<scratch>/new` on `client`, `diff` the JSON files. The dump file names get long (detail pages): `git diff --no-index` can fail on Windows path length — compare with a small node script instead.
 - **Backend:** `cd server && npx vitest run && npx tsc --noEmit && npx eslint src`.
-- **Running a test backend:** in `server/`: `$env:PORT='3001'; npx tsx src/server.ts` (background). Relja's own server is usually on 3000 and may run OLD backend code — restart it after backend changes or use 3001. Wait until `/api/status` answers.
+- **Running a test backend:** in `server/`: `$env:PORT='3001'; npx tsx src/server.ts` (background). If 3001 is taken (an old server from an earlier chat — EADDRINUSE), use 3002. Relja's own server is usually on 3000 and may run OLD backend code — restart it after backend changes or use 3001. Wait until `/api/status` answers.
 - Useful IDs (live feed 2026-11-02): `novi-sad-grbavica-lux-cetvorosoban-stan-180m2-dva-garazna-mesta-606` (apartment), `novi-sad-klisa-lokacija-gradjevinska-parcela-356m2-116` (plot), `bac-ugostiteljski-0bjekat-salas-359-m2-88` (type `other`), `ruma-voganj-porodicna-kuca-ranc-196-m2-91` (house, Okolina). Agents: `nada-atanaskovic`, `marija-ranisavljevic`. Feed IDs change over time — fetch `/api/properties?pageSize=100` for current ones.
 
 ## 5. What's left — step by step
 
-### 3e — Agents (`agenti.html`, `agent-detalj.html`, `page-agents.js`, `page-agent.js`) — functional only
+### 3e — Agents — DONE
+- Keys: `agent.tag / inquiryTitle / formLabel / aboutTag / aboutTitle / portfolioTag / portfolioTitle / activeListings / notFound.*`, `agents.empty`, `form.messageShort`, `form.send` (shared submit text; replaced `detail.agent.send`, the detail page uses it too). Names inserted via `{name}` go through `esc()` — `t()` does not escape vars.
+- `agenti.html`: breadcrumb only. Its hero, "Vaši Agenti", the 6 benefit cards, the CTA (incl. its "Pošaljite Upit" button) and the section aria-labels wait for step S — the page test lists them, expected.
+- `agent-detalj.html`: hero aria-label = `agent.tag`. `document.title` stays "{name} | ProVizija Nekretnine" (language-neutral); the 404 `<title>` "Agent | …" → phase 6.
+- Agent bio (`shortBio`) and `stats.label` come from `server/src/modules/agents/enrichment.ts` (empty today, so nothing shows). Relja: wait for the client's short bios; then add them in sr/en/ru together with step S.
+- Original notes (kept for reference):
 - `page-agent.js`: hero tag "Profil agenta", breadcrumb (`common.home`, `nav.agents`, `common.breadcrumb`), "Pošaljite upit – {name}", form aria, field placeholders/aria (reuse `form.*`; "Kratka poruka..." needs a new `form.messageShort`), "Pošaljite Upit", "Portfolio", "Nekretnine – {name}", "Aktivni oglasi", contact buttons (call/email/WhatsApp… check the code), stats labels if any, 404 texts, `document.title`. `agent.stats.label` comes from data (check what it is).
 - `page-agents.js`: empty/error states.
 - Static HTML: only functional bits (breadcrumb, aria labels of lists). Section titles/intro/benefits = marketing → later.
 - Agent names never translated.
 
-### 3f — Forms (`forms.js`, `kontakt.html`, `oglasite-nekretninu.html`, inquiry forms on detail + agent pages)
+### 3f — Forms (`forms.js`, `kontakt.html`, `oglasite-nekretninu.html`, inquiry forms on detail + agent pages) — NEXT
+- The inquiry forms on the detail + agent pages already use `form.*` keys for fields + `form.send`; what is left there is `forms.js` (validation, alerts, success screen).
 - **Trap:** `forms.js` maps the selected `<option>` **text** to API values (`transactionTypeMap`, `propertyTypeMap`, `priceTypeMap`, `parseRooms('Garsonjera')`), and e-mails contain option texts. Before translating options: give every `<option>` an explicit `value="<current Serbian text>"` (or a key) and read `.value` in `forms.js`, so the submitted data and the e-mails stay Serbian while only the label is translated. Check every select: og-namena, og-tip, og-grad, og-opstina, og-sobe, og-sprat, og-grejanje, og-pregovaranje, k-tema.
 - City/district options in og-grad / og-opstina are proper nouns — don't translate (only "Odaberite...").
 - Labels, placeholders, required-field messages, checkboxes (features: lift, parking…), submit buttons, success screens ("Hvala vam…", "Nazad na početnu"), error alerts (`showAlert`), 429 message (use `errors.RATE_LIMIT_EXCEEDED`), validation messages.

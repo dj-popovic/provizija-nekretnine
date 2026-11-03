@@ -19,6 +19,30 @@ export function normalizeStringOr(value: unknown, fallback: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Phone normalization
+// ---------------------------------------------------------------------------
+
+/**
+ * Brings a Serbian phone number to one international format without spaces.
+ * Examples: "0691822652" → "+381691822652", "00381 60 551 1106" → "+381605511106",
+ * "381605511106" → "+381605511106", "+381605511106" stays.
+ * Anything it doesn't recognize is returned trimmed, as written.
+ */
+export function normalizePhone(value: unknown): string | undefined {
+  const trimmed = normalizeString(value);
+  if (!trimmed) return undefined;
+
+  const compact = trimmed.replace(/[\s\-/.()]/g, "");
+  if (!/^\+?\d{6,}$/.test(compact)) return trimmed;
+
+  if (compact.startsWith("+")) return compact;
+  if (compact.startsWith("00")) return "+" + compact.slice(2);
+  if (compact.startsWith("381")) return "+" + compact;
+  if (compact.startsWith("0")) return "+381" + compact.slice(1);
+  return trimmed;
+}
+
+// ---------------------------------------------------------------------------
 // Slug generation
 // ---------------------------------------------------------------------------
 

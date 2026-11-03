@@ -374,7 +374,7 @@ The core agent relationship is XML-driven, while some additional fields may be e
 
 - `name: string`
 - `email: string | null`
-- `phone: string | null`
+- `phone: string | null` — normalized to one international format without spaces: a local number `0691822652` becomes `+381691822652`, `00381…` / `381…` become `+381…`; any other shape is kept as written (trimmed)
 
 ### Local enrichment fields
 
