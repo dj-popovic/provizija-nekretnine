@@ -7,6 +7,7 @@
 
 import { config } from "../../config/index.js";
 import { sendEmail } from "../shared/email.js";
+import { parseVisitorLang, visitorLangRow, type VisitorLang } from "./lang.js";
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -19,6 +20,7 @@ interface ContactPayload {
   email: string;
   subject: string;
   message: string;
+  lang: VisitorLang | null;
 }
 
 interface ValidationError {
@@ -58,11 +60,12 @@ export function validateContactPayload(body: unknown): {
   else if (subject.length > 200) errors.push({ field: "subject", message: "Subject is too long." });
   if (!message) errors.push({ field: "message", message: "Message is required." });
   else if (message.length > 5000) errors.push({ field: "message", message: "Message is too long." });
+  const lang = parseVisitorLang(b.lang, errors);
 
   if (errors.length > 0) return { data: null, errors };
 
   return {
-    data: { firstName, lastName, phone, email, subject, message },
+    data: { firstName, lastName, phone, email, subject, message, lang },
     errors: [],
   };
 }
@@ -71,7 +74,7 @@ export function validateContactPayload(body: unknown): {
 // Email composition
 // ---------------------------------------------------------------------------
 
-function composeContactEmail(data: ContactPayload): { subject: string; html: string } {
+export function composeContactEmail(data: ContactPayload): { subject: string; html: string } {
   const subject = `Nova poruka sa sajta: ${data.subject}`;
 
   const html = `
@@ -93,6 +96,7 @@ function composeContactEmail(data: ContactPayload): { subject: string; html: str
         <td style="padding: 8px 12px; font-weight: bold; border-bottom: 1px solid #eee;">Email</td>
         <td style="padding: 8px 12px; border-bottom: 1px solid #eee;">${escapeHtml(data.email)}</td>
       </tr>
+      ${visitorLangRow(data.lang)}
       <tr>
         <td style="padding: 8px 12px; font-weight: bold; border-bottom: 1px solid #eee;">Tema</td>
         <td style="padding: 8px 12px; border-bottom: 1px solid #eee;">${escapeHtml(data.subject)}</td>

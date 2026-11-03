@@ -1042,8 +1042,9 @@ None.
   "lastName": "Opacic",
   "phone": "+38160111222",
   "email": "relja@example.com",
-  "subject": "Kupovina stana",
-  "message": "Zanima me vise informacija o dostupnim stanovima."
+  "subject": "Kupovina nekretnine",
+  "message": "Zanima me vise informacija o dostupnim stanovima.",
+  "lang": "en"
 }
 ```
 
@@ -1077,6 +1078,8 @@ None.
 
 - This endpoint should use minimal MVP payload matching the actual contact form.
 - Validation should cover required/optional rules and basic format expectations.
+- `subject` is the Serbian text of the chosen topic (the option value stays Serbian in every site language).
+- Optional `lang` (`"sr"` | `"en"` | `"ru"`): the site language of the visitor. The e-mail stays Serbian and gets a "Jezik posetioca: srpski / engleski / ruski" row. Any other value → `400` (`details[].field = "lang"`); missing → no row.
 
 ---
 
@@ -1102,7 +1105,8 @@ None.
   "fullName": "Relja Opacic",
   "phone": "+38160111222",
   "email": "relja@example.com",
-  "message": "Zanima me da li je nekretnina jos uvek dostupna."
+  "message": "Zanima me da li je nekretnina jos uvek dostupna.",
+  "lang": "ru"
 }
 ```
 
@@ -1137,6 +1141,7 @@ None.
 - The property reference must not come from free text.
 - The endpoint should receive a clear property reference such as `propertyId`.
 - This endpoint uses minimal MVP payload matching the actual property inquiry form.
+- Optional `lang` (`"sr"` | `"en"` | `"ru"`): the site language of the visitor. The e-mail stays Serbian and gets a "Jezik posetioca: srpski / engleski / ruski" row. Any other value → `400` (`details[].field = "lang"`); missing → no row.
 
 ---
 
@@ -1162,7 +1167,8 @@ None.
   "fullName": "Relja Opacic",
   "phone": "+38160111222",
   "email": "relja@example.com",
-  "message": "Zelim da vas kontaktiram u vezi sa nekretninama koje vodite."
+  "message": "Zelim da vas kontaktiram u vezi sa nekretninama koje vodite.",
+  "lang": "sr"
 }
 ```
 
@@ -1197,6 +1203,7 @@ None.
 - The agent reference must not come from free text.
 - The endpoint should receive the actual agent identity field `agentId`.
 - This endpoint uses minimal MVP payload matching the actual agent inquiry form.
+- Optional `lang` (`"sr"` | `"en"` | `"ru"`): the site language of the visitor. The e-mail stays Serbian and gets a "Jezik posetioca: srpski / engleski / ruski" row. Any other value → `400` (`details[].field = "lang"`); missing → no row.
 
 ---
 
@@ -1224,8 +1231,8 @@ None.
   "district": "Grbavica",
   "address": "Primer adrese 12",
   "area": 64,
-  "rooms": 3,
-  "floor": 2,
+  "rooms": "3 sobe",
+  "floor": "2. sprat",
   "heating": "Centralno",
   "yearBuilt": 2018,
   "features": [
@@ -1239,7 +1246,8 @@ None.
   "description": "Stan je renoviran i odmah useljiv.",
   "fullName": "Relja Opacic",
   "phone": "+38160111222",
-  "email": "relja@example.com"
+  "email": "relja@example.com",
+  "lang": "en"
 }
 ```
 
@@ -1264,6 +1272,19 @@ Supported MVP payload fields:
 - `fullName`
 - `phone`
 - `email`
+- `lang`
+
+### Field values
+
+- `transactionType`: `sale` | `rent`
+- `propertyType`: `apartment` | `house` | `commercial` | `land` | `garage` | `other`
+- `priceType`: `fixed` | `negotiable` | `urgent`
+- `features`: array of `lift` | `parking` | `terrace` | `pool` | `yard` | `airConditioning` | `internet` | `alarm` (duplicates are dropped)
+- Any other value of these four → `400` with that field in `details`.
+- `rooms` (required, ≤ 50 chars) and `floor` (optional, ≤ 50 chars) are the **Serbian text** of the chosen option, e.g. `"Garsonjera"`, `"5+ soba"`, `"Prizemlje"`, `"Poslednji sprat"` — like `heating`. (They were numbers before 2026-11-03: a studio could not be sent and the floor never reached the e-mail.)
+- `area`, `expectedPrice` (required) and `yearBuilt` (optional) are numbers.
+- Optional `lang` (`"sr"` | `"en"` | `"ru"`): the site language of the visitor. The e-mail stays Serbian and gets a "Jezik posetioca: srpski / engleski / ruski" row. Any other value → `400` (`details[].field = "lang"`); missing → no row.
+- The e-mail to the agency shows Serbian labels for the keys ("Prodaja", "Stan", "Po dogovoru", "Terasa, Klima").
 
 ### Required fields
 
@@ -1289,6 +1310,7 @@ Optional:
 - `heating`
 - `yearBuilt`
 - `features`
+- `lang`
 
 ### Success response
 

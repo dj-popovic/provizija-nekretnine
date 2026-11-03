@@ -9,6 +9,7 @@
 import { config } from "../../config/index.js";
 import { getProperties, getAgents } from "../shared/cache.js";
 import { sendEmail } from "../shared/email.js";
+import { parseVisitorLang, visitorLangRow, type VisitorLang } from "./lang.js";
 
 // ---------------------------------------------------------------------------
 // Validation
@@ -20,6 +21,7 @@ interface PropertyInquiryPayload {
   phone: string;
   email: string;
   message: string;
+  lang: VisitorLang | null;
 }
 
 interface ValidationError {
@@ -56,11 +58,12 @@ export function validatePropertyInquiryPayload(body: unknown): {
   else if (!email.includes("@")) errors.push({ field: "email", message: "Email is not valid." });
   if (!message) errors.push({ field: "message", message: "Message is required." });
   else if (message.length > 5000) errors.push({ field: "message", message: "Message is too long." });
+  const lang = parseVisitorLang(b.lang, errors);
 
   if (errors.length > 0) return { data: null, errors };
 
   return {
-    data: { propertyId, fullName, phone, email, message },
+    data: { propertyId, fullName, phone, email, message, lang },
     errors: [],
   };
 }
@@ -90,7 +93,7 @@ interface PropertyContext {
   url: string;
 }
 
-function composePropertyInquiryEmail(
+export function composePropertyInquiryEmail(
   data: PropertyInquiryPayload,
   property: PropertyContext,
 ): { subject: string; html: string } {
@@ -140,6 +143,7 @@ function composePropertyInquiryEmail(
         <td style="padding: 8px 12px; font-weight: bold; border-bottom: 1px solid #eee;">Email</td>
         <td style="padding: 8px 12px; border-bottom: 1px solid #eee;">${escapeHtml(data.email)}</td>
       </tr>
+      ${visitorLangRow(data.lang)}
       <tr>
         <td style="padding: 8px 12px; font-weight: bold; vertical-align: top;">Poruka</td>
         <td style="padding: 8px 12px;">${escapeHtml(data.message).replace(/\n/g, "<br>")}</td>

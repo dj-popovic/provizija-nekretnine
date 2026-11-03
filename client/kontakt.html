@@ -84,8 +84,8 @@
             <div class="page-hero-tag">Dostupni smo za vas</div>
             <h1 class="page-hero-title">Stupite u Kontakt<br>sa Nama</h1>
             <p class="page-hero-subtitle">Naš tim je tu da odgovori na sva vaša pitanja. Javite se – odgovorimo u roku od 2 sata.</p>
-            <nav class="breadcrumb-nav" aria-label="Breadcrumb">
-                <a href="index.html">Početna</a><span class="separator">/</span><span class="current">Kontakt</span>
+            <nav class="breadcrumb-nav" aria-label="Breadcrumb" data-i18n-attr="aria-label:common.breadcrumb">
+                <a href="index.html" data-i18n="common.home">Početna</a><span class="separator">/</span><span class="current" data-i18n="contact.breadcrumb">Kontakt</span>
             </nav>
         </div>
     </section>
@@ -102,61 +102,61 @@
                     <div class="kontakt-form-card">
                         <h2>Pošaljite nam poruku</h2>
                         <p>Ispunite formular i javićemo vam se u najkraćem mogućem roku.</p>
-                        <form id="contactForm" class="needs-validation" novalidate aria-label="Kontakt forma">
+                        <form id="contactForm" class="needs-validation" novalidate aria-label="Kontakt forma" data-i18n-attr="aria-label:contact.formLabel">
                             <div class="row g-0">
                                 <div class="col-md-6 pe-md-2">
                                     <div class="form-group-custom">
-                                        <label for="k-ime">Ime</label>
-                                        <input type="text" id="k-ime" class="form-control" placeholder="Vaše ime" required>
+                                        <label for="k-ime" data-i18n="form.firstName">Ime</label>
+                                        <input type="text" id="k-ime" name="firstName" class="form-control" placeholder="Vaše ime" required data-i18n-attr="placeholder:contact.firstNamePh">
                                     </div>
                                 </div>
                                 <div class="col-md-6 ps-md-2">
                                     <div class="form-group-custom">
-                                        <label for="k-prezime">Prezime</label>
-                                        <input type="text" id="k-prezime" class="form-control" placeholder="Vaše prezime" required>
+                                        <label for="k-prezime" data-i18n="form.lastName">Prezime</label>
+                                        <input type="text" id="k-prezime" name="lastName" class="form-control" placeholder="Vaše prezime" required data-i18n-attr="placeholder:contact.lastNamePh">
                                     </div>
                                 </div>
                                 <div class="col-md-6 pe-md-2">
                                     <div class="form-group-custom">
-                                        <label for="k-tel">Telefon</label>
-                                        <input type="tel" id="k-tel" class="form-control" placeholder="+381 6x xxx xxxx" required>
+                                        <label for="k-tel" data-i18n="form.phone">Telefon</label>
+                                        <input type="tel" id="k-tel" name="phone" class="form-control" placeholder="+381 6x xxx xxxx" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6 ps-md-2">
                                     <div class="form-group-custom">
-                                        <label for="k-email">Email</label>
-                                        <input type="email" id="k-email" class="form-control" placeholder="vas@email.com" required>
+                                        <label for="k-email" data-i18n="form.email">Email</label>
+                                        <input type="email" id="k-email" name="email" class="form-control" placeholder="vas@email.com" required data-i18n-attr="placeholder:form.emailExample">
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group-custom">
-                                        <label for="k-tema">Tema upita</label>
-                                        <select id="k-tema" class="form-select">
-                                            <option value="">Odaberite temu...</option>
-                                            <option>Kupovina nekretnine</option>
-                                            <option>Iznajmljivanje</option>
-                                            <option>Prodaja nekretnine</option>
-                                            <option>Procena vrednosti</option>
-                                            <option>Investicija</option>
-                                            <option>Ostalo</option>
+                                        <label for="k-tema" data-i18n="contact.topic">Tema upita</label>
+                                        <select id="k-tema" name="subject" class="form-select">
+                                            <option value="" data-i18n="contact.topicChoose">Odaberite temu...</option>
+                                            <option value="Kupovina nekretnine" data-i18n="contact.topics.buy">Kupovina nekretnine</option>
+                                            <option value="Iznajmljivanje" data-i18n="contact.topics.rent">Iznajmljivanje</option>
+                                            <option value="Prodaja nekretnine" data-i18n="contact.topics.sell">Prodaja nekretnine</option>
+                                            <option value="Procena vrednosti" data-i18n="contact.topics.valuation">Procena vrednosti</option>
+                                            <option value="Investicija" data-i18n="contact.topics.investment">Investicija</option>
+                                            <option value="Ostalo" data-i18n="form.other">Ostalo</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group-custom">
-                                        <label for="k-poruka">Poruka</label>
-                                        <textarea id="k-poruka" class="form-control" placeholder="Opišite vaš zahtev..." required></textarea>
+                                        <label for="k-poruka" data-i18n="form.message">Poruka</label>
+                                        <textarea id="k-poruka" name="message" class="form-control" placeholder="Opišite vaš zahtev..." required data-i18n-attr="placeholder:contact.messagePh"></textarea>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-check" style="margin-bottom:20px;">
                                         <input type="checkbox" class="form-check-input" id="gdpr" required style="accent-color:var(--accent);">
-                                        <label class="form-check-label" for="gdpr" style="font-size:13px;color:var(--text-light);">Slažem se sa <a href="#" style="color:var(--accent);">politikom privatnosti</a> i obradom mojih podataka u svrhu odgovora na upit.</label>
+                                        <label class="form-check-label" for="gdpr" style="font-size:13px;color:var(--text-light);" data-i18n-html="contact.consent">Slažem se sa <a href="#" style="color:var(--accent);">politikom privatnosti</a> i obradom mojih podataka u svrhu odgovora na upit.</label>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <button type="submit" class="btn-submit-full" style="font-size:16px;">
-                                        <i class="bi bi-send" aria-hidden="true"></i> Pošaljite Poruku
+                                        <i class="bi bi-send" aria-hidden="true"></i> <span data-i18n="contact.send">Pošaljite Poruku</span>
                                     </button>
                                 </div>
                             </div>
@@ -221,7 +221,7 @@
                     <div class="section-tag text-center">Kako do nas</div>
                     <h2 class="section-title text-center" style="margin-bottom:28px;">Naša Lokacija</h2>
                     <div class="map-container">
-                        <iframe title="Mapa – Vase Stajića 36, Novi Sad" src="https://maps.google.com/maps?q=Vase+Staji%C4%87a+36,+21000+Novi+Sad&amp;output=embed" 
+                        <iframe title="Mapa – Vase Stajića 36, Novi Sad" data-i18n-attr="title:contact.mapTitle" src="https://maps.google.com/maps?q=Vase+Staji%C4%87a+36,+21000+Novi+Sad&amp;output=embed" 
                         width="600" 
                         height="450" 
                         style="border:0;" 

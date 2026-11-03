@@ -4,7 +4,7 @@ Read this whole file before any i18n work. Sections: 0 status · 1 decisions · 
 
 ## 0. Status at a glance
 
-All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: the 3e commit ("i18n 3e: agenti…", after `0a490b4`).
+All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: the 3f commit ("i18n 3f: forme…", after `3d04dd9` = 3e).
 
 | Step | What | Status | Commit |
 |---|---|---|---|
@@ -15,8 +15,9 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 | 3c | Property detail page (specs, gallery, features, share, inquiry form fields, related, 404) | done | 95d0ae8 |
 | 3d | Home page — functional part (hero search, "view all", stats number format) | done | 9b23a12 |
 | 3e | Agents list + agent profile — functional part (+ agent phones normalized to `+381…` in the backend) | done | see git log |
-| 3f | Forms: kontakt, oglasite, inquiry forms (labels, options, validation, alerts) | **NEXT** | |
-| 5 | Backend cleanup + `lang` in forms + "Jezik posetioca" in e-mails | todo | |
+| 3f | Forms: kontakt, oglasite, inquiry forms + `lang` / "Jezik posetioca" in e-mails (moved here from 5) + form bug fixes | done | see git log |
+| 3g | O nama — functional part only (if any; most of it is marketing → S) | **NEXT** (check first) | |
+| 5 | Backend cleanup (legacy fields) | todo | |
 | 6 | Meta: `<title>` per page per language (+ descriptions with the static content) | todo | |
 | S | **Static marketing copy** on all pages | **waits for the client's final texts** | |
 | 7 | Machine translation of property descriptions + titles (Claude API) | **waits for the client's API key + model choice** | |
@@ -58,7 +59,7 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 **JS:**
 - `renderers.js`: every `PV.maps.*.toUi` = `i18n.labels('enum.*')` → pages using the maps are translated automatically. Formatters (`formatArea`, `formatLandArea`, `formatRooms`, `formatBathrooms`, `formatFloor`, `priceParts`, `formatPrice`, `formatNumber`) use the dictionaries. `propertyTitle(item)` (see decisions). `errorState(err)` takes the caught error: ApiError → its translated message, anything else → generic text. `PV.render.plural(n, one, few, many)` (Serbian words) still exists for old callers — don't use it in new code.
 - `api.js`: `ApiError.message` = `errors.<CODE>` from the dictionary (generic fallback); the server's English text is in `serverMessage`.
-- Pages translated: `page-properties.js`, `dropdown.js`, `page-property.js`, `page-home.js`, `page-agent.js`, `page-agents.js`, `scroll-top.js`, `script.js` (stats counter locale only).
+- Pages translated: `page-properties.js`, `dropdown.js`, `page-property.js`, `page-home.js`, `page-agent.js`, `page-agents.js`, `forms.js`, `scroll-top.js`, `script.js` (stats counter locale only).
 
 **Backend changes made for i18n:** list `propertyType` = key (was the Serbian label); heating `EG`/`Etažno` → `individual_central`, `Toplotne pumpe`/`Toplotna pumpa` → `heat_pump`. Contract + data-model docs updated. Step 3e: agent `phone` is normalized in `agent-extractor.ts` via `normalizePhone` (`shared/utils.ts`): `069…` → `+38169…`, `00381…`/`381…` → `+381…`, other shapes kept; data-model doc updated, 298 tests green.
 
@@ -98,7 +99,16 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 - Static HTML: only functional bits (breadcrumb, aria labels of lists). Section titles/intro/benefits = marketing → later.
 - Agent names never translated.
 
-### 3f — Forms (`forms.js`, `kontakt.html`, `oglasite-nekretninu.html`, inquiry forms on detail + agent pages) — NEXT
+### 3f — Forms — DONE
+- Every `<option>` has an explicit value: og-namena / og-tip / og-pregovaranje = the API keys; og-sobe / og-sprat / og-grejanje / k-tema / "Ostalo" = the Serbian text. `forms.js` reads `.value`; only labels are translated → submitted data + e-mails stay Serbian. City / district options are proper nouns: `lang="sr"`, not translated.
+- All inputs got `name` = the API field, so `details[].field` errors land under the right input. The English `details[].message` is never shown: `form.fieldError.required / tooLong / invalid` by kind.
+- Consent checkbox is now enforced in JS (`form.consentRequired`). 429 → `form.rateLimit` (keeps the old Serbian text).
+- Backend: optional `lang` (sr|en|ru, else 400) on all 4 forms → "Jezik posetioca: srpski/engleski/ruski" row (`forms/lang.ts`). Advertise: transactionType / propertyType / priceType / features accept only known keys and the e-mail shows Serbian labels (it showed "sale", "apartment", "negotiable", "airConditioning" before); `rooms` + `floor` are now the Serbian option text (a studio couldn't be sent — rooms 0 was rejected; the floor was a string vs number and silently dropped). Contract updated. Tests: `forms/__tests__/forms.test.ts`, 307 total.
+- Verified with a scratch jsdom submit test (POSTs captured, no e-mail sent) + the captured bodies run through the real validators/composers.
+- Marketing copy on kontakt / oglasite (hero, "Pošaljite nam poruku" + intro, info cards incl. "Otvori na mapi", "Zašto prodati" benefits) → step S.
+- The page test flags "I agree to the" in English: the Serbian-word regex matches "I" as the word "i" — false positive.
+- **Open (ask Relja):** the property inquiry form says "Poruka (opciono)" but the backend requires `message` (same for the agent form) → empty message = 400 under the field.
+- Original notes (kept for reference):
 - The inquiry forms on the detail + agent pages already use `form.*` keys for fields + `form.send`; what is left there is `forms.js` (validation, alerts, success screen).
 - **Trap:** `forms.js` maps the selected `<option>` **text** to API values (`transactionTypeMap`, `propertyTypeMap`, `priceTypeMap`, `parseRooms('Garsonjera')`), and e-mails contain option texts. Before translating options: give every `<option>` an explicit `value="<current Serbian text>"` (or a key) and read `.value` in `forms.js`, so the submitted data and the e-mails stay Serbian while only the label is translated. Check every select: og-namena, og-tip, og-grad, og-opstina, og-sobe, og-sprat, og-grejanje, og-pregovaranje, k-tema.
 - City/district options in og-grad / og-opstina are proper nouns — don't translate (only "Odaberite...").
@@ -107,7 +117,7 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 - The long descriptive texts on Oglasite/Kontakt (benefits, intro) = marketing → later.
 
 ### 5 — Backend cleanup
-- Forms accept an optional `lang` (`sr|en|ru`); the frontend sends `PV.i18n.lang`; the agency e-mail gets a row "Jezik posetioca: srpski / engleski / ruski". Validate strictly, tests, update `docs/api-contract.md`.
+- (`lang` in the forms + "Jezik posetioca" was done in 3f.)
 - Remove legacy Serbian fields once nothing reads them: list `highlights`; detail flat `propertyType` (label), `heating` (joined string), `furnished` label, raw `floor`, `elevator`, `registrationStatus`. `page-property.js` still falls back to `p.propertyType` in the spec "Tip" row — switch it to the key first. Update contract + tests; bump nothing unless the internal model changes (`DATASET_SCHEMA_VERSION` only for Property/Agent model changes).
 
 ### 6 — Meta
@@ -119,6 +129,7 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 - Question to raise then: the FAQ says "pružamo usluge na engleskom jeziku" — now that the site is also Russian, maybe "na engleskom i ruskom".
 
 ### 7 — Machine translation (needs the client's API key + model choice; ask Relja first)
+- **Also (Relja, 2026-11-03):** free text typed into the forms in en/ru (message, description, address) should reach the agency in Serbian too: with the same API key, translate it in the form handler and put the Serbian translation under the original in the e-mail ("Prevod: …"); on failure send the original only. Dropdowns / checkboxes already arrive in Serbian.
 - New backend module: after each sync, translate only new/changed descriptions AND titles (keyed by property id + text hash) into en/ru; cache file next to `properties-cache.json`; never block or fail the sync; on failure keep Serbian; `/api/status` shows pending/failed counts.
 - Prompt rules: keep place names / streets / agent names exactly as written; titles in ALL CAPS ("RUMA, VOGANJ, FAMILY HOUSE – RANCH, 196 M²"); natural real-estate tone.
 - Detail API exposes `translations`; the frontend prefers the translated title/description, falls back to the generated title / Serbian description + note.

@@ -305,6 +305,29 @@ PV.i18n.add('sr', {
     messageOptional: 'Poruka (opciono)...',
     messageShort: 'Kratka poruka...',
     send: 'Pošaljite Upit',
+    // forms.js
+    sending: 'Slanje...',
+    required: {
+      contact: 'Molimo popunite sva obavezna polja.',
+      inquiry: 'Molimo popunite ime, telefon i email.',
+      advertise: 'Molimo popunite sva obavezna polja (površina, cena, opis, kontakt podaci).',
+    },
+    consentRequired: 'Potrebna je vaša saglasnost sa politikom privatnosti.',
+    rateLimit: 'Previše zahteva. Pokušajte ponovo za nekoliko minuta.',
+    fieldError: {
+      required: 'Ovo polje je obavezno.',
+      tooLong: 'Unos je predugačak.',
+      invalid: 'Neispravan unos.',
+    },
+    success: {
+      contactTitle: 'Poruka je poslata!',
+      contactText: 'Hvala vam na poruci. Javićemo vam se u najkraćem roku.',
+      inquiryTitle: 'Upit je poslat!',
+      inquiryText: 'Hvala vam. Javićemo vam se u najkraćem roku.',
+      advertiseTitle: 'Oglas je poslat!',
+      advertiseText: 'Hvala vam. Naš tim će pregledati vaš oglas i javiti vam se u roku od 24 sata.',
+      backHome: 'Nazad na početnu',
+    },
   },
 
   // By API error code (PV.ApiError); unknown codes get "generic"

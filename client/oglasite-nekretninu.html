@@ -65,8 +65,8 @@
             <div class="page-hero-tag">Prodajte ili iznajmite</div>
             <h1 class="page-hero-title">Oglasite Svoju<br>Nekretninu</h1>
             <p class="page-hero-subtitle">Besplatna procena, profesionalna fotografija i ciljani marketing. Prodajte brže i za bolju cenu.</p>
-            <nav class="breadcrumb-nav" aria-label="Breadcrumb">
-                <a href="index.html">Početna</a><span class="separator">/</span><span class="current">Oglasite Nekretninu</span>
+            <nav class="breadcrumb-nav" aria-label="Breadcrumb" data-i18n-attr="aria-label:common.breadcrumb">
+                <a href="index.html" data-i18n="common.home">Početna</a><span class="separator">/</span><span class="current" data-i18n="advertise.breadcrumb">Oglasite Nekretninu</span>
             </nav>
         </div>
     </section>
@@ -84,28 +84,28 @@
                         <!-- Step 1 -->
                         <div class="form-step-header">
                             <div class="form-step-number">1</div>
-                            <h3>Tip i namena nekretnine</h3>
+                            <h3 data-i18n="advertise.step1">Tip i namena nekretnine</h3>
                         </div>
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <div class="form-group-custom">
-                                    <label for="og-namena">Šta želite?</label>
-                                    <select id="og-namena" class="form-select">
-                                        <option>Prodaja</option>
-                                        <option>Izdavanje</option>
+                                    <label for="og-namena" data-i18n="advertise.want">Šta želite?</label>
+                                    <select id="og-namena" name="transactionType" class="form-select">
+                                        <option value="sale" data-i18n="advertise.opt.sale">Prodaja</option>
+                                        <option value="rent" data-i18n="advertise.opt.rent">Izdavanje</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
-                                    <label for="og-tip">Tip nekretnine</label>
-                                    <select id="og-tip" class="form-select">
-                                        <option>Stan</option>
-                                        <option>Kuća</option>
-                                        <option>Poslovni prostor</option>
-                                        <option>Zemljište</option>
-                                        <option>Garaža</option>
-                                        <option>Ostalo</option>
+                                    <label for="og-tip" data-i18n="advertise.type">Tip nekretnine</label>
+                                    <select id="og-tip" name="propertyType" class="form-select">
+                                        <option value="apartment" data-i18n="advertise.types.apartment">Stan</option>
+                                        <option value="house" data-i18n="advertise.types.house">Kuća</option>
+                                        <option value="commercial" data-i18n="advertise.types.commercial">Poslovni prostor</option>
+                                        <option value="land" data-i18n="advertise.types.land">Zemljište</option>
+                                        <option value="garage" data-i18n="advertise.types.garage">Garaža</option>
+                                        <option value="other" data-i18n="form.other">Ostalo</option>
                                     </select>
                                 </div>
                             </div>
@@ -114,30 +114,30 @@
                         <!-- Step 2 -->
                         <div class="form-step-header">
                             <div class="form-step-number">2</div>
-                            <h3>Lokacija nekretnine</h3>
+                            <h3 data-i18n="advertise.step2">Lokacija nekretnine</h3>
                         </div>
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <div class="form-group-custom">
-                                    <label for="og-grad">Grad</label>
-                                    <select id="og-grad" class="form-select">
-                                        <option>Novi Sad</option><option>Petrovaradin</option><option>Sremska Kamenica</option><option>Futog</option><option>Veternik</option><option>Ostalo</option>
+                                    <label for="og-grad" data-i18n="advertise.city">Grad</label>
+                                    <select id="og-grad" name="city" class="form-select">
+                                        <option lang="sr">Novi Sad</option><option lang="sr">Petrovaradin</option><option lang="sr">Sremska Kamenica</option><option lang="sr">Futog</option><option lang="sr">Veternik</option><option value="Ostalo" data-i18n="form.other">Ostalo</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
-                                    <label for="og-opstina">Opština / Kvart</label>
-                                    <select id="og-opstina" class="form-select">
-                                        <option value="">Odaberite...</option>
-                                        <option>Centar</option><option>Stari Grad</option><option>Liman</option><option>Grbavica</option><option>Adice</option><option>Detelinara</option><option>Novo Naselje</option><option>Sajam</option><option>Telep</option><option>Podbara</option><option>Salajka</option><option>Rotkvarija</option><option>Bistrica</option><option>Klisa</option><option>Ostalo</option>
+                                    <label for="og-opstina" data-i18n="advertise.district">Opština / Kvart</label>
+                                    <select id="og-opstina" name="district" class="form-select">
+                                        <option value="" data-i18n="form.choose">Odaberite...</option>
+                                        <option lang="sr">Centar</option><option lang="sr">Stari Grad</option><option lang="sr">Liman</option><option lang="sr">Grbavica</option><option lang="sr">Adice</option><option lang="sr">Detelinara</option><option lang="sr">Novo Naselje</option><option lang="sr">Sajam</option><option lang="sr">Telep</option><option lang="sr">Podbara</option><option lang="sr">Salajka</option><option lang="sr">Rotkvarija</option><option lang="sr">Bistrica</option><option lang="sr">Klisa</option><option value="Ostalo" data-i18n="form.other">Ostalo</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group-custom">
-                                    <label for="og-adresa">Ulica i broj (opciono)</label>
-                                    <input type="text" id="og-adresa" class="form-control" placeholder="Npr. Bulevar oslobođenja 10">
+                                    <label for="og-adresa" data-i18n="advertise.address">Ulica i broj (opciono)</label>
+                                    <input type="text" id="og-adresa" name="address" class="form-control" placeholder="Npr. Bulevar oslobođenja 10" data-i18n-attr="placeholder:advertise.addressPh">
                                 </div>
                             </div>
                         </div>
@@ -145,57 +145,57 @@
                         <!-- Step 3 -->
                         <div class="form-step-header">
                             <div class="form-step-number">3</div>
-                            <h3>Karakteristike nekretnine</h3>
+                            <h3 data-i18n="advertise.step3">Karakteristike nekretnine</h3>
                         </div>
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <div class="form-group-custom">
-                                    <label for="og-povrsina">Površina (m²)</label>
-                                    <input type="number" id="og-povrsina" class="form-control" placeholder="Npr. 75" min="1">
+                                    <label for="og-povrsina" data-i18n="advertise.area">Površina (m²)</label>
+                                    <input type="number" id="og-povrsina" name="area" class="form-control" placeholder="Npr. 75" min="1" data-i18n-attr="placeholder:advertise.areaPh">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group-custom">
-                                    <label for="og-sobe">Broj soba</label>
-                                    <select id="og-sobe" class="form-select">
-                                        <option>Garsonjera</option><option>1 soba</option><option>2 sobe</option><option>3 sobe</option><option>4 sobe</option><option>5+ soba</option>
+                                    <label for="og-sobe" data-i18n="advertise.rooms">Broj soba</label>
+                                    <select id="og-sobe" name="rooms" class="form-select">
+                                        <option value="Garsonjera" data-i18n="advertise.roomOpt.studio">Garsonjera</option><option value="1 soba" data-i18n="advertise.roomOpt.r1">1 soba</option><option value="2 sobe" data-i18n="advertise.roomOpt.r2">2 sobe</option><option value="3 sobe" data-i18n="advertise.roomOpt.r3">3 sobe</option><option value="4 sobe" data-i18n="advertise.roomOpt.r4">4 sobe</option><option value="5+ soba" data-i18n="advertise.roomOpt.r5plus">5+ soba</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group-custom">
-                                    <label for="og-sprat">Sprat</label>
-                                    <select id="og-sprat" class="form-select">
-                                        <option>Prizemlje</option><option>1. sprat</option><option>2. sprat</option><option>3. sprat</option><option>4. sprat</option><option>5+ sprat</option><option>Poslednji sprat</option>
+                                    <label for="og-sprat" data-i18n="advertise.floor">Sprat</label>
+                                    <select id="og-sprat" name="floor" class="form-select">
+                                        <option value="Prizemlje" data-i18n="advertise.floorOpt.ground">Prizemlje</option><option value="1. sprat" data-i18n="advertise.floorOpt.f1">1. sprat</option><option value="2. sprat" data-i18n="advertise.floorOpt.f2">2. sprat</option><option value="3. sprat" data-i18n="advertise.floorOpt.f3">3. sprat</option><option value="4. sprat" data-i18n="advertise.floorOpt.f4">4. sprat</option><option value="5+ sprat" data-i18n="advertise.floorOpt.f5plus">5+ sprat</option><option value="Poslednji sprat" data-i18n="advertise.floorOpt.top">Poslednji sprat</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
-                                    <label for="og-grejanje">Grejanje</label>
-                                    <select id="og-grejanje" class="form-select">
-                                        <option>Centralno</option><option>Podno grejanje</option><option>Gas</option><option>Struja</option><option>TA peć</option><option>Klima</option>
+                                    <label for="og-grejanje" data-i18n="advertise.heating">Grejanje</label>
+                                    <select id="og-grejanje" name="heating" class="form-select">
+                                        <option value="Centralno" data-i18n="advertise.heatingOpt.central">Centralno</option><option value="Podno grejanje" data-i18n="advertise.heatingOpt.underfloor">Podno grejanje</option><option value="Gas" data-i18n="advertise.heatingOpt.gas">Gas</option><option value="Struja" data-i18n="advertise.heatingOpt.electric">Struja</option><option value="TA peć" data-i18n="advertise.heatingOpt.storage">TA peć</option><option value="Klima" data-i18n="advertise.heatingOpt.ac">Klima</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
-                                    <label for="og-godina">Godina izgradnje</label>
-                                    <input type="number" id="og-godina" class="form-control" placeholder="Npr. 2015" min="1900" max="2030">
+                                    <label for="og-godina" data-i18n="advertise.year">Godina izgradnje</label>
+                                    <input type="number" id="og-godina" name="yearBuilt" class="form-control" placeholder="Npr. 2015" min="1900" max="2030" data-i18n-attr="placeholder:advertise.yearPh">
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group-custom">
-                                    <label>Dodatne karakteristike</label>
+                                    <label data-i18n="advertise.features">Dodatne karakteristike</label>
                                     <div class="row g-2" style="margin-top:4px;">
-                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-lift" style="accent-color:var(--accent);"><label class="form-check-label" for="f-lift" style="font-size:14px;">Lift</label></div></div>
-                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-parking" style="accent-color:var(--accent);"><label class="form-check-label" for="f-parking" style="font-size:14px;">Parking</label></div></div>
-                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-terasa" style="accent-color:var(--accent);"><label class="form-check-label" for="f-terasa" style="font-size:14px;">Terasa</label></div></div>
-                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-bazen" style="accent-color:var(--accent);"><label class="form-check-label" for="f-bazen" style="font-size:14px;">Bazen</label></div></div>
-                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-dvor" style="accent-color:var(--accent);"><label class="form-check-label" for="f-dvor" style="font-size:14px;">Dvorište</label></div></div>
-                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-klima" style="accent-color:var(--accent);"><label class="form-check-label" for="f-klima" style="font-size:14px;">Klima</label></div></div>
-                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-internet" style="accent-color:var(--accent);"><label class="form-check-label" for="f-internet" style="font-size:14px;">Internet</label></div></div>
-                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-alarm" style="accent-color:var(--accent);"><label class="form-check-label" for="f-alarm" style="font-size:14px;">Alarm</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-lift" style="accent-color:var(--accent);"><label class="form-check-label" for="f-lift" style="font-size:14px;" data-i18n="advertise.feature.lift">Lift</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-parking" style="accent-color:var(--accent);"><label class="form-check-label" for="f-parking" style="font-size:14px;" data-i18n="advertise.feature.parking">Parking</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-terasa" style="accent-color:var(--accent);"><label class="form-check-label" for="f-terasa" style="font-size:14px;" data-i18n="advertise.feature.terrace">Terasa</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-bazen" style="accent-color:var(--accent);"><label class="form-check-label" for="f-bazen" style="font-size:14px;" data-i18n="advertise.feature.pool">Bazen</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-dvor" style="accent-color:var(--accent);"><label class="form-check-label" for="f-dvor" style="font-size:14px;" data-i18n="advertise.feature.yard">Dvorište</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-klima" style="accent-color:var(--accent);"><label class="form-check-label" for="f-klima" style="font-size:14px;" data-i18n="advertise.feature.ac">Klima</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-internet" style="accent-color:var(--accent);"><label class="form-check-label" for="f-internet" style="font-size:14px;" data-i18n="advertise.feature.internet">Internet</label></div></div>
+                                        <div class="col-6 col-md-3"><div class="form-check"><input type="checkbox" class="form-check-input" id="f-alarm" style="accent-color:var(--accent);"><label class="form-check-label" for="f-alarm" style="font-size:14px;" data-i18n="advertise.feature.alarm">Alarm</label></div></div>
                                     </div>
                                 </div>
                             </div>
@@ -204,27 +204,27 @@
                         <!-- Step 4 -->
                         <div class="form-step-header">
                             <div class="form-step-number">4</div>
-                            <h3>Cena i opis</h3>
+                            <h3 data-i18n="advertise.step4">Cena i opis</h3>
                         </div>
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <div class="form-group-custom">
-                                    <label for="og-cena">Očekivana cena (€)</label>
-                                    <input type="number" id="og-cena" class="form-control" placeholder="Npr. 120000" min="0">
+                                    <label for="og-cena" data-i18n="advertise.price">Očekivana cena (€)</label>
+                                    <input type="number" id="og-cena" name="expectedPrice" class="form-control" placeholder="Npr. 120000" min="0" data-i18n-attr="placeholder:advertise.pricePh">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
-                                    <label for="og-pregovaranje">Cena je</label>
-                                    <select id="og-pregovaranje" class="form-select">
-                                        <option>Fiksna</option><option>Po dogovoru</option><option>Hitna prodaja</option>
+                                    <label for="og-pregovaranje" data-i18n="advertise.priceIs">Cena je</label>
+                                    <select id="og-pregovaranje" name="priceType" class="form-select">
+                                        <option value="fixed" data-i18n="advertise.priceOpt.fixed">Fiksna</option><option value="negotiable" data-i18n="advertise.priceOpt.negotiable">Po dogovoru</option><option value="urgent" data-i18n="advertise.priceOpt.urgent">Hitna prodaja</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group-custom">
-                                    <label for="og-opis">Opis nekretnine</label>
-                                    <textarea id="og-opis" class="form-control" style="height:120px;" placeholder="Opišite vašu nekretninu, posebnosti, renovacije, karakteristike lokacije..."></textarea>
+                                    <label for="og-opis" data-i18n="advertise.description">Opis nekretnine</label>
+                                    <textarea id="og-opis" name="description" class="form-control" style="height:120px;" data-i18n-attr="placeholder:advertise.descriptionPh" placeholder="Opišite vašu nekretninu, posebnosti, renovacije, karakteristike lokacije..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -232,39 +232,39 @@
                         <!-- Step 5 -->
                         <div class="form-step-header">
                             <div class="form-step-number">5</div>
-                            <h3>Vaši kontakt podaci</h3>
+                            <h3 data-i18n="advertise.step5">Vaši kontakt podaci</h3>
                         </div>
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-group-custom">
-                                    <label for="og-ime">Ime i prezime</label>
-                                    <input type="text" id="og-ime" class="form-control" placeholder="Vaše ime i prezime" required>
+                                    <label for="og-ime" data-i18n="form.fullName">Ime i prezime</label>
+                                    <input type="text" id="og-ime" name="fullName" class="form-control" placeholder="Vaše ime i prezime" required data-i18n-attr="placeholder:advertise.fullNamePh">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group-custom">
-                                    <label for="og-tel">Telefon</label>
-                                    <input type="tel" id="og-tel" class="form-control" placeholder="+381 6x xxx xxxx" required>
+                                    <label for="og-tel" data-i18n="form.phone">Telefon</label>
+                                    <input type="tel" id="og-tel" name="phone" class="form-control" placeholder="+381 6x xxx xxxx" required>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group-custom">
-                                    <label for="og-email">Email adresa</label>
-                                    <input type="email" id="og-email" class="form-control" placeholder="vas@email.com">
+                                    <label for="og-email" data-i18n="form.emailPlaceholder">Email adresa</label>
+                                    <input type="email" id="og-email" name="email" class="form-control" placeholder="vas@email.com" data-i18n-attr="placeholder:form.emailExample">
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-check" style="margin-bottom:20px;">
                                     <input type="checkbox" class="form-check-input" id="og-gdpr" required style="accent-color:var(--accent);">
-                                    <label class="form-check-label" for="og-gdpr" style="font-size:13px;color:var(--text-light);">Slažem se sa <a href="#" style="color:var(--accent);">politikom privatnosti</a> i obradom podataka.</label>
+                                    <label class="form-check-label" for="og-gdpr" style="font-size:13px;color:var(--text-light);" data-i18n-html="advertise.consent">Slažem se sa <a href="#" style="color:var(--accent);">politikom privatnosti</a> i obradom podataka.</label>
                                 </div>
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn-submit-full" style="font-size:16px;padding:18px;">
-                                    <i class="bi bi-send" aria-hidden="true"></i> Pošaljite Oglas na Procenu
+                                    <i class="bi bi-send" aria-hidden="true"></i> <span data-i18n="advertise.send">Pošaljite Oglas na Procenu</span>
                                 </button>
                                 <p style="font-size:13px;color:var(--text-light);text-align:center;margin-top:12px;">
-                                    <i class="bi bi-clock" aria-hidden="true"></i> Javićemo vam se u roku od 24 sata
+                                    <i class="bi bi-clock" aria-hidden="true"></i> <span data-i18n="advertise.replyTime">Javićemo vam se u roku od 24 sata</span>
                                 </p>
                             </div>
                         </div>

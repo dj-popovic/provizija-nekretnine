@@ -6,13 +6,15 @@ window.PV = window.PV || {};
 (function () {
   'use strict';
 
+  var t = PV.i18n.t;
+
   // --- Shared helpers ---
 
   function setLoading(btn, loading) {
     if (loading) {
       btn.disabled = true;
       btn.dataset.originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="bi bi-hourglass-split" aria-hidden="true"></i> Slanje...';
+      btn.innerHTML = '<i class="bi bi-hourglass-split" aria-hidden="true"></i> ' + t('form.sending');
     } else {
       btn.disabled = false;
       btn.innerHTML = btn.dataset.originalText || btn.innerHTML;
@@ -35,17 +37,25 @@ window.PV = window.PV || {};
     alerts.forEach(function (a) { a.remove(); });
   }
 
+  // The API's field messages are English ("Email is not valid.") — show our own text by kind
+  function fieldMessage(apiMessage) {
+    var msg = String(apiMessage || '');
+    if (/required/i.test(msg)) return t('form.fieldError.required');
+    if (/too long/i.test(msg)) return t('form.fieldError.tooLong');
+    return t('form.fieldError.invalid');
+  }
+
   function showFieldErrors(form, details) {
     if (!details || !details.length) return;
 
-    // Map API field names to form input selectors
+    // API field names = the inputs' name attributes
     details.forEach(function (detail) {
       var input = form.querySelector('[name="' + detail.field + '"]');
       if (input) {
         input.classList.add('is-invalid');
         var feedback = document.createElement('div');
         feedback.className = 'invalid-feedback form-field-error';
-        feedback.textContent = detail.message;
+        feedback.textContent = fieldMessage(detail.message);
         input.parentNode.appendChild(feedback);
       }
     });
@@ -62,9 +72,29 @@ window.PV = window.PV || {};
 
   function getErrorMessage(err) {
     if (err.status === 429) {
-      return 'Previše zahteva. Pokušajte ponovo za nekoliko minuta.';
+      return t('form.rateLimit');
     }
-    return err.message || 'Došlo je do greške. Pokušajte ponovo.';
+    return err.message || t('errors.generic');
+  }
+
+  function showSubmitError(form, container, err) {
+    if (err.status === 400 && err.details) {
+      showFieldErrors(form, err.details);
+      showAlert(container, 'danger', err.message || t('errors.VALIDATION_ERROR'));
+    } else {
+      showAlert(container, 'danger', getErrorMessage(err));
+    }
+  }
+
+  function successHtml(titleKey, textKey, extra) {
+    return (
+      '<div class="text-center ' + (extra ? 'py-5' : 'py-4') + '">' +
+        '<i class="bi bi-check-circle" style="font-size:3rem;color:#27c964;" aria-hidden="true"></i>' +
+        '<h3 style="margin-top:16px;color:var(--primary);">' + t(titleKey) + '</h3>' +
+        '<p style="color:var(--text-light);">' + t(textKey) + '</p>' +
+        (extra || '') +
+      '</div>'
+    );
   }
 
   // --- C1: Contact form (kontakt.html) ---
@@ -87,12 +117,18 @@ window.PV = window.PV || {};
       var lastName = (document.getElementById('k-prezime').value || '').trim();
       var phone = (document.getElementById('k-tel').value || '').trim();
       var email = (document.getElementById('k-email').value || '').trim();
+      // The option value is the Serbian topic in every language, so the e-mail stays Serbian
       var subject = (document.getElementById('k-tema').value || '').trim();
       var message = (document.getElementById('k-poruka').value || '').trim();
 
       // Client-side validation
       if (!firstName || !lastName || !phone || !email || !subject || !message) {
-        showAlert(card, 'danger', 'Molimo popunite sva obavezna polja.');
+        showAlert(card, 'danger', t('form.required.contact'));
+        return;
+      }
+      var consent = document.getElementById('gdpr');
+      if (consent && !consent.checked) {
+        showAlert(card, 'danger', t('form.consentRequired'));
         return;
       }
 
@@ -106,25 +142,15 @@ window.PV = window.PV || {};
           email: email,
           subject: subject,
           message: message,
+          lang: PV.i18n.lang,
         });
 
         // Success — replace form with success message
-        card.innerHTML =
-          '<div class="text-center py-4">' +
-            '<i class="bi bi-check-circle" style="font-size:3rem;color:#27c964;" aria-hidden="true"></i>' +
-            '<h3 style="margin-top:16px;color:var(--primary);">Poruka je poslata!</h3>' +
-            '<p style="color:var(--text-light);">Hvala vam na poruci. Javićemo vam se u najkraćem roku.</p>' +
-          '</div>';
+        card.innerHTML = successHtml('form.success.contactTitle', 'form.success.contactText');
 
       } catch (err) {
         setLoading(btn, false);
-
-        if (err.status === 400 && err.details) {
-          showFieldErrors(form, err.details);
-          showAlert(card, 'danger', err.message || 'Molimo ispravite greške u formularu.');
-        } else {
-          showAlert(card, 'danger', getErrorMessage(err));
-        }
+        showSubmitError(form, card, err);
       }
     });
   }
@@ -147,10 +173,11 @@ window.PV = window.PV || {};
         body[input.name] = (input.value || '').trim();
       }
     });
+    body.lang = PV.i18n.lang;
 
     // Client-side validation — fullName, phone, email required
     if (!body.fullName || !body.phone || !body.email) {
-      showAlert(container, 'danger', 'Molimo popunite ime, telefon i email.');
+      showAlert(container, 'danger', t('form.required.inquiry'));
       return;
     }
 
@@ -158,21 +185,11 @@ window.PV = window.PV || {};
 
     PV.api.post(endpoint, body)
       .then(function () {
-        container.innerHTML =
-          '<div class="text-center py-4">' +
-            '<i class="bi bi-check-circle" style="font-size:3rem;color:#27c964;" aria-hidden="true"></i>' +
-            '<h3 style="margin-top:16px;color:var(--primary);">Upit je poslat!</h3>' +
-            '<p style="color:var(--text-light);">Hvala vam. Javićemo vam se u najkraćem roku.</p>' +
-          '</div>';
+        container.innerHTML = successHtml('form.success.inquiryTitle', 'form.success.inquiryText');
       })
       .catch(function (err) {
         setLoading(btn, false);
-        if (err.status === 400 && err.details) {
-          showFieldErrors(form, err.details);
-          showAlert(container, 'danger', err.message || 'Molimo ispravite greške u formularu.');
-        } else {
-          showAlert(container, 'danger', getErrorMessage(err));
-        }
+        showSubmitError(form, container, err);
       });
   }
 
@@ -189,14 +206,9 @@ window.PV = window.PV || {};
   });
 
   // --- C3: Advertise property form (oglasite-nekretninu.html) ---
+  // Select values: namena / tip / pregovaranje hold the API keys; the other selects hold
+  // the Serbian option text, which goes to the e-mail as is. Only the labels are translated.
 
-  // Value mappings for advertise form (Serbian UI → English API)
-  var transactionTypeMap = { 'Prodaja': 'sale', 'Izdavanje': 'rent', 'Iznajmljivanje': 'rent' };
-  var propertyTypeMap = {
-    'Stan': 'apartment', 'Kuća': 'house', 'Poslovni prostor': 'commercial',
-    'Zemljište': 'land', 'Garaža': 'garage', 'Ostalo': 'other',
-  };
-  var priceTypeMap = { 'Fiksna': 'fixed', 'Po dogovoru': 'negotiable', 'Hitna prodaja': 'urgent' };
   var featureCheckboxes = [
     { id: 'f-lift', value: 'lift' },
     { id: 'f-parking', value: 'parking' },
@@ -208,11 +220,8 @@ window.PV = window.PV || {};
     { id: 'f-alarm', value: 'alarm' },
   ];
 
-  function parseRooms(val) {
-    if (!val) return null;
-    if (val === 'Garsonjera') return 0;
-    var match = val.match(/^(\d+)/);
-    return match ? parseInt(match[1], 10) : null;
+  function fieldValue(id) {
+    return (document.getElementById(id).value || '').trim();
   }
 
   function initAdvertiseForm() {
@@ -229,29 +238,34 @@ window.PV = window.PV || {};
       clearFieldErrors(form);
 
       // Collect required fields
-      var transactionType = transactionTypeMap[document.getElementById('og-namena').value] || document.getElementById('og-namena').value;
-      var propertyType = propertyTypeMap[document.getElementById('og-tip').value] || document.getElementById('og-tip').value;
-      var city = (document.getElementById('og-grad').value || '').trim();
+      var transactionType = fieldValue('og-namena');
+      var propertyType = fieldValue('og-tip');
+      var city = fieldValue('og-grad');
       var area = parseInt(document.getElementById('og-povrsina').value, 10);
-      var rooms = parseRooms(document.getElementById('og-sobe').value);
+      var rooms = fieldValue('og-sobe');
       var expectedPrice = parseInt(document.getElementById('og-cena').value, 10);
-      var priceType = priceTypeMap[document.getElementById('og-pregovaranje').value] || document.getElementById('og-pregovaranje').value;
-      var description = (document.getElementById('og-opis').value || '').trim();
-      var fullName = (document.getElementById('og-ime').value || '').trim();
-      var phone = (document.getElementById('og-tel').value || '').trim();
-      var email = (document.getElementById('og-email').value || '').trim();
+      var priceType = fieldValue('og-pregovaranje');
+      var description = fieldValue('og-opis');
+      var fullName = fieldValue('og-ime');
+      var phone = fieldValue('og-tel');
+      var email = fieldValue('og-email');
 
       // Client-side validation for required fields
       if (!fullName || !phone || !email || !city || !description || !area || !expectedPrice) {
-        showAlert(card, 'danger', 'Molimo popunite sva obavezna polja (površina, cena, opis, kontakt podaci).');
+        showAlert(card, 'danger', t('form.required.advertise'));
+        return;
+      }
+      var consent = document.getElementById('og-gdpr');
+      if (consent && !consent.checked) {
+        showAlert(card, 'danger', t('form.consentRequired'));
         return;
       }
 
       // Collect optional fields
-      var district = (document.getElementById('og-opstina').value || '').trim();
-      var address = (document.getElementById('og-adresa').value || '').trim();
-      var floor = document.getElementById('og-sprat').value || null;
-      var heating = (document.getElementById('og-grejanje').value || '').trim();
+      var district = fieldValue('og-opstina');
+      var address = fieldValue('og-adresa');
+      var floor = fieldValue('og-sprat');
+      var heating = fieldValue('og-grejanje');
       var yearBuilt = parseInt(document.getElementById('og-godina').value, 10);
 
       // Collect features
@@ -274,6 +288,7 @@ window.PV = window.PV || {};
         fullName: fullName,
         phone: phone,
         email: email,
+        lang: PV.i18n.lang,
       };
 
       // Add optional fields only if present
@@ -289,23 +304,12 @@ window.PV = window.PV || {};
       try {
         await PV.api.post('/api/advertise-property', body);
 
-        card.innerHTML =
-          '<div class="text-center py-5">' +
-            '<i class="bi bi-check-circle" style="font-size:3rem;color:#27c964;" aria-hidden="true"></i>' +
-            '<h3 style="margin-top:16px;color:var(--primary);">Oglas je poslat!</h3>' +
-            '<p style="color:var(--text-light);">Hvala vam. Naš tim će pregledati vaš oglas i javiti vam se u roku od 24 sata.</p>' +
-            '<a href="index.html" class="btn-submit-full" style="display:inline-block;width:auto;padding:12px 32px;margin-top:16px;">Nazad na početnu</a>' +
-          '</div>';
+        card.innerHTML = successHtml('form.success.advertiseTitle', 'form.success.advertiseText',
+          '<a href="index.html" class="btn-submit-full" style="display:inline-block;width:auto;padding:12px 32px;margin-top:16px;">' + t('form.success.backHome') + '</a>');
 
       } catch (err) {
         setLoading(btn, false);
-
-        if (err.status === 400 && err.details) {
-          showFieldErrors(form, err.details);
-          showAlert(card, 'danger', err.message || 'Molimo ispravite greške u formularu.');
-        } else {
-          showAlert(card, 'danger', getErrorMessage(err));
-        }
+        showSubmitError(form, card, err);
       }
     });
   }
