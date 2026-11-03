@@ -383,7 +383,7 @@ window.PV = window.PV || {};
             '<div class="col-md-6"><input type="text" class="form-control" name="fullName" placeholder="' + t('form.fullName') + '" required aria-label="' + t('form.fullName') + '"></div>' +
             '<div class="col-md-6"><input type="tel" class="form-control" name="phone" placeholder="' + t('form.phone') + '" required aria-label="' + t('form.phone') + '"></div>' +
             '<div class="col-12"><input type="email" class="form-control" name="email" placeholder="' + t('form.emailPlaceholder') + '" required aria-label="' + t('form.email') + '"></div>' +
-            '<div class="col-12"><textarea class="form-control" name="message" placeholder="' + t('form.messageOptional') + '" aria-label="' + t('form.message') + '"></textarea></div>' +
+            '<div class="col-12"><textarea class="form-control" name="message" placeholder="' + esc(t('form.messagePh')) + '" required aria-label="' + esc(t('form.message')) + '"></textarea></div>' +
             '<div class="col-12"><button type="submit" class="btn-submit-full"><i class="bi bi-send" aria-hidden="true"></i> ' + t('form.send') + '</button></div>' +
           '</div>' +
         '</form>' +

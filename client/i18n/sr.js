@@ -302,14 +302,15 @@ PV.i18n.add('sr', {
     email: 'Email',
     emailPlaceholder: 'Email adresa',
     message: 'Poruka',
-    messageOptional: 'Poruka (opciono)...',
+    messagePh: 'Vaša poruka...',
+    messageRequired: 'Morate napisati poruku.',
     messageShort: 'Kratka poruka...',
     send: 'Pošaljite Upit',
     // forms.js
     sending: 'Slanje...',
     required: {
       contact: 'Molimo popunite sva obavezna polja.',
-      inquiry: 'Molimo popunite ime, telefon i email.',
+      inquiry: 'Molimo popunite ime, telefon, email i poruku.',
       advertise: 'Molimo popunite sva obavezna polja (površina, cena, opis, kontakt podaci).',
     },
     consentRequired: 'Potrebna je vaša saglasnost sa politikom privatnosti.',

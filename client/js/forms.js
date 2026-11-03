@@ -45,19 +45,21 @@ window.PV = window.PV || {};
     return t('form.fieldError.invalid');
   }
 
+  function markField(input, message) {
+    input.classList.add('is-invalid');
+    var feedback = document.createElement('div');
+    feedback.className = 'invalid-feedback form-field-error';
+    feedback.textContent = message;
+    input.parentNode.appendChild(feedback);
+  }
+
   function showFieldErrors(form, details) {
     if (!details || !details.length) return;
 
     // API field names = the inputs' name attributes
     details.forEach(function (detail) {
       var input = form.querySelector('[name="' + detail.field + '"]');
-      if (input) {
-        input.classList.add('is-invalid');
-        var feedback = document.createElement('div');
-        feedback.className = 'invalid-feedback form-field-error';
-        feedback.textContent = fieldMessage(detail.message);
-        input.parentNode.appendChild(feedback);
-      }
+      if (input) markField(input, fieldMessage(detail.message));
     });
   }
 
@@ -175,9 +177,16 @@ window.PV = window.PV || {};
     });
     body.lang = PV.i18n.lang;
 
-    // Client-side validation — fullName, phone, email required
-    if (!body.fullName || !body.phone || !body.email) {
+    // Client-side validation — all four fields are required; the agent needs to know what the visitor wants
+    var missing = ['fullName', 'phone', 'email', 'message'].filter(function (name) { return !body[name]; });
+    if (missing.length) {
+      missing.forEach(function (name) {
+        var input = form.querySelector('[name="' + name + '"]');
+        if (input) markField(input, name === 'message' ? t('form.messageRequired') : t('form.fieldError.required'));
+      });
       showAlert(container, 'danger', t('form.required.inquiry'));
+      var first = form.querySelector('[name="' + missing[0] + '"]');
+      if (first) first.focus();
       return;
     }
 

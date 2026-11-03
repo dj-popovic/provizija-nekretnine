@@ -73,7 +73,7 @@ window.PV = window.PV || {};
             '<div class="col-md-6"><input type="text" class="form-control" name="fullName" placeholder="' + esc(t('form.fullName')) + '" required aria-label="' + esc(t('form.fullName')) + '"></div>' +
             '<div class="col-md-6"><input type="tel" class="form-control" name="phone" placeholder="' + esc(t('form.phone')) + '" required aria-label="' + esc(t('form.phone')) + '"></div>' +
             '<div class="col-12"><input type="email" class="form-control" name="email" placeholder="' + esc(t('form.emailPlaceholder')) + '" required aria-label="' + esc(t('form.email')) + '"></div>' +
-            '<div class="col-12"><textarea class="form-control" name="message" placeholder="' + esc(t('form.messageShort')) + '" aria-label="' + esc(t('form.message')) + '"></textarea></div>' +
+            '<div class="col-12"><textarea class="form-control" name="message" placeholder="' + esc(t('form.messageShort')) + '" required aria-label="' + esc(t('form.message')) + '"></textarea></div>' +
             '<div class="col-12"><button type="submit" class="btn-submit-full"><i class="bi bi-send" aria-hidden="true"></i> ' + t('form.send') + '</button></div>' +
           '</div>' +
         '</form>' +
