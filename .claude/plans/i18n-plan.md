@@ -4,7 +4,7 @@ Read this whole file before any i18n work. Sections: 0 status · 1 decisions · 
 
 ## 0. Status at a glance
 
-All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: the 3f commit ("i18n 3f: forme…", after `3d04dd9` = 3e).
+All commits are **local on `main`, not pushed** (Relja pushes when he decides). Last commit: "i18n 3g: o-nama…" (after `ad8107c` = required inquiry message, `0ff5330` = 3f, `3d04dd9` = 3e).
 
 | Step | What | Status | Commit |
 |---|---|---|---|
@@ -16,8 +16,8 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 | 3d | Home page — functional part (hero search, "view all", stats number format) | done | 9b23a12 |
 | 3e | Agents list + agent profile — functional part (+ agent phones normalized to `+381…` in the backend) | done | see git log |
 | 3f | Forms: kontakt, oglasite, inquiry forms + `lang` / "Jezik posetioca" in e-mails (moved here from 5) + form bug fixes | done | see git log |
-| 3g | O nama — functional part only (if any; most of it is marketing → S) | **NEXT** (check first) | |
-| 5 | Backend cleanup (legacy fields) | todo | |
+| 3g | O nama — functional part = breadcrumb only; the rest is marketing → S | done | see git log |
+| 5 | Backend cleanup (legacy fields) | **NEXT** | |
 | 6 | Meta: `<title>` per page per language (+ descriptions with the static content) | todo | |
 | S | **Static marketing copy** on all pages | **waits for the client's final texts** | |
 | 7 | Machine translation of property descriptions + titles (Claude API) | **waits for the client's API key + model choice** | |
@@ -98,6 +98,10 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 - `page-agents.js`: empty/error states.
 - Static HTML: only functional bits (breadcrumb, aria labels of lists). Section titles/intro/benefits = marketing → later.
 - Agent names never translated.
+
+### 3g — O nama — DONE
+- Only the breadcrumb was functional. Everything else (hero, story, values, stats labels, partners, testimonials, CTA, section aria-labels) → step S.
+- **Tell the client with the new texts (Relja was told 2026-11-03):** the 3 testimonials are made up (randomuser.me photos) — real ones or remove; the partner banks must be real partnerships; "3 stručna agenta" / "Tri eksperta" vs 2 agents in the feed; "10.000 klijenata", "850 prodatih godišnje" unverified; "osnovana 2008" vs "15+ godina"; agenti.html "Govorimo srpski, engleski i nemački" (site is now also Russian). The team photo is from unsplash.
 
 ### 3f — Forms — DONE
 - Every `<option>` has an explicit value: og-namena / og-tip / og-pregovaranje = the API keys; og-sobe / og-sprat / og-grejanje / k-tema / "Ostalo" = the Serbian text. `forms.js` reads `.value`; only labels are translated → submitted data + e-mails stay Serbian. City / district options are proper nouns: `lang="sr"`, not translated.
