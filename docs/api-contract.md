@@ -334,6 +334,7 @@ None.
 - `landArea` — plot area in **ares**; `null` for apartments or when not provided
 - `rooms`
 - `floor` — apartments only: `"ground"` (prizemlje) or the floor number as a string (`"3"`); `null` for every other type or when unknown (same rule as `specs.floor`)
+- `translations` — machine-translated titles, `{ "en": { "title": "…" }, "ru": { "title": "…" } }`, or `null` (see "Translations" in section 3)
 
 `propertyType` in list items is the stable type key (`apartment`, `house`, `commercial`, `office`, `plot`, `land`, `garage`, `other`); the frontend translates it (i18n, 2026-11-02). Before that it was the Serbian label (`"Stan"`).
 
@@ -521,8 +522,26 @@ If the slug does not match the ID:
 - `area`
 - `rooms`
 - `bathrooms`
+- `translations`
 - `agent`
 - `relatedProperties`
+
+### Translations (i18n phase 7)
+
+`translations` on `PropertyDetail` holds the machine translation of the agency's Serbian `title` and `description`:
+
+```json
+"translations": {
+  "en": { "title": "NOVI SAD, GRBAVICA, LUXURY FOUR-ROOM APARTMENT, 180 M² + TWO GARAGE SPACES", "description": "…" },
+  "ru": { "title": "NOVI SAD, GRBAVICA, ЛЮКС ЧЕТЫРЁХКОМНАТНАЯ КВАРТИРА, 180 М² + ДВА ГАРАЖНЫХ МЕСТА", "description": "…" }
+}
+```
+
+- `null` when the property has no translation yet, **or when the Serbian title / description changed since it was translated** (the stale translation is never shown). The frontend then generates the en / ru title from the data and shows the Serbian description with a note.
+- Titles are ALL CAPS like the agency's. Cities, districts and streets stay exactly as written (Latin, also in Russian); other geography uses the standard foreign name (Danube / Дунай).
+- `description` is `null` when the Serbian description is empty. `PropertyListItem.translations` carries the titles only.
+- Source: `server/src/data/translations.json` (committed). Development: filled from Claude Code (Opus 5.5). Production (phase 7b): the backend translates new / changed properties after each sync.
+- Serbian (`title`, `description`) is unchanged; Serbian has no entry in `translations`.
 
 ### Guaranteed vs optional fields
 
@@ -969,7 +988,8 @@ None.
     "status": "ok",
     "lastSuccessfulSync": "2026-03-14T11:20:00.000Z",
     "numberOfLoadedProperties": 487,
-    "lastSyncError": null
+    "lastSyncError": null,
+    "translations": { "translated": 480, "missing": 5, "outdated": 2 }
   }
 }
 ```
@@ -984,6 +1004,7 @@ Recommended MVP fields:
 - `lastSuccessfulSync`
 - `numberOfLoadedProperties`
 - `lastSyncError`
+- `translations` — en / ru machine translations of the loaded properties: `translated` (up to date), `missing` (never translated), `outdated` (the Serbian text changed since; not shown until re-translated)
 
 ### Error responses
 

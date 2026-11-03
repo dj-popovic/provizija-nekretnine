@@ -20,7 +20,8 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 | 5 | Backend cleanup (legacy fields) | done (detail `propertyType` label kept on purpose, see 5) | see git log |
 | 6 | Meta: `<title>` per page per language (descriptions / og tags go with S) | done | see git log |
 | S | **Static marketing copy** on all pages | **waits for the client's final texts** | |
-| 7 | Machine translation of property descriptions + titles (Claude API) | **waits for the client's API key + model choice** | |
+| 7a | Translations file + API `translations` + frontend + all 43 listings translated here (Opus 5.5) | done | see git log |
+| 7b | API translator after each sync + form free text → Serbian + real-API smoke test | **at production** (Relja's key) | |
 | 8 | Final QA + Relja's browser check (desktop + phone) | todo, last | |
 
 ## 1. Decisions (confirmed by Relja)
@@ -141,6 +142,22 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 - Question to raise then: the FAQ says "pružamo usluge na engleskom jeziku" — now that the site is also Russian, maybe "na engleskom i ruskom".
 
 ### 7 — Machine translation (needs the client's API key + model choice; ask Relja first)
+- **7a DONE (2026-11-03):**
+  - Backend: `server/src/modules/translations/store.ts` reads `server/src/data/translations.json` (committed; entries keyed by property id + `sourceHash` of title+description; a mismatch means outdated, never shown). The list item gets `translations.{en,ru}.title`, the detail gets `translations.{en,ru}.{title,description}`, and `/api/status` gets `translations: {translated, missing, outdated}`. Docs: api-contract (detail "Translations" section), architecture. 312 tests.
+  - Frontend: `propertyTitle()` prefers the translated title. The detail description uses the translation with `lang="en|ru"`, and the "Opis je na srpskom" note shows only without a translation.
+  - All 43 listings were translated by Opus 5.5 subagents with `tools/translations/instructions.md`, checked by `merge-batches.js`, and spot-checked.
+  - How to translate new listings later: `tools/translations/README.md`. At the start of each chat, check `/api/status` and offer to run it.
+  - The page test now treats API translation text as allowed (it keeps place names in Latin).
+- 7b (at production, with Relja's key): translator module (Claude API, Opus 5.5, prompt = `tools/translations/instructions.md`), run after each sync for missing/outdated entries, never blocking the sync. Form free text (message, description, address) → Serbian, added to the agency e-mail as "Prevod: …". `/api/status` shows the counts. Run 1–2 listings through the real API as a check. Read the `claude-api` skill first.
+- **Update 2026-11-03:** the key is **Relja's own** (separate Console account), he pays the credits; no client key. Until production there is no key: translations are made here (Claude Code) and stored; with the key in production only new/changed listings are translated by the API.
+- **Model test done 2026-11-03** (blind, 13 real listings: 5 apartments, 4 houses, 2 plots, lokal, salaš, titles + descriptions → en + ru, plus 5 en/ru visitor messages → sr; same instructions for all; run as Claude Code subagents, not the API, so no measured cost/latency). Test files: session scratchpad `mt/` (instructions.md = the draft production prompt). Automatic checks: all three kept every number, price, area and line break. Blind grades (1–10):
+  | | EN | RU | messages → sr | notes |
+  |---|---|---|---|---|
+  | Opus 5.5 | 9.5 | 9.5 | 9.5 | most natural (buy-to-let, "выходит окнами во двор", "uknjiži na svoje ime"); follows formatting rules best; took "rivers stay as written" literally ("the Dunav") |
+  | Sonnet 5.5 | 9 | 9 | 9 | faithful and natural; kept the ALL-CAPS lines of the original; used "Danube" / "Petrovaradin Fortress"; small helpful glosses |
+  | Haiku 5.5 | 7.5 | 7 | 8 | more literal ("represents an opportunity", "price-to-quality ratio"); in Russian it broke the place-name rule (Нови-Сад, Подбара, even "Каћ" with a Serbian letter); calques ("в широком центре", "kozmetički remont") |
+- Estimated API cost per listing (title + description, en + ru): Opus ≈ $0.03, Sonnet ≈ $0.015, Haiku ≈ $0.001 → ~40 new listings/month ≈ $1.2 / $0.6 / $0.04 (Batch API halves it). Visitor messages are negligible.
+- Prompt fixes learned: well-known geographic names (Danube/Дунай, Petrovaradin Fortress) in their standard form vs. local places as written — ask Relja; say explicitly "write ALL-CAPS lines of the description in normal case".
 - **Also (Relja, 2026-11-03):** free text typed into the forms in en/ru (message, description, address) should reach the agency in Serbian too: with the same API key, translate it in the form handler and put the Serbian translation under the original in the e-mail ("Prevod: …"); on failure send the original only. Dropdowns / checkboxes already arrive in Serbian.
 - New backend module: after each sync, translate only new/changed descriptions AND titles (keyed by property id + text hash) into en/ru; cache file next to `properties-cache.json`; never block or fail the sync; on failure keep Serbian; `/api/status` shows pending/failed counts.
 - Prompt rules: keep place names / streets / agent names exactly as written; titles in ALL CAPS ("RUMA, VOGANJ, FAMILY HOUSE – RANCH, 196 M²"); natural real-estate tone.

@@ -11,12 +11,13 @@ window.PV = window.PV || {};
   var i18n = PV.i18n;
   var t = i18n.t;
 
-  // Title in the current language: the agency's own title in Serbian,
-  // a generated one in English / Russian (see PV.render.propertyTitle)
+  // Title in the current language: the agency's own title in Serbian; in English /
+  // Russian its translation, or a generated one (see PV.render.propertyTitle)
   function titleOf(p) {
     var s = p.specs || {};
     return PV.render.propertyTitle({
       title: p.title,
+      translations: p.translations,
       propertyType: s.propertyType,
       rooms: s.rooms,
       area: s.area,
@@ -559,12 +560,16 @@ window.PV = window.PV || {};
     // Description + Agent
     html += '<div class="row g-4"><div class="col-12">';
     if (p.description) {
+      // English / Russian: the machine translation when there is one (i18n phase 7),
+      // otherwise the agency's Serbian text with a note
+      var translated = i18n.lang !== 'sr' && p.translations && p.translations[i18n.lang];
+      var descText = translated && translated.description ? translated.description : p.description;
+      var descLang = descText === p.description ? 'sr' : i18n.lang;
       html += '<div class="detail-description"><h2>' + t('detail.description') + '</h2>';
-      // The description is the agency's Serbian text (machine translation: i18n phase 7)
-      if (i18n.lang !== 'sr') html += '<p class="detail-description-note"><i class="bi bi-translate" aria-hidden="true"></i> ' + t('detail.descriptionInSerbian') + '</p>';
-      html += '<div class="detail-description-body is-clamped" id="descBody" lang="sr">';
+      if (i18n.lang !== 'sr' && descLang === 'sr') html += '<p class="detail-description-note"><i class="bi bi-translate" aria-hidden="true"></i> ' + t('detail.descriptionInSerbian') + '</p>';
+      html += '<div class="detail-description-body is-clamped" id="descBody" lang="' + descLang + '">';
       // Split description paragraphs
-      var paragraphs = p.description.split(/\n\n|\n/);
+      var paragraphs = descText.split(/\n\n|\n/);
       for (var i = 0; i < paragraphs.length; i++) {
         if (paragraphs[i].trim()) {
           html += '<p>' + esc(paragraphs[i].trim()) + '</p>';

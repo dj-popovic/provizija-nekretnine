@@ -9,6 +9,8 @@ import { LAND_TYPE_KEYS } from "../shared/models.js";
 import type { Property } from "../shared/models.js";
 import { getProperties, getAgents } from "../shared/cache.js";
 import { getEnrichment } from "../agents/enrichment.js";
+import { getTranslation } from "../translations/store.js";
+import type { TranslatedText } from "../translations/store.js";
 import type { PropertyListingQuery, SortOption } from "./query.js";
 
 // ---------------------------------------------------------------------------
@@ -34,6 +36,14 @@ export interface PropertyListItem {
   landArea: number | null; // ares
   rooms: number | null;
   floor: string | null; // apartments only: "ground" (prizemlje) or the floor number ("3")
+  // Machine-translated titles (ALL CAPS like the agency's); null = not translated
+  // (yet), the frontend then generates the en / ru title from the data
+  translations: { en: { title: string }; ru: { title: string } } | null;
+}
+
+function listTranslations(property: Property): PropertyListItem["translations"] {
+  const entry = getTranslation(property);
+  return entry ? { en: { title: entry.en.title }, ru: { title: entry.ru.title } } : null;
 }
 
 export interface PaginationMeta {
@@ -104,6 +114,7 @@ function toListItem(property: Property): PropertyListItem {
     rooms: property.roomStructure,
     // Same rule as the spec panel: a floor only means something for an apartment
     floor: property.propertyTypeKey === "apartment" ? property.floor : null,
+    translations: listTranslations(property),
   };
 }
 
@@ -404,6 +415,9 @@ export interface PropertyDetail {
   area: number | null;
   rooms: number | null;
   bathrooms: number | null;
+  // Machine-translated title + description; null = not translated or the Serbian
+  // text changed since (the frontend shows the Serbian description with a note)
+  translations: { en: TranslatedText; ru: TranslatedText } | null;
   agent: AgentSummary | null;
   relatedProperties: PropertyListItem[];
 }
@@ -507,6 +521,16 @@ function buildSpecs(property: Property): PropertySpecs {
   };
 }
 
+function detailTranslations(property: Property): PropertyDetail["translations"] {
+  const entry = getTranslation(property);
+  return entry
+    ? {
+        en: { title: entry.en.title, description: entry.en.description },
+        ru: { title: entry.ru.title, description: entry.ru.description },
+      }
+    : null;
+}
+
 /**
  * Look up a single property by ID and return the full detail projection.
  * Returns null if the property is not found in the cache.
@@ -533,6 +557,7 @@ export function getPropertyDetail(propertyId: string): PropertyDetail | null {
     area: property.surface,
     rooms: property.roomStructure,
     bathrooms: property.bathrooms,
+    translations: detailTranslations(property),
     agent: buildAgentSummary(property.agentId),
     relatedProperties: getRelatedProperties(property),
   };

@@ -172,7 +172,11 @@ window.PV = window.PV || {};
   // item: { title, propertyType (key), rooms, area, landArea, location }
 
   function propertyTitle(item) {
-    if (i18n.lang === 'sr' || !item.propertyType) return item.title;
+    if (i18n.lang === 'sr') return item.title;
+    // The machine-translated agency title (i18n phase 7) when there is one
+    var translated = item.translations && item.translations[i18n.lang];
+    if (translated && translated.title) return translated.title;
+    if (!item.propertyType) return item.title;
     var type = item.propertyType;
     var name;
     if (type === 'apartment' && item.rooms === 0.5) name = t('title.studio');

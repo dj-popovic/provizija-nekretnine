@@ -607,13 +607,17 @@ server/
       agents/
       forms/
       home/
+      translations/
       shared/
     data/
       agent-enrichment.json
       properties-cache.json
+      translations.json
 ```
 
 This structure is only a recommended starting point and may evolve.
+
+`translations/` (i18n phase 7) reads `data/translations.json`: the en / ru machine translations of property titles and descriptions, keyed by property id plus a hash of the Serbian text. Unlike `properties-cache.json` this file is **committed to git**, because it is produced data, not a copy of the feed. The public API joins it into list and detail items at request time. A translation whose hash no longer matches the current Serbian text is ignored. During development the file is filled from Claude Code. In production (phase 7b) the backend translates new or changed properties after a sync; this never blocks or fails the sync.
 
 ---
 

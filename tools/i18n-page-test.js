@@ -133,6 +133,22 @@ const SERBIAN_WORDS = /\b(i|ili|za|na|od|do|sa|se|je|su|nas|vaš\w*|naš\w*|nekr
   });
   const props = await (await fetch(API + '/api/properties?pageSize=100')).json();
   (props.items || []).forEach((p) => allowed.add(p.location));
+  // Machine translations (phase 7) are API content: they keep village / street names as written
+  // ("BANOŠTOR, BUILDING PLOT", "Kać, Budisava"), so they count as allowed text too
+  const addTranslation = (tr) => {
+    ['en', 'ru'].forEach((l) => {
+      if (!tr || !tr[l]) return;
+      if (tr[l].title) allowed.add(tr[l].title);
+      String(tr[l].description || '').split(/\n\n|\n/).map((s) => s.trim()).filter(Boolean).forEach((s) => allowed.add(s));
+    });
+  };
+  (props.items || []).forEach((p) => addTranslation(p.translations));
+  for (const page of PAGES) {
+    const m = page.match(/^nekretnina-detalj\.html\?id=(.+)$/);
+    if (!m) continue;
+    const res = await fetch(API + '/api/properties/' + encodeURIComponent(m[1]));
+    if (res.ok) addTranslation(((await res.json()).data || {}).translations);
+  }
   const agents = await (await fetch(API + '/api/agents')).json();
   ((agents.data && agents.data.items) || agents.items || agents.data || []).forEach((a) => { if (a && a.fullName) { allowed.add(a.fullName); allowed.add(a.fullName.split(/\s+/).slice(0, 2).map((w) => w.charAt(0)).join('').toUpperCase()); } });
 
