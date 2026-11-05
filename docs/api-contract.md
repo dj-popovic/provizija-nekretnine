@@ -1290,7 +1290,7 @@ Supported MVP payload fields:
 ### Field values
 
 - `transactionType`: `sale` | `rent`
-- `propertyType`: `apartment` | `house` | `commercial` | `land` | `garage` | `other`
+- `propertyType`: `apartment` | `house` | `commercial` | `retail` | `hospitality` | `warehouse` | `garage` | `plot` | `farmland` | `industrial_land` | `other` (the listing type keys; `land` was replaced by the three land types on 2026-11-05)
 - `priceType`: `fixed` | `negotiable` | `urgent`
 - `features`: array of `lift` | `parking` | `terrace` | `pool` | `yard` | `airConditioning` | `internet` | `alarm` (duplicates are dropped)
 - Any other value of these four → `400` with that field in `details`.

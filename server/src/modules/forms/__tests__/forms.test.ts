@@ -73,6 +73,23 @@ describe("advertise-property e-mail", () => {
     }
   });
 
+  it("accepts every listing type key and shows its Serbian label", () => {
+    const labels: Record<string, string> = {
+      retail: "Lokal",
+      hospitality: "Ugostiteljski objekat",
+      warehouse: "Hala",
+      plot: "Građevinsko zemljište",
+      farmland: "Poljoprivredno zemljište",
+      industrial_land: "Industrijsko zemljište",
+    };
+    for (const [key, label] of Object.entries(labels)) {
+      const { data, errors } = validateAdvertisePropertyPayload(advertiseBody({ propertyType: key }));
+      expect(errors).toEqual([]);
+      expect(composeAdvertisePropertyEmail(data!).subject).toBe(`Novi oglas za nekretninu: ${label} — Novi Sad`);
+    }
+    expect(fieldsOf(validateAdvertisePropertyPayload(advertiseBody({ propertyType: "land" })).errors)).toEqual(["propertyType"]);
+  });
+
   it("has no language row when the form didn't send one", () => {
     const { data } = validateAdvertisePropertyPayload(advertiseBody());
     expect(composeAdvertisePropertyEmail(data!).html).not.toContain("Jezik posetioca");

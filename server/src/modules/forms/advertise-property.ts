@@ -22,8 +22,13 @@ const PROPERTY_TYPES: Record<string, string> = {
   apartment: "Stan",
   house: "Kuća",
   commercial: "Poslovni prostor",
-  land: "Zemljište",
+  retail: "Lokal",
+  hospitality: "Ugostiteljski objekat",
+  warehouse: "Hala",
   garage: "Garaža",
+  plot: "Građevinsko zemljište",
+  farmland: "Poljoprivredno zemljište",
+  industrial_land: "Industrijsko zemljište",
   other: "Ostalo",
 };
 
