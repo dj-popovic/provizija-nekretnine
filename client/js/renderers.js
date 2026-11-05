@@ -22,14 +22,14 @@ window.PV = window.PV || {};
       toUi: i18n.labels('enum.transactionType'),
     },
     propertyType: {
-      // Type chip / select value → API type keys. "Poslovni prostor" covers
-      // both RELPER types Poslovni prostor and Kancelarija.
+      // Type chip / select value → API type keys (RELPER's Kancelarija is
+      // already "commercial" in the API)
       chips: {
         stan: ['apartment'],
         kuca: ['house'],
         plac: ['plot'],
-        zemljiste: ['land'],
-        poslovni: ['commercial', 'office'],
+        zemljiste: ['farmland'],
+        poslovni: ['commercial'],
         garaza: ['garage'],
       },
       toUi: i18n.labels('enum.propertyType'),

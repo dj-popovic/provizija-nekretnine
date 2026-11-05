@@ -41,8 +41,8 @@ window.PV = window.PV || {};
     new: ['stan', 'kuca', 'poslovni'],
   };
 
-  // Plots and farmland: no rooms, area in ares
-  var LAND_TYPES = ['plot', 'land'];
+  // Land types: no rooms, area in ares
+  var LAND_TYPES = ['plot', 'farmland', 'industrial_land'];
 
   // --- Rooms: the feed stores a studio (garsonjera) as 0.5 rooms ---
   // Hints under the numbers: list.roomHint.r2_5 = "dvoiposoban"
@@ -363,7 +363,7 @@ window.PV = window.PV || {};
       if (s === 'building') return !land;
       if (s === 'apartment') return anyOf(['apartment']);
       if (s === 'plot') return !land && anyOf(['house']);
-      if (s === 'infra') return anyOf(['house', 'plot', 'land']);
+      if (s === 'infra') return anyOf(['house', 'hospitality', 'warehouse'].concat(LAND_TYPES));
       if (s === 'not-new') return !filters.newBuild;
       return true; // 'all'
     });

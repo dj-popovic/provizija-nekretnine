@@ -15,7 +15,7 @@ export type SortOption = "newest" | "priceAsc" | "priceDesc";
 export interface PropertyListingQuery {
   // Filters
   transactionType: string | undefined;
-  propertyTypes: string[]; // empty = all types; several = any of them ("Poslovni prostor" = commercial + office)
+  propertyTypes: string[]; // empty = all types; several = any of them (the "Zemljište" group = plot + farmland + industrial_land)
   city: string | undefined;
   hoods: string[]; // districts of `city`; empty = the whole city
   roomsMin: number | undefined;

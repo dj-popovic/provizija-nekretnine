@@ -72,12 +72,12 @@ describe("parseListingQuery", () => {
     const result = parseListingQuery({
       city: "Novi Sad",
       hood: ["Telep", " Grbavica ", "", "Telep"],
-      propertyType: ["commercial", "office"],
+      propertyType: ["plot", "farmland"],
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.query.hoods).toEqual(["Telep", "Grbavica"]);
-    expect(result.query.propertyTypes).toEqual(["commercial", "office"]);
+    expect(result.query.propertyTypes).toEqual(["plot", "farmland"]);
   });
 
   it("rejects hood without city", () => {

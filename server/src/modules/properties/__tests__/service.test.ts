@@ -76,11 +76,27 @@ describe("matchesFilters", () => {
     expect(matchesFilters(property, makeQuery({ propertyTypes: ["house"] }))).toBe(false);
   });
 
-  it("matches any of several property types", () => {
-    const office = makeProperty({ propertyTypeKey: "office" });
-    const types = ["commercial", "office"];
-    expect(matchesFilters(office, makeQuery({ propertyTypes: types }))).toBe(true);
+  it("matches any of several property types (the Zemljište group)", () => {
+    const farmland = makeProperty({ propertyTypeKey: "farmland", surface: null, landSurface: 300 });
+    const types = ["plot", "farmland", "industrial_land"];
+    expect(matchesFilters(farmland, makeQuery({ propertyTypes: types }))).toBe(true);
     expect(matchesFilters(property, makeQuery({ propertyTypes: types }))).toBe(false);
+  });
+
+  it("filters only on values the type shows (rooms of a lokal, heating of a garage)", () => {
+    const retail = makeProperty({ propertyTypeKey: "retail", roomStructure: 2, furnishedKey: "furnished" });
+    const garage = makeProperty({ propertyTypeKey: "garage", heatingKeys: ["central"], bathrooms: 1, constructionYear: 2005 });
+    expect(matchesFilters(retail, makeQuery({ roomsMin: 1 }))).toBe(false);
+    expect(matchesFilters(retail, makeQuery({ furnished: ["furnished"] }))).toBe(false);
+    expect(matchesFilters(garage, makeQuery({ heating: ["central"] }))).toBe(false);
+    expect(matchesFilters(garage, makeQuery({ bathroomsMin: 1 }))).toBe(false);
+    expect(matchesFilters(garage, makeQuery({ yearMin: 2000 }))).toBe(false);
+  });
+
+  it("filters commercial space by floor like apartments", () => {
+    const office = makeProperty({ propertyTypeKey: "commercial", floor: "3", totalFloors: 5 });
+    expect(matchesFilters(office, makeQuery({ floorMin: 2, floorMax: 4 }))).toBe(true);
+    expect(matchesFilters(office, makeQuery({ notTopFloor: true }))).toBe(true);
   });
 
   it("filters by city (case-insensitive)", () => {
@@ -222,8 +238,12 @@ describe("matchesFilters", () => {
   it("the land area filter skips apartments and listings without a plot area", () => {
     const flat = makeProperty({ propertyTypeKey: "apartment", landSurface: 5 });
     const house = makeProperty({ propertyTypeKey: "house", landSurface: null });
+    const retail = makeProperty({ propertyTypeKey: "retail", landSurface: 5 });
+    const hall = makeProperty({ propertyTypeKey: "warehouse", landSurface: 40 });
     expect(matchesFilters(flat, makeQuery({ landAreaMin: 1 }))).toBe(false);
     expect(matchesFilters(house, makeQuery({ landAreaMin: 1 }))).toBe(false);
+    expect(matchesFilters(retail, makeQuery({ landAreaMin: 1 }))).toBe(false);
+    expect(matchesFilters(hall, makeQuery({ landAreaMin: 1 }))).toBe(true);
   });
 
   it("filters by price range", () => {
@@ -314,10 +334,17 @@ describe("toListItem", () => {
     expect(item).not.toHaveProperty("highlights");
   });
 
-  it("sends the floor for apartments only (prizemlje as 'ground')", () => {
+  it("sends the floor for apartments and commercial space only (prizemlje as 'ground')", () => {
     expect(toListItem(makeProperty({ floor: "ground" })).floor).toBe("ground");
     expect(toListItem(makeProperty({ floor: null })).floor).toBeNull();
+    expect(toListItem(makeProperty({ propertyTypeKey: "commercial", floor: "2" })).floor).toBe("2");
     expect(toListItem(makeProperty({ propertyTypeKey: "house", floor: "1" })).floor).toBeNull();
+    expect(toListItem(makeProperty({ propertyTypeKey: "retail", floor: "ground" })).floor).toBeNull();
+  });
+
+  it("sends no rooms for a type without rooms (lokal, hala, garaža)", () => {
+    expect(toListItem(makeProperty({ propertyTypeKey: "retail", roomStructure: 2 })).rooms).toBeNull();
+    expect(toListItem(makeProperty({ propertyTypeKey: "hospitality", roomStructure: 4 })).rooms).toBe(4);
   });
 
   it("exposes plots in ares (landArea), never as m² (area)", () => {
@@ -388,6 +415,57 @@ describe("buildSpecs", () => {
     });
   });
 
+  it("farmland and industrial land: the same rows as a plot", () => {
+    for (const key of ["farmland", "industrial_land"]) {
+      const specs = buildSpecs(makeProperty({ propertyTypeKey: key, surface: null, landSurface: 300 }));
+      expect(specs.landArea).toBe(300);
+      expect([specs.rooms, specs.bathrooms, specs.furnished, specs.constructionYear]).toEqual([null, null, null, null]);
+      expect(specs.heating).toEqual([]);
+    }
+  });
+
+  it("commercial space: floor rows like an apartment, no land area", () => {
+    const specs = buildSpecs(makeProperty({ propertyTypeKey: "commercial", floor: "2", totalFloors: 4, landSurface: 3 }));
+    expect([specs.floor, specs.totalFloors, specs.landArea]).toEqual(["2", 4, null]);
+  });
+
+  it("lokal: bathrooms, heating, year; no rooms, furnishing, floor or land", () => {
+    const specs = buildSpecs(
+      makeProperty({ propertyTypeKey: "retail", roomStructure: 1, floor: "ground", landSurface: 1 }),
+    );
+    expect([specs.bathrooms, specs.constructionYear]).toEqual([1, 2005]);
+    expect(specs.heating).toEqual(["central"]);
+    expect([specs.rooms, specs.furnished, specs.floor, specs.totalFloors, specs.landArea]).toEqual([null, null, null, null, null]);
+  });
+
+  it("ugostiteljski objekat: like a house (rooms, furnishing, land area)", () => {
+    const specs = buildSpecs(makeProperty({ propertyTypeKey: "hospitality", surface: 359, landSurface: 81.3, roomStructure: 4 }));
+    expect([specs.area, specs.landArea, specs.rooms, specs.furnished, specs.floor]).toEqual([359, 81.3, 4, "furnished", null]);
+  });
+
+  it("hala: land area, no rooms or furnishing", () => {
+    const specs = buildSpecs(makeProperty({ propertyTypeKey: "warehouse", landSurface: 40 }));
+    expect([specs.landArea, specs.rooms, specs.furnished, specs.bathrooms]).toEqual([40, null, null, 1]);
+  });
+
+  it("garaža: only area, location and registration", () => {
+    const specs = buildSpecs(makeProperty({ propertyTypeKey: "garage", surface: 15, landSurface: 1 }));
+    expect(specs).toEqual({
+      propertyType: "garage",
+      area: 15,
+      landArea: null,
+      location: "Beograd, Vračar",
+      rooms: null,
+      bathrooms: null,
+      floor: null,
+      totalFloors: null,
+      furnished: null,
+      heating: [],
+      registration: "registered",
+      constructionYear: null,
+    });
+  });
+
   it("treats missing registration as not registered", () => {
     expect(buildSpecs(makeProperty({ registrationStatus: null })).registration).toBe("not_registered");
     expect(buildSpecs(makeProperty({ registrationStatus: "in_progress" })).registration).toBe("in_progress");
@@ -427,6 +505,18 @@ describe("buildFeatureList", () => {
       featureKeys: ["pool", "terrace", "elevator", "paved_road", "city_water", "city_sewage"],
     });
     expect(buildFeatureList(p)).toEqual(["pool", "terrace", "paved_road", "city_water", "city_sewage"]);
+  });
+
+  it("hala / ugostiteljski: infrastructure chips, no elevator or permits", () => {
+    for (const key of ["warehouse", "hospitality"]) {
+      const p = makeProperty({ propertyTypeKey: key, featureKeys: ["elevator", "paved_road", "building_permit"] });
+      expect(buildFeatureList(p)).toEqual(["paved_road"]);
+    }
+  });
+
+  it("farmland: infrastructure and permit chips like a plot", () => {
+    const p = makeProperty({ propertyTypeKey: "farmland", featureKeys: ["paved_road", "building_permit"] });
+    expect(buildFeatureList(p)).toEqual(["paved_road", "building_permit"]);
   });
 
   it("plot: infrastructure and permit chips", () => {
@@ -567,7 +657,8 @@ describe("getPropertyDetail", () => {
 
   it("has no legacy Serbian / raw fields (i18n phase 5)", () => {
     const detail = getPropertyDetail("100")!;
-    for (const field of ["highlights", "floor", "heating", "furnished", "elevator", "registrationStatus"]) {
+    // propertyType (the Serbian label) went with the new type keys (2026-11-05)
+    for (const field of ["highlights", "floor", "heating", "furnished", "elevator", "registrationStatus", "propertyType"]) {
       expect(detail).not.toHaveProperty(field);
     }
   });

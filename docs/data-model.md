@@ -217,7 +217,7 @@ It represents a valid property record that has passed mapping and validation and
 
 - `price: number`
 - `priceOnRequest: boolean` — `true` when the XML price is the symbolic **1 €** that agents use for "cena na upit". The internal `price` stays 1; the public API exposes `price: null`.
-- `surface: number | null` — building area in **m²**; `null` for land types (`plot`, `land`), which come with `property_surface = 0`
+- `surface: number | null` — building area in **m²**; `null` for land types (`plot`, `farmland`, `industrial_land`), which come with `property_surface = 0`
 - `landSurface: number | null` — plot area in **ares** (XML `property_land_surface`)
 - `roomStructure: number | null`
 - `bathrooms: number | null`
@@ -252,7 +252,7 @@ These are optional normalized helper fields derived from XML feature lists where
 - `isOldBuild: boolean` — `<other>` "Stara gradnja" (filter `construction=old`)
 - `conditionKey: "original" | "renovated" | "needs_renovation" | null` — `<other>` "Izvorno stanje" / "Renoviran" / "Za adaptaciju"; if several are ticked, Renoviran wins, then Za adaptaciju (filter `condition`)
 
-The snapshot `schemaVersion` is 5 since these three fields were added (2026-10-20, #16).
+The snapshot `schemaVersion` was 5 since these three fields were added (2026-10-20, #16), and is 6 since the new type keys (2026-11-05).
 
 ### Registration status
 
@@ -485,22 +485,28 @@ The backend should normalize XML property type values into internal keys.
 
 Examples:
 
-- apartment
-- house
-- plot — XML `Plac` (building plot, no house)
-- land — XML `Poljoprivredno zemljište` (farmland)
-- commercial
-- office
-- garage
-- (XML `Vikendica` is mapped to `house`)
-- other
+- apartment — `Stan`
+- house — `Kuća`, `Vikendica`
+- commercial — `Poslovni prostor`, `Kancelarija` (one and the same for the client)
+- retail — `Lokal`
+- hospitality — `Ugostiteljski objekat`
+- warehouse — `Hala`
+- garage — `Garaža`
+- plot — `Plac`, `Građevinsko zemljište` (building land; one and the same type, label "Građevinsko zemljište")
+- farmland — `Poljoprivredno zemljište` (was `land` until 2026-11-05)
+- industrial_land — `Industrijsko zemljište`
+- other — anything else
+
+Matching is case-insensitive. Types that hadn't appeared in the feed yet (Garaža, Hala, Građevinsko / Industrijsko zemljište, Poslovni prostor, Kancelarija) are spelled like the ones that had, with č/ć/š/ž/đ; if RELPER spells one differently it becomes `other`, and the validator logs every `other` label once per sync ("unmapped property types").
 
 The model should also preserve a human-readable label:
 
 - `propertyTypeKey`
-- `propertyTypeLabel`
+- `propertyTypeLabel` — the Serbian label (internal only: the title fallback and the "unmapped" log)
 
 Unknown or unmapped values may fall back to `other` if the record is otherwise usable.
+
+Which values each type shows (rooms, floor, plot area…) is the type table in `api-contract.md` (detail `specs`), kept in `PROPERTY_TYPE_RULES` (`shared/models.ts`).
 
 ---
 
@@ -546,7 +552,7 @@ A property record is accepted into the normalized runtime read model only if it 
 - `title`
 - `city`
 - `price`
-- `surface` — for land types (`plot`, `land`) either `surface` or `land_surface` is enough
+- `surface` — for land types (`plot`, `farmland`, `industrial_land`) either `surface` or `land_surface` is enough
 - `id_agent`
 
 If any of these is missing, the property is rejected and not loaded into the public read model.

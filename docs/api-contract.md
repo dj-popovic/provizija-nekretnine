@@ -227,13 +227,13 @@ Supported MVP query params:
 | Param | Repeatable | Meaning |
 |---|---|---|
 | `transactionType` | no | `sale` or `rent` |
-| `propertyType` | yes | type key(s); several = any of them. "Poslovni prostor" in the UI sends `commercial` + `office` |
+| `propertyType` | yes | type key(s); several = any of them. The "Zemljište" chip in the UI sends `plot` + `farmland` + `industrial_land` |
 | `city` | no | exact city name as listed by `GET /api/filter-options` (case-insensitive) |
 | `hood` | yes | district(s) of `city`; several = any of them. **Requires `city`**: a district name is only unique within its city ("Okolina") |
-| `roomsMin`, `roomsMax` | no | inclusive rooms range, positive numbers; a studio (garsonjera) is `0.5`. Listings without rooms (plots, farmland) never match |
+| `roomsMin`, `roomsMax` | no | inclusive rooms range, positive numbers; a studio (garsonjera) is `0.5`. Listings without rooms (land, lokal, hala, garaža — see the type table) never match |
 | `priceMin`, `priceMax` | no | inclusive, €; "cena na upit" never matches a price filter |
-| `areaMin`, `areaMax` | no | inclusive building area in **m²**; plots / farmland (no building area) never match |
-| `landAreaMin`, `landAreaMax` | no | inclusive plot area in **ares** (the `landArea` value); apartments and listings without a plot area never match |
+| `areaMin`, `areaMax` | no | inclusive building area in **m²**; land types (no building area) never match |
+| `landAreaMin`, `landAreaMax` | no | inclusive plot area in **ares** (the `landArea` value); types without a plot area (apartment, commercial, lokal, garaža) and listings without one never match |
 | `page`, `pageSize` | no | pagination (`pageSize` ≤ 100) |
 | `sort` | no | see below |
 
@@ -243,8 +243,8 @@ Supported MVP query params:
 |---|---|---|
 | `newBuild` | no | `true` = Novogradnja tab: listings with feature `new_build` or `under_construction` |
 | `bathroomsMin` | no | at least this many bathrooms |
-| `floorMin`, `floorMax` | no | inclusive floor range, **apartments only**; prizemlje = `0` |
-| `notGroundFloor` | no | `true` = apartments with a known floor above prizemlje |
+| `floorMin`, `floorMax` | no | inclusive floor range, **apartments and commercial space only**; prizemlje = `0` |
+| `notGroundFloor` | no | `true` = apartments / commercial space with a known floor above prizemlje |
 | `notTopFloor` | no | `true` = apartments with a known floor below `totalFloors` |
 | `yearMin`, `yearMax` | no | inclusive construction year range |
 | `heating` | yes | **any of** the heating keys (`central`, `gas`…; unmapped XML values pass through as-is) |
@@ -330,13 +330,13 @@ None.
 - `location`
 - `price`
 - `images`
-- `area` — building area in m²; `null` for plots / farmland
-- `landArea` — plot area in **ares**; `null` for apartments or when not provided
-- `rooms`
-- `floor` — apartments only: `"ground"` (prizemlje) or the floor number as a string (`"3"`); `null` for every other type or when unknown (same rule as `specs.floor`)
+- `area` — building area in m²; `null` for land types
+- `landArea` — plot area in **ares**; `null` for types without a plot area (see the type table in section 3) or when not provided
+- `rooms` — `null` for types without rooms
+- `floor` — apartments and commercial space only: `"ground"` (prizemlje) or the floor number as a string (`"3"`); `null` for every other type or when unknown (same rule as `specs.floor`)
 - `translations` — machine-translated titles, `{ "en": { "title": "…" }, "ru": { "title": "…" } }`, or `null` (see "Translations" in section 3)
 
-`propertyType` in list items is the stable type key (`apartment`, `house`, `commercial`, `office`, `plot`, `land`, `garage`, `other`); the frontend translates it (i18n, 2026-11-02). Before that it was the Serbian label (`"Stan"`).
+`propertyType` in list items is the stable type key (`apartment`, `house`, `commercial`, `retail`, `hospitality`, `warehouse`, `garage`, `plot`, `farmland`, `industrial_land`, `other` — see the type table in section 3); the frontend translates it (i18n, 2026-11-02). Before that it was the Serbian label (`"Stan"`). Since 2026-11-05 `office` is part of `commercial` and `land` was renamed `farmland`.
 
 The Serbian `highlights` array was removed in i18n phase 5 (2026-11-03); the frontend never used it after the card redesign. Feature chips come from `features` keys on the detail.
 
@@ -432,7 +432,6 @@ If the slug does not match the ID:
     "code": "100123",
     "title": "Moderan dvosoban stan",
     "transactionType": "sale",
-    "propertyType": "Stan",
     "price": 154500,
     "images": [
       {
@@ -577,20 +576,38 @@ The following may be `null` or omitted if not available or not reliably mapped f
 
 | Field | Type | Notes |
 |---|---|---|
-| `propertyType` | string | key: `apartment`, `house`, `plot`, `land`, `commercial`, `office`, `garage`, `other` |
-| `area` | number \| null | m². `null` for plots / farmland |
-| `landArea` | number \| null | **ares**. Always `null` for apartments |
+| `propertyType` | string | type key (see the table below) |
+| `area` | number \| null | m². `null` for land types |
+| `landArea` | number \| null | **ares**. The main area of land types; the yard of a house / hall / hospitality property; always `null` for the other types |
 | `location` | string | `"City, Hood"`; never a street or number |
 | `rooms` | number \| null | may be fractional (`2.5`) |
 | `bathrooms` | number \| null | |
-| `floor` | string \| null | `"ground"` (prizemlje) or a floor number as string. Apartments only |
-| `totalFloors` | number \| null | Apartments only |
+| `floor` | string \| null | `"ground"` (prizemlje) or a floor number as string. Apartments and commercial space only |
+| `totalFloors` | number \| null | Apartments and commercial space only |
 | `furnished` | string \| null | key: `furnished`, `semi_furnished`, `empty` |
 | `heating` | string[] | keys: `central`, `gas`, `underfloor`, `solid_fuel`, `norwegian_radiators`, `storage_heater`, `individual_central` (etažno), `heat_pump`; unknown values pass through |
 | `registration` | string | `registered`, `in_progress`, `unregisterable`, `not_registered`. **Never null:** a missing value means `not_registered` |
 | `constructionYear` | number \| null | |
 
-Type rules applied by the backend: `floor` / `totalFloors` only for apartments. Plots and farmland (`plot`, `land`) have only `propertyType`, `landArea`, `location` and `registration`; the other fields are `null` or `[]`. A `null` / empty field means the frontend skips that row.
+A `null` / empty field means the frontend skips that row. Which fields a type gets:
+
+#### Property types and their rules (2026-11-05)
+
+| Key | RELPER `property_type` | Area | Rooms | Bathrooms | Floor | Furnished | Heating | Year | Plot area (ares) | Infrastructure chips | Elevator chip |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `apartment` | Stan | m² | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | ✓ |
+| `house` | Kuća, Vikendica | m² | ✓ | ✓ | – | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| `commercial` | Poslovni prostor, Kancelarija | m² | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | – | – | ✓ |
+| `retail` | Lokal | m² | – | ✓ | – | – | ✓ | ✓ | – | – | – |
+| `hospitality` | Ugostiteljski objekat | m² | ✓ | ✓ | – | ✓ | ✓ | ✓ | ✓ | ✓ | – |
+| `warehouse` | Hala | m² | – | ✓ | – | – | ✓ | ✓ | ✓ | ✓ | – |
+| `garage` | Garaža | m² | – | – | – | – | – | – | – | – | – |
+| `plot` | Plac, Građevinsko zemljište | ares | – | – | – | – | – | – | (= area) | ✓ + permits | – |
+| `farmland` | Poljoprivredno zemljište | ares | – | – | – | – | – | – | (= area) | ✓ + permits | – |
+| `industrial_land` | Industrijsko zemljište | ares | – | – | – | – | – | – | (= area) | ✓ + permits | – |
+| `other` | any other value (logged once per sync) | m² | ✓ | ✓ | – | ✓ | ✓ | ✓ | ✓ | – | ✓ |
+
+The table lives in `shared/models.ts` (`PROPERTY_TYPE_RULES`). A value a type doesn't show is `null` (`[]` for heating) in `specs`, in the list item and in the flat detail numbers, and **filters never look at it**: e.g. a lokal with rooms in RELPER never matches a rooms filter. `registration` applies to every type. The listing page keeps the same table for its filter groups.
 
 The legacy flat fields `floor` (raw XML value), `heating` (Serbian, comma-joined), `furnished` (Serbian label), `elevator`, `registrationStatus` and `highlights` were removed in i18n phase 5 (2026-11-03); the frontend reads `specs`. The flat numbers `area`, `rooms`, `bathrooms` stay (language-neutral).
 
@@ -610,9 +627,9 @@ Priority order and keys:
 | Condition / buying | `renovated` (Renoviran), `move_in_ready` (Odmah useljiv), `mortgage_eligible` (Može na kredit) |
 
 Type rules applied by the backend:
-- infrastructure keys only for `house`, `plot`, `land` (apartments always have them, so they're noise there)
-- permit keys only for `plot`, `land`
-- `elevator` never for `house`, `plot`, `land`
+- infrastructure keys only for the types marked in the type table above (house, hospitality, hall, land types — an apartment always has them, so they're noise there)
+- permit keys only for land types (`plot`, `farmland`, `industrial_land`)
+- `elevator` only for `apartment`, `commercial`, `other`
 
 (The legacy Serbian `highlights` field was removed in i18n phase 5.)
 
@@ -661,7 +678,7 @@ RELPER requires a price, so agents enter a symbolic **1 €** for "cena na upit"
 - Image `alt` text is derived from the property title.
 - `url` is a canonical relative frontend path generated by the backend using pattern `/nekretnine/:slug-:id`.
 - `specs.registration` is derived from `<other>` XML values (`registered`, `unregisterable`, `in_progress`); a missing value is `not_registered`.
-- `propertyType` (flat field) is the agency's Serbian label (`"Stan"`, `"Lokal"`). **Temporary:** the frontend uses it only for type `other` (today "Lokal", "Ugostiteljski objekat") in Serbian, until those types get their own keys (after the i18n work). Everything else uses `specs.propertyType` (the key). It will be removed then.
+- The flat Serbian `propertyType` label was removed on 2026-11-05, when Lokal and Ugostiteljski objekat got their own keys; the type is `specs.propertyType` (the key). A RELPER type without a key is `other` (the frontend shows "Druga nekretnina").
 
 ---
 

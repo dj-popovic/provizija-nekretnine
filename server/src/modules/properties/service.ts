@@ -5,7 +5,7 @@
 // and shapes public API response models.
 // ---------------------------------------------------------------------------
 
-import { LAND_TYPE_KEYS } from "../shared/models.js";
+import { typeRules } from "../shared/models.js";
 import type { Property } from "../shared/models.js";
 import { getProperties, getAgents } from "../shared/cache.js";
 import { getEnrichment } from "../agents/enrichment.js";
@@ -28,14 +28,14 @@ export interface PropertyListItem {
   url: string;
   title: string;
   transactionType: string;
-  propertyType: string; // key: apartment, house, plot, land, …
+  propertyType: string; // key: apartment, house, plot, farmland, retail, …
   location: string;
   price: number | null; // null = "cena na upit"
   images: ApiImage[];
   area: number | null; // m²
   landArea: number | null; // ares
   rooms: number | null;
-  floor: string | null; // apartments only: "ground" (prizemlje) or the floor number ("3")
+  floor: string | null; // apartments and commercial space only: "ground" (prizemlje) or the floor number ("3")
   // Machine-translated titles (ALL CAPS like the agency's); null = not translated
   // (yet), the frontend then generates the en / ru title from the data
   translations: { en: { title: string }; ru: { title: string } } | null;
@@ -87,11 +87,42 @@ function publicPrice(property: Property): number | null {
 }
 
 // ---------------------------------------------------------------------------
-// Land area — apartments never show a plot area
+// The values the site shows for the property's type (typeRules in models.ts).
+// The cards, the spec panel AND the filters all read these, so a filter never
+// finds a value the visitor can't see. null / [] = not shown for this type.
 // ---------------------------------------------------------------------------
 
 function publicLandArea(property: Property): number | null {
-  return property.propertyTypeKey === "apartment" ? null : property.landSurface;
+  const rules = typeRules(property.propertyTypeKey);
+  return rules.land || rules.plotArea ? property.landSurface : null;
+}
+
+function publicRooms(property: Property): number | null {
+  return typeRules(property.propertyTypeKey).rooms ? property.roomStructure : null;
+}
+
+function publicBathrooms(property: Property): number | null {
+  return typeRules(property.propertyTypeKey).bathrooms ? property.bathrooms : null;
+}
+
+function publicFloor(property: Property): string | null {
+  return typeRules(property.propertyTypeKey).floor ? property.floor : null;
+}
+
+function publicTotalFloors(property: Property): number | null {
+  return typeRules(property.propertyTypeKey).floor ? property.totalFloors : null;
+}
+
+function publicFurnished(property: Property): string | null {
+  return typeRules(property.propertyTypeKey).furnished ? property.furnishedKey : null;
+}
+
+function publicHeating(property: Property): string[] {
+  return typeRules(property.propertyTypeKey).heating ? property.heatingKeys : [];
+}
+
+function publicConstructionYear(property: Property): number | null {
+  return typeRules(property.propertyTypeKey).constructionYear ? property.constructionYear : null;
 }
 
 // ---------------------------------------------------------------------------
@@ -111,9 +142,9 @@ function toListItem(property: Property): PropertyListItem {
     images: mapImages(property),
     area: property.surface,
     landArea: publicLandArea(property),
-    rooms: property.roomStructure,
-    // Same rule as the spec panel: a floor only means something for an apartment
-    floor: property.propertyTypeKey === "apartment" ? property.floor : null,
+    rooms: publicRooms(property),
+    // Same rule as the spec panel: apartments and commercial space only
+    floor: publicFloor(property),
     translations: listTranslations(property),
   };
 }
@@ -142,7 +173,7 @@ function matchesFilters(property: Property, query: PropertyListingQuery): boolea
 
   // Rooms range, inclusive; land without rooms never matches it
   if (query.roomsMin !== undefined || query.roomsMax !== undefined) {
-    const rooms = property.roomStructure;
+    const rooms = publicRooms(property);
     if (rooms === null) return false;
     if (query.roomsMin !== undefined && rooms < query.roomsMin) return false;
     if (query.roomsMax !== undefined && rooms > query.roomsMax) return false;
@@ -170,7 +201,7 @@ function matchesFilters(property: Property, query: PropertyListingQuery): boolea
     }
   }
 
-  // Land area filter is in ares, on the same value the cards show (never for apartments)
+  // Land area filter is in ares, on the same value the cards show (land, or the yard of a house…)
   if (query.landAreaMin !== undefined || query.landAreaMax !== undefined) {
     const landArea = publicLandArea(property);
     if (landArea === null) return false;
@@ -187,11 +218,12 @@ function matchesFilters(property: Property, query: PropertyListingQuery): boolea
 // A listing without the value (null / empty) never matches a set filter.
 // ---------------------------------------------------------------------------
 
-/** Floor as a number (prizemlje = 0); null when unknown or not an apartment. */
+/** Floor as a number (prizemlje = 0); null when unknown or not shown for the type. */
 function floorNumber(property: Property): number | null {
-  if (property.propertyTypeKey !== "apartment" || property.floor === null) return null;
-  if (property.floor === "ground") return 0;
-  const n = Number(property.floor);
+  const floor = publicFloor(property);
+  if (floor === null) return null;
+  if (floor === "ground") return 0;
+  const n = Number(floor);
   return Number.isFinite(n) ? n : null;
 }
 
@@ -217,20 +249,21 @@ function matchesMoreFilters(property: Property, query: PropertyListingQuery): bo
     return false;
   }
 
-  if (query.bathroomsMin !== undefined && (property.bathrooms ?? 0) < query.bathroomsMin) return false;
+  if (query.bathroomsMin !== undefined && (publicBathrooms(property) ?? 0) < query.bathroomsMin) return false;
 
   const floor = floorNumber(property);
   if (!inRange(floor, query.floorMin, query.floorMax)) return false;
   if (query.notGroundFloor && (floor === null || floor === 0)) return false;
-  if (query.notTopFloor && (floor === null || property.totalFloors === null || floor >= property.totalFloors)) {
+  const totalFloors = publicTotalFloors(property);
+  if (query.notTopFloor && (floor === null || totalFloors === null || floor >= totalFloors)) {
     return false;
   }
 
-  if (!inRange(property.constructionYear, query.yearMin, query.yearMax)) return false;
+  if (!inRange(publicConstructionYear(property), query.yearMin, query.yearMax)) return false;
 
   // Any of the chosen values
-  if (query.heating.length > 0 && !query.heating.some((h) => property.heatingKeys.includes(h))) return false;
-  if (query.furnished.length > 0 && !query.furnished.includes(property.furnishedKey ?? "")) return false;
+  if (query.heating.length > 0 && !query.heating.some((h) => publicHeating(property).includes(h))) return false;
+  if (query.furnished.length > 0 && !query.furnished.includes(publicFurnished(property) ?? "")) return false;
   if (query.construction.length > 0 && !query.construction.some((c) => matchesConstruction(property, c))) {
     return false;
   }
@@ -321,14 +354,14 @@ export interface AgentSummary {
 // can translate them. Fields that don't apply to the property type are null
 // (or [] for heating) — the frontend simply skips those rows.
 export interface PropertySpecs {
-  propertyType: string; // key: apartment, house, plot, land, …
+  propertyType: string; // key: apartment, house, plot, farmland, retail, …
   area: number | null; // m²
   landArea: number | null; // ares
   location: string; // "City, Hood" — never street / number
   rooms: number | null;
   bathrooms: number | null;
-  floor: string | null; // "ground" or a floor number — apartments only
-  totalFloors: number | null; // apartments only
+  floor: string | null; // "ground" or a floor number — apartments and commercial space only
+  totalFloors: number | null; // apartments and commercial space only
   furnished: string | null; // key: furnished, semi_furnished, empty
   heating: string[]; // keys: central, gas, underfloor, …
   registration: "registered" | "in_progress" | "unregisterable" | "not_registered";
@@ -376,16 +409,16 @@ const FEATURE_PRIORITY: readonly string[] = [
 
 const MAX_FEATURES = 12;
 
-// Infrastructure only says something for houses and land; apartments always have it
+// Infrastructure only says something for houses, halls… and land (an apartment
+// always has it); permits only for land; no elevator for a house, a garage…
 const INFRASTRUCTURE_FEATURES: ReadonlySet<string> = new Set(["paved_road", "city_water", "city_sewage"]);
-const INFRASTRUCTURE_TYPES: ReadonlySet<string> = new Set(["house", "plot", "land"]);
 const PERMIT_FEATURES: ReadonlySet<string> = new Set(["building_permit", "location_permit", "occupancy_permit"]);
-const NO_ELEVATOR_TYPES: ReadonlySet<string> = new Set(["house", "plot", "land"]);
 
 function featureApplies(key: string, propertyTypeKey: string): boolean {
-  if (INFRASTRUCTURE_FEATURES.has(key)) return INFRASTRUCTURE_TYPES.has(propertyTypeKey);
-  if (PERMIT_FEATURES.has(key)) return LAND_TYPE_KEYS.has(propertyTypeKey);
-  if (key === "elevator") return !NO_ELEVATOR_TYPES.has(propertyTypeKey);
+  const rules = typeRules(propertyTypeKey);
+  if (INFRASTRUCTURE_FEATURES.has(key)) return rules.infrastructure;
+  if (PERMIT_FEATURES.has(key)) return rules.land;
+  if (key === "elevator") return rules.elevator;
   return true;
 }
 
@@ -402,10 +435,6 @@ export interface PropertyDetail {
   code: string | null;
   title: string;
   transactionType: string;
-  // Serbian RELPER label ("Stan", "Lokal"). Temporary: the frontend uses it only for
-  // type "other" (Lokal, Ugostiteljski objekat) until those get their own keys
-  // (after-i18n backlog); everything else reads specs.propertyType (the key).
-  propertyType: string;
   price: number | null; // null = "cena na upit"
   images: ApiImage[];
   description: string | null;
@@ -495,29 +524,25 @@ function getRelatedProperties(property: Property): PropertyListItem[] {
 // ---------------------------------------------------------------------------
 // Specification panel
 //
-// Type rules (agreed with the client):
-// - floor + totalFloors only for apartments
-// - land types (plot, farmland): only type, land area, location, registration
-// - missing registration means "not registered"
+// Which rows a type gets comes from typeRules (models.ts), e.g. floor only for
+// apartments and commercial space, land types only type / land area /
+// location / registration. Missing registration means "not registered".
 // ---------------------------------------------------------------------------
 
 function buildSpecs(property: Property): PropertySpecs {
-  const isApartment = property.propertyTypeKey === "apartment";
-  const isLand = LAND_TYPE_KEYS.has(property.propertyTypeKey);
-
   return {
     propertyType: property.propertyTypeKey,
     area: property.surface,
     landArea: publicLandArea(property),
     location: property.locationLabel,
-    rooms: isLand ? null : property.roomStructure,
-    bathrooms: isLand ? null : property.bathrooms,
-    floor: isApartment ? property.floor : null,
-    totalFloors: isApartment ? property.totalFloors : null,
-    furnished: isLand ? null : property.furnishedKey,
-    heating: isLand ? [] : property.heatingKeys,
+    rooms: publicRooms(property),
+    bathrooms: publicBathrooms(property),
+    floor: publicFloor(property),
+    totalFloors: publicTotalFloors(property),
+    furnished: publicFurnished(property),
+    heating: publicHeating(property),
     registration: property.registrationStatus ?? "not_registered",
-    constructionYear: isLand ? null : property.constructionYear,
+    constructionYear: publicConstructionYear(property),
   };
 }
 
@@ -547,7 +572,6 @@ export function getPropertyDetail(propertyId: string): PropertyDetail | null {
     code: property.code,
     title: property.title,
     transactionType: property.transactionType,
-    propertyType: property.propertyTypeLabel,
     price: publicPrice(property),
     images: mapImages(property),
     description: property.description,
@@ -555,8 +579,8 @@ export function getPropertyDetail(propertyId: string): PropertyDetail | null {
     specs: buildSpecs(property),
     features: buildFeatureList(property),
     area: property.surface,
-    rooms: property.roomStructure,
-    bathrooms: property.bathrooms,
+    rooms: publicRooms(property),
+    bathrooms: publicBathrooms(property),
     translations: detailTranslations(property),
     agent: buildAgentSummary(property.agentId),
     relatedProperties: getRelatedProperties(property),
@@ -567,5 +591,5 @@ export function getPropertyDetail(propertyId: string): PropertyDetail | null {
 // Exports for tests and downstream modules
 // ---------------------------------------------------------------------------
 
-export { hasPublicFeature, matchesConstruction };
+export { hasPublicFeature, matchesConstruction, publicHeating, publicFurnished };
 export { buildPropertyUrl, mapImages, toListItem, matchesFilters, sortProperties, buildAgentSummary, getRelatedProperties, buildSpecs, buildFeatureList, FEATURE_PRIORITY };

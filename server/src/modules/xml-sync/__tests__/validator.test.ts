@@ -1,6 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { validateAndNormalize } from "../validator.js";
 import { makeRawListing } from "./fixtures.js";
+import { logger } from "../../shared/logger.js";
 
 describe("validateAndNormalize", () => {
   // -----------------------------------------------------------------------
@@ -165,6 +166,32 @@ describe("validateAndNormalize", () => {
 
     expect(result.properties).toHaveLength(0);
     expect(result.rejectedCount).toBe(1);
+  });
+
+  it("accepts the other land types with only a land surface", () => {
+    const result = validateAndNormalize(
+      ["Poljoprivredno zemljište", "Industrijsko zemljište", "Građevinsko zemljište"].map((type, i) =>
+        makeRawListing({
+          property_id: String(i + 1),
+          property_type: type,
+          property_surface: "0",
+          property_land_surface: "300",
+        }),
+      ),
+    );
+    expect(result.properties.map((p) => p.propertyTypeKey)).toEqual(["farmland", "industrial_land", "plot"]);
+  });
+
+  it("logs property types without a key once per sync", () => {
+    const info = vi.spyOn(logger, "info").mockImplementation(() => undefined);
+    validateAndNormalize([
+      makeRawListing({ property_id: "1", property_type: "Šupa" }),
+      makeRawListing({ property_id: "2", property_type: "Šupa" }),
+      makeRawListing({ property_id: "3", property_type: "Lokal" }),
+    ]);
+    const call = info.mock.calls.find((c) => String(c[1]).includes("unmapped property types"));
+    expect(call?.[0]).toEqual({ values: ["Šupa"] });
+    info.mockRestore();
   });
 
   // -----------------------------------------------------------------------

@@ -98,18 +98,23 @@ describe("normalizeProperty", () => {
     const cases: [unknown, string][] = [
       ["Stan", "apartment"],
       ["Kuća", "house"],
-      ["Plac", "plot"],
-      ["Poljoprivredno zemljište", "land"],
-      ["Garaža", "garage"],
-      ["Poslovni prostor", "commercial"],
-      ["Kancelarija", "office"],
       ["Vikendica", "house"],
+      ["Plac", "plot"],
+      ["Građevinsko zemljište", "plot"],
+      ["Poljoprivredno zemljište", "farmland"],
+      ["Industrijsko zemljište", "industrial_land"],
+      ["Poslovni prostor", "commercial"],
+      ["Kancelarija", "commercial"],
+      ["Lokal", "retail"],
+      ["Ugostiteljski objekat", "hospitality"],
+      ["Hala", "warehouse"],
+      ["Garaža", "garage"],
     ];
     for (const [xmlType, expectedKey] of cases) {
       const raw = makeRawListing({
         property_type: xmlType,
         // land types come with surface 0 and only a land surface
-        ...(expectedKey === "plot" || expectedKey === "land"
+        ...(["plot", "farmland", "industrial_land"].includes(expectedKey)
           ? { property_surface: "0", property_land_surface: "500" }
           : {}),
       });
@@ -117,6 +122,18 @@ describe("normalizeProperty", () => {
       expect(p).not.toBeNull();
       expect(p!.propertyTypeKey).toBe(expectedKey);
     }
+  });
+
+  it("matches property types case-insensitively", () => {
+    const p = normalizeProperty(makeRawListing({ property_type: "UGOSTITELJSKI OBJEKAT" }));
+    expect(p!.propertyTypeKey).toBe("hospitality");
+  });
+
+  it("labels Plac as building land (one and the same type)", () => {
+    const p = normalizeProperty(
+      makeRawListing({ property_type: "Plac", property_surface: "0", property_land_surface: "6" }),
+    );
+    expect(p!.propertyTypeLabel).toBe("Građevinsko zemljište");
   });
 
   it("maps unknown property type to 'other'", () => {

@@ -1,7 +1,8 @@
 import { logger } from "../shared/logger.js";
 import { normalizeString, parsePositiveNumber } from "../shared/utils.js";
 import type { RawXmlListing } from "./raw-listing.js";
-import { normalizeProperty, isKnownOtherValue } from "./normalizer.js";
+import { normalizeProperty, isKnownOtherValue, mapPropertyType } from "./normalizer.js";
+import { LAND_TYPE_KEYS } from "../shared/models.js";
 import type { Property } from "../shared/models.js";
 
 // ---------------------------------------------------------------------------
@@ -67,8 +68,28 @@ export function validateAndNormalize(
   );
 
   logUnknownOtherValues(properties);
+  logUnknownPropertyTypes(properties);
 
   return { properties, rejectedCount };
+}
+
+// ---------------------------------------------------------------------------
+// Unknown property types
+//
+// A RELPER type without a key (or spelled differently than expected) shows
+// as "Druga nekretnina". Log it once per sync so a key can be added.
+// ---------------------------------------------------------------------------
+
+function logUnknownPropertyTypes(properties: Property[]): void {
+  const unknown = new Set(
+    properties.filter((p) => p.propertyTypeKey === "other").map((p) => p.propertyTypeLabel),
+  );
+  if (unknown.size > 0) {
+    logger.info(
+      { values: [...unknown] },
+      "xml-sync: unmapped property types (shown as 'other')",
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -126,9 +147,7 @@ function findRejectionReason(raw: RawXmlListing): string {
   // Surface check mirrors the normalizer: land types may have only a land surface
   if (parsePositiveNumber(raw.property_surface) === undefined) {
     const landSurface = parsePositiveNumber(raw.property_land_surface);
-    const propertyType = normalizeString(raw.property_type);
-    const isLandType =
-      propertyType === "Plac" || propertyType === "Poljoprivredno zemljište";
+    const isLandType = LAND_TYPE_KEYS.has(mapPropertyType(raw.property_type).key);
 
     if (!isLandType || landSurface === undefined) {
       return `invalid or missing surface: ${String(raw.property_surface)}`;

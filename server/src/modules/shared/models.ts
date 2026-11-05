@@ -15,9 +15,86 @@ export interface PropertyImage {
   order: number;
 }
 
-// Property types that are plain land (no building): measured in ares only,
-// no rooms / bathrooms / floors / heating / furnishing.
-export const LAND_TYPE_KEYS: ReadonlySet<string> = new Set(["plot", "land"]);
+// ---------------------------------------------------------------------------
+// Property type rules (agreed with the client, 2026-11-05)
+//
+// Which values make sense for each type. The spec panel shows only these, and
+// the filters only look at these, so a filter never finds a hidden value.
+// The listing page keeps the same table for its filter groups (page-properties.js).
+// ---------------------------------------------------------------------------
+
+export interface PropertyTypeRules {
+  land: boolean; // plain land: measured in ares only, no building values at all
+  rooms: boolean;
+  bathrooms: boolean;
+  floor: boolean; // floor + total floors
+  furnished: boolean;
+  heating: boolean;
+  constructionYear: boolean;
+  plotArea: boolean; // the land around a building, in ares
+  infrastructure: boolean; // paved road, city water, city sewage chips
+  elevator: boolean;
+}
+
+const BUILDING: PropertyTypeRules = {
+  land: false,
+  rooms: true,
+  bathrooms: true,
+  floor: false,
+  furnished: true,
+  heating: true,
+  constructionYear: true,
+  plotArea: false,
+  infrastructure: false,
+  elevator: true,
+};
+
+const LAND: PropertyTypeRules = {
+  land: true,
+  rooms: false,
+  bathrooms: false,
+  floor: false,
+  furnished: false,
+  heating: false,
+  constructionYear: false,
+  plotArea: false,
+  infrastructure: true,
+  elevator: false,
+};
+
+const WITH_YARD = { plotArea: true, infrastructure: true, elevator: false };
+
+export const PROPERTY_TYPE_RULES: Readonly<Record<string, PropertyTypeRules>> = {
+  apartment: { ...BUILDING, floor: true },
+  house: { ...BUILDING, ...WITH_YARD },
+  commercial: { ...BUILDING, floor: true }, // Poslovni prostor + Kancelarija
+  retail: { ...BUILDING, rooms: false, furnished: false, elevator: false }, // Lokal
+  hospitality: { ...BUILDING, ...WITH_YARD }, // Ugostiteljski objekat
+  warehouse: { ...BUILDING, ...WITH_YARD, rooms: false, furnished: false }, // Hala
+  garage: {
+    ...BUILDING,
+    rooms: false,
+    bathrooms: false,
+    furnished: false,
+    heating: false,
+    constructionYear: false,
+    elevator: false,
+  },
+  plot: LAND, // Građevinsko zemljište (RELPER "Plac")
+  farmland: LAND, // Poljoprivredno zemljište
+  industrial_land: LAND, // Industrijsko zemljište
+  // A RELPER type without a key yet: show whatever the agency entered, except a floor
+  other: { ...BUILDING, plotArea: true },
+};
+
+export function typeRules(propertyTypeKey: string): PropertyTypeRules {
+  return PROPERTY_TYPE_RULES[propertyTypeKey] ?? PROPERTY_TYPE_RULES.other;
+}
+
+// Property types that are plain land (no building)
+export const LAND_TYPE_KEYS: ReadonlySet<string> = new Set(
+  Object.keys(PROPERTY_TYPE_RULES).filter((key) => PROPERTY_TYPE_RULES[key].land),
+);
 
 export interface Property {
   // Identity
@@ -124,7 +201,8 @@ export interface NormalizedDataset {
 
 // Bump whenever the Property / Agent shape changes, so an old JSON snapshot
 // on disk is ignored at startup instead of being served with missing fields.
-export const DATASET_SCHEMA_VERSION = 5;
+// 6: new type keys (retail, hospitality, warehouse, farmland, industrial_land; office → commercial)
+export const DATASET_SCHEMA_VERSION = 6;
 
 // ---------------------------------------------------------------------------
 // Sync status

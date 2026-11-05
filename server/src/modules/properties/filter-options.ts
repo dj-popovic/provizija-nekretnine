@@ -23,7 +23,7 @@ import type { Property } from "../shared/models.js";
 import { getProperties } from "../shared/cache.js";
 import { parseListingQuery } from "./query.js";
 import type { PropertyListingQuery } from "./query.js";
-import { hasPublicFeature, matchesConstruction, matchesFilters } from "./service.js";
+import { hasPublicFeature, matchesConstruction, matchesFilters, publicFurnished, publicHeating } from "./service.js";
 
 // A query with no filters at all (the defaults of an empty query string)
 const EMPTY_QUERY: PropertyListingQuery = (() => {
@@ -191,8 +191,8 @@ export function buildFilterOptions(
   const counts: FilterCounts = {
     feature: countBy(all, (p) => p.featureKeys.filter((k) => hasPublicFeature(p, k))),
     equipment: countBy(all, (p) => p.equipmentKeys),
-    heating: countBy(matching({ heating: [] }), (p) => p.heatingKeys),
-    furnished: countBy(matching({ furnished: [] }), (p) => [p.furnishedKey]),
+    heating: countBy(matching({ heating: [] }), (p) => publicHeating(p)),
+    furnished: countBy(matching({ furnished: [] }), (p) => [publicFurnished(p)]),
     construction: countBy(matching({ construction: [] }), (p) =>
       CONSTRUCTION_KEYS.filter((k) => matchesConstruction(p, k)),
     ),

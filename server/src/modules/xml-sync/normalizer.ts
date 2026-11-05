@@ -27,26 +27,31 @@ function mapTransactionType(value: unknown): "sale" | "rent" | null {
 // Property type mapping
 // ---------------------------------------------------------------------------
 
-// "Plac" (building plot) and "Poljoprivredno zemljište" (farmland) are kept
-// as separate keys so they can be filtered separately.
+// Matched case-insensitively. Types that haven't appeared in the feed yet
+// (Garaža, Hala, Građevinsko / Industrijsko zemljište, Poslovni prostor,
+// Kancelarija) are spelled like the ones that have, with č/ć/š/ž/đ.
+// Any other value becomes "other" and is logged once per sync (validator).
 const PROPERTY_TYPE: Record<string, { key: string; label: string }> = {
-  Stan: { key: "apartment", label: "Stan" },
-  Kuća: { key: "house", label: "Kuća" },
-  Plac: { key: "plot", label: "Plac" },
-  "Poljoprivredno zemljište": {
-    key: "land",
-    label: "Poljoprivredno zemljište",
-  },
-  Garaža: { key: "garage", label: "Garaža" },
-  "Poslovni prostor": { key: "commercial", label: "Poslovni prostor" },
-  Kancelarija: { key: "office", label: "Kancelarija" },
-  Vikendica: { key: "house", label: "Kuća" }, // a weekend house is listed as a house
+  stan: { key: "apartment", label: "Stan" },
+  kuća: { key: "house", label: "Kuća" },
+  vikendica: { key: "house", label: "Kuća" }, // a weekend house is listed as a house
+  // "Plac" is building land (Relja, 2026-11-05: one and the same type)
+  plac: { key: "plot", label: "Građevinsko zemljište" },
+  "građevinsko zemljište": { key: "plot", label: "Građevinsko zemljište" },
+  "poljoprivredno zemljište": { key: "farmland", label: "Poljoprivredno zemljište" },
+  "industrijsko zemljište": { key: "industrial_land", label: "Industrijsko zemljište" },
+  "poslovni prostor": { key: "commercial", label: "Poslovni prostor" },
+  kancelarija: { key: "commercial", label: "Poslovni prostor" }, // an office is commercial space
+  lokal: { key: "retail", label: "Lokal" },
+  "ugostiteljski objekat": { key: "hospitality", label: "Ugostiteljski objekat" },
+  hala: { key: "warehouse", label: "Hala" },
+  garaža: { key: "garage", label: "Garaža" },
 };
 
-function mapPropertyType(value: unknown): { key: string; label: string } {
+export function mapPropertyType(value: unknown): { key: string; label: string } {
   const label = normalizeString(value);
   if (!label) return { key: "other", label: "Ostalo" };
-  return PROPERTY_TYPE[label] ?? { key: "other", label };
+  return PROPERTY_TYPE[label.toLowerCase()] ?? { key: "other", label };
 }
 
 // ---------------------------------------------------------------------------

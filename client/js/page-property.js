@@ -142,10 +142,8 @@ window.PV = window.PV || {};
     var rows = '';
 
     if (s.propertyType) {
-      // Type "other" (Lokal, Ugostiteljski objekat) has no key yet: Serbian shows the agency's
-      // label, en/ru a generic text instead of the Serbian word
-      rows += specRow(t('detail.spec.type'), maps.propertyType.toUi[s.propertyType] ||
-        (i18n.lang === 'sr' ? p.propertyType : t('detail.spec.otherType')));
+      // A RELPER type without a key yet ("other") gets a generic text
+      rows += specRow(t('detail.spec.type'), maps.propertyType.toUi[s.propertyType] || t('detail.spec.otherType'));
     }
     if (s.area != null) {
       rows += specRow(t('detail.spec.area'), PV.render.formatArea(s.area));
