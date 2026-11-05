@@ -2686,14 +2686,18 @@ p, li,
     height: 100%;
 }
 .detail-summary { padding: 28px 0 0; }
+/* Title left, price always right: a long (translated) title wraps onto more lines
+   instead of pushing the price below it. Phones stack them (see max-width: 767px). */
 .detail-summary-head {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
+    flex-wrap: nowrap;
+    gap: 16px 32px;
     margin-bottom: 12px;
 }
+.detail-summary-main { flex: 1 1 auto; min-width: 0; }
+.detail-summary-head .detail-price { flex: 0 0 auto; }
 .detail-title {
     font-family: 'Playfair Display', serif;
     font-size: 30px; font-weight: 800; color: var(--primary); margin-bottom: 6px;
@@ -3075,7 +3079,7 @@ textarea.field-input { resize: none; }
 
     /* --- Detail page --- */
     .detail-title { font-size: 22px; }
-    .detail-summary-head { gap: 4px; }
+    .detail-summary-head { flex-wrap: wrap; gap: 4px; }
     .detail-price { text-align: left; }
     .detail-price-tag { font-size: 28px; }
     .detail-price-tag.is-on-request { font-size: 24px; }

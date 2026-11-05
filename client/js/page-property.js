@@ -545,7 +545,7 @@ window.PV = window.PV || {};
 
     // Title + price
     html += '<div class="detail-summary-head">';
-    html += '<div>';
+    html += '<div class="detail-summary-main">';
     html += '<h1 class="detail-title">' + esc(title) + '</h1>';
     html += '<div class="detail-location"><i class="bi bi-geo-alt" aria-hidden="true"></i> ' + esc(p.location || '') + '</div>';
     html += '</div>';
