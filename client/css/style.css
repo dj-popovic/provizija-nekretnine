@@ -2114,25 +2114,6 @@ p, li,
 .filter-chip.is-muted:hover i { color: #c9ccd1; }
 .filter-chips--sub { margin-top: 10px; }
 .filter-chips--sub .filter-chip { padding: 7px 12px; font-size: 13px; }
-/* "Zemljište" type chip: a dropdown (dropdown.js) dressed as a filter chip;
-   once a kind of land is picked it looks like an active chip */
-.pv-dd--chip .pv-dd-trigger {
-    width: auto;
-    gap: 6px;
-    padding: 8px 14px 8px 16px;
-    border-radius: 50px;
-    line-height: 1;
-}
-.pv-dd--chip:not(.has-value) .pv-dd-text { color: var(--text-dark); font-weight: 600; }
-.pv-dd--chip .pv-dd-trigger:not(:disabled):hover,
-.pv-dd--chip:not(.has-value) .pv-dd-trigger:not(:disabled):hover .pv-dd-text { border-color: var(--accent); color: var(--accent); }
-.pv-dd--chip .pv-dd-caret { font-size: 11px; color: inherit; }
-.pv-dd--chip.has-value .pv-dd-trigger,
-.pv-dd--chip.has-value .pv-dd-trigger:hover { background: var(--accent); border-color: var(--accent); color: var(--white); }
-.pv-dd--chip.has-value .pv-dd-caret { color: var(--white); }
-.pv-dd--chip.is-disabled .pv-dd-trigger { color: #a9aeb5; border-color: #ececee; background: #fafafa; cursor: default; }
-.pv-dd--chip.is-disabled .pv-dd-text { color: #a9aeb5; }
-
 /* An option indented under the one before it (the kinds of land under "Zemljište") */
 .pv-dd-option--sub { padding-left: 28px; }
 
@@ -2234,6 +2215,25 @@ p, li,
     transition: opacity .15s var(--ease-out), translate .15s var(--ease-out), visibility 0s;
 }
 .pv-dd--picker .pv-dd-panel { width: max(100%, 320px); }
+
+/* "Zemljište" type chip: a dropdown (dropdown.js) dressed as a filter chip;
+   once a kind of land is picked it looks like an active chip */
+.pv-dd--chip .pv-dd-trigger {
+    width: auto;
+    gap: 6px;
+    padding: 8px 14px 8px 16px;
+    border-radius: 50px;
+    line-height: 1;
+}
+.pv-dd--chip:not(.has-value) .pv-dd-text { color: var(--text-dark); font-weight: 600; }
+.pv-dd--chip .pv-dd-trigger:not(:disabled):hover,
+.pv-dd--chip:not(.has-value) .pv-dd-trigger:not(:disabled):hover .pv-dd-text { border-color: var(--accent); color: var(--accent); }
+.pv-dd--chip .pv-dd-caret { font-size: 11px; color: inherit; }
+.pv-dd--chip.has-value .pv-dd-trigger,
+.pv-dd--chip.has-value .pv-dd-trigger:hover { background: var(--accent); border-color: var(--accent); color: var(--white); }
+.pv-dd--chip.has-value .pv-dd-caret { color: var(--white); }
+.pv-dd--chip.is-disabled .pv-dd-trigger { color: #a9aeb5; border-color: #ececee; background: #fafafa; cursor: default; }
+.pv-dd--chip.is-disabled .pv-dd-text { color: #a9aeb5; }
 
 .pv-dd-sheet-head,
 .pv-dd-backdrop { display: none; }
