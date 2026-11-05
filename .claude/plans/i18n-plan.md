@@ -23,6 +23,7 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 | 7a | Translations file + API `translations` + frontend + all 43 listings translated here (Opus 5.5) | done | see git log |
 | 7b | API translator after each sync + form free text → Serbian + real-API smoke test | **at production** (Relja's key) | |
 | 8 | Final QA + Relja's browser check (desktop + phone) | todo, last | |
+| after | New property types (after-i18n backlog): keys + type rules, chips + Zemljište subtypes, "Cena po m²", Oglasite form — all sr/en/ru | done 2026-11-05 | 3d9d92f, bd8c819, e721f82, 659410f |
 
 ## 1. Decisions (confirmed by Relja)
 
@@ -123,6 +124,7 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 
 ### 5 — Backend cleanup — DONE
 - Removed from the public API: `highlights` (list + detail + home + agent portfolio — all via `toListItem`), detail `floor` (raw), `heating` (joined Serbian), `furnished` (label), `elevator`, `registrationStatus`. `buildHighlights` + its tests gone. Internal model unchanged → no `DATASET_SCHEMA_VERSION` bump. Contract + data-model updated. 305 tests.
+- **Update 2026-11-05:** the flat `propertyType` is gone — Lokal (`retail`) and Ugostiteljski objekat (`hospitality`) got keys with the other new types. Old note:
 - **Kept on purpose:** detail flat `propertyType` (the agency's Serbian label). Type `other` (today "Lokal" id 81, "Ugostiteljski objekat" id 88) has no key yet: Serbian shows that label in the "Tip" row, en/ru show `detail.spec.otherType` ("Other property" / "Другая недвижимость") — before, en/ru showed the Serbian word (the page test can't catch it: no č/ć/š/ž/đ). Relja (2026-11-03): these two must NOT stay "Ostalo" — they get real named types in the after-i18n types work (with Garaža, the Zemljište group…); remove the flat `propertyType` then.
 - Flat `area` / `rooms` / `bathrooms` stay (numbers).
 - Original notes (kept for reference):
@@ -183,4 +185,4 @@ All commits are **local on `main`, not pushed** (Relja pushes when he decides). 
 ## 7. Open questions
 
 - "EG" heating was assumed = etažno grejanje (Relja didn't object; confirm with the client if unsure).
-- New RELPER types seen in the feed ("Lokal", "Ugostiteljski objekat") are `other` for now → after-i18n backlog (with Garaža, Hala, Zemljište group, rent types, "Cena po m²").
+- ~~New RELPER types ("Lokal", "Ugostiteljski objekat") are `other`~~ → done 2026-11-05: every type has a key + sr/en/ru labels (`enum.propertyType`, `list.chip.*`, `list.landSub.*`, `advertise.types.*`). Types not yet seen in the feed (Garaža, Hala, Građevinsko / Industrijsko zemljište, Poslovni prostor, Kancelarija) are spelled by analogy; an unknown spelling becomes `other` and shows in the sync log as "unmapped property types".
