@@ -8,6 +8,7 @@
 import { config } from "../../config/index.js";
 import { sendEmail } from "../shared/email.js";
 import { parseVisitorLang, visitorLangRow, type VisitorLang } from "./lang.js";
+import { typeRules, LAND_TYPE_KEYS as LAND_TYPES } from "../shared/models.js";
 
 // ---------------------------------------------------------------------------
 // Accepted keys → the Serbian label used in the e-mail
@@ -53,6 +54,22 @@ function isKey(map: Record<string, string>, value: string): boolean {
   return Object.hasOwn(map, value);
 }
 
+// Which fields the form shows for the type: the listing type rules (shared/models.ts),
+// the same as the filter groups on the site; "Ostalo" shows them all. A field that
+// doesn't fit the type is ignored, so "Sobe" is required only where rooms exist.
+function formFields(propertyType: string) {
+  if (propertyType === "other") return { rooms: true, floor: true, heating: true, year: true, features: true, land: false };
+  const rules = typeRules(propertyType);
+  return {
+    rooms: rules.rooms,
+    floor: rules.floor,
+    heating: rules.heating,
+    year: rules.constructionYear,
+    features: !rules.land && propertyType !== "garage", // the "Karakteristike" filter group
+    land: rules.land, // area in ares
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Validation
 // ---------------------------------------------------------------------------
@@ -64,7 +81,7 @@ interface AdvertisePropertyPayload {
   district: string | null;
   address: string | null;
   area: number;
-  rooms: string;
+  rooms: string | null; // null for a type without rooms (Lokal, Hala, Garaža, land)
   floor: string | null;
   heating: string | null;
   yearBuilt: number | null;
@@ -100,7 +117,8 @@ export function validateAdvertisePropertyPayload(body: unknown): {
   const propertyType = typeof b.propertyType === "string" ? b.propertyType.trim() : "";
   const city = typeof b.city === "string" ? b.city.trim() : "";
   // Rooms / floor are the Serbian option text the visitor picked ("Garsonjera", "5+ soba", "Poslednji sprat")
-  const rooms = typeof b.rooms === "string" ? b.rooms.trim() : "";
+  const fields = formFields(typeof b.propertyType === "string" && isKey(PROPERTY_TYPES, b.propertyType.trim()) ? b.propertyType.trim() : "other");
+  const rooms = fields.rooms && typeof b.rooms === "string" ? b.rooms.trim() : "";
   const priceType = typeof b.priceType === "string" ? b.priceType.trim() : "";
   const description = typeof b.description === "string" ? b.description.trim() : "";
   const fullName = typeof b.fullName === "string" ? b.fullName.trim() : "";
@@ -114,10 +132,10 @@ export function validateAdvertisePropertyPayload(body: unknown): {
   // Optional fields
   const district = typeof b.district === "string" ? b.district.trim() || null : null;
   const address = typeof b.address === "string" ? b.address.trim() || null : null;
-  const floor = typeof b.floor === "string" ? b.floor.trim() || null : null;
-  const heating = typeof b.heating === "string" ? b.heating.trim() || null : null;
-  const yearBuilt = typeof b.yearBuilt === "number" ? b.yearBuilt : null;
-  const rawFeatures = Array.isArray(b.features)
+  const floor = fields.floor && typeof b.floor === "string" ? b.floor.trim() || null : null;
+  const heating = fields.heating && typeof b.heating === "string" ? b.heating.trim() || null : null;
+  const yearBuilt = fields.year && typeof b.yearBuilt === "number" ? b.yearBuilt : null;
+  const rawFeatures = fields.features && Array.isArray(b.features)
     ? b.features.filter((f): f is string => typeof f === "string").map((f) => f.trim())
     : [];
   const features = Array.from(new Set(rawFeatures));
@@ -130,7 +148,7 @@ export function validateAdvertisePropertyPayload(body: unknown): {
   if (!city) errors.push({ field: "city", message: "City is required." });
   else if (city.length > 200) errors.push({ field: "city", message: "City is too long." });
   if (isNaN(area) || area <= 0) errors.push({ field: "area", message: "Area is required and must be a positive number." });
-  if (!rooms) errors.push({ field: "rooms", message: "Rooms is required." });
+  if (fields.rooms && !rooms) errors.push({ field: "rooms", message: "Rooms is required." });
   else if (rooms.length > 50) errors.push({ field: "rooms", message: "Rooms is too long." });
   if (isNaN(expectedPrice) || expectedPrice <= 0) errors.push({ field: "expectedPrice", message: "Expected price is required and must be a positive number." });
   if (!priceType) errors.push({ field: "priceType", message: "Price type is required." });
@@ -156,7 +174,7 @@ export function validateAdvertisePropertyPayload(body: unknown): {
   return {
     data: {
       transactionType, propertyType, city, district, address,
-      area, rooms, floor, heating, yearBuilt, features,
+      area, rooms: rooms || null, floor, heating, yearBuilt, features,
       expectedPrice, priceType, description, fullName, phone, email, lang,
     },
     errors: [],
@@ -212,8 +230,8 @@ export function composeAdvertisePropertyEmail(data: AdvertisePropertyPayload): {
       ${row("Tip nekretnine", propertyType)}
       ${row("Grad", escapeHtml(data.city))}
       ${optionalRows.join("\n      ")}
-      ${row("Površina", data.area + " m²")}
-      ${row("Sobe", escapeHtml(data.rooms))}
+      ${row("Površina", data.area + (LAND_TYPES.has(data.propertyType) ? " ar" : " m²"))}
+      ${data.rooms ? row("Sobe", escapeHtml(data.rooms)) : ""}
       ${row("Očekivana cena", formatPrice(data.expectedPrice))}
       ${row("Tip cene", PRICE_TYPES[data.priceType])}
       ${rowLast("Opis", escapeHtml(data.description).replace(/\n/g, "<br>"))}

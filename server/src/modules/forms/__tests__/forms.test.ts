@@ -90,6 +90,27 @@ describe("advertise-property e-mail", () => {
     expect(fieldsOf(validateAdvertisePropertyPayload(advertiseBody({ propertyType: "land" })).errors)).toEqual(["propertyType"]);
   });
 
+  it("ignores fields that don't fit the type: no rooms for a garage, ares for land", () => {
+    const garage = validateAdvertisePropertyPayload(
+      advertiseBody({ propertyType: "garage", rooms: undefined, floor: "1. sprat", heating: "Gas", yearBuilt: 2000, features: ["lift"] }),
+    );
+    expect(garage.errors).toEqual([]);
+    expect([garage.data!.rooms, garage.data!.floor, garage.data!.heating, garage.data!.yearBuilt]).toEqual([null, null, null, null]);
+    expect(garage.data!.features).toEqual([]);
+    const garageHtml = composeAdvertisePropertyEmail(garage.data!).html;
+    expect(garageHtml).not.toContain("Sobe");
+    expect(garageHtml).toContain("64 m²");
+
+    const plot = validateAdvertisePropertyPayload(advertiseBody({ propertyType: "plot", rooms: "Garsonjera", area: 6 }));
+    expect(plot.data!.rooms).toBeNull();
+    expect(composeAdvertisePropertyEmail(plot.data!).html).toContain("6 ar");
+
+    // Commercial space keeps rooms + floor; an apartment still needs rooms
+    const office = validateAdvertisePropertyPayload(advertiseBody({ propertyType: "commercial", floor: "2. sprat" }));
+    expect([office.data!.rooms, office.data!.floor]).toEqual(["Garsonjera", "2. sprat"]);
+    expect(fieldsOf(validateAdvertisePropertyPayload(advertiseBody({ rooms: undefined })).errors)).toEqual(["rooms"]);
+  });
+
   it("has no language row when the form didn't send one", () => {
     const { data } = validateAdvertisePropertyPayload(advertiseBody());
     expect(composeAdvertisePropertyEmail(data!).html).not.toContain("Jezik posetioca");

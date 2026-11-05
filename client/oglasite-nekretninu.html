@@ -159,7 +159,7 @@
                                     <input type="number" id="og-povrsina" name="area" class="form-control" placeholder="Npr. 75" min="1" data-i18n-attr="placeholder:advertise.areaPh">
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4" data-type-field="rooms">
                                 <div class="form-group-custom">
                                     <label for="og-sobe" data-i18n="advertise.rooms">Broj soba</label>
                                     <select id="og-sobe" name="rooms" class="form-select">
@@ -167,7 +167,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4" data-type-field="floor">
                                 <div class="form-group-custom">
                                     <label for="og-sprat" data-i18n="advertise.floor">Sprat</label>
                                     <select id="og-sprat" name="floor" class="form-select">
@@ -175,7 +175,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6" data-type-field="heating">
                                 <div class="form-group-custom">
                                     <label for="og-grejanje" data-i18n="advertise.heating">Grejanje</label>
                                     <select id="og-grejanje" name="heating" class="form-select">
@@ -183,13 +183,13 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6" data-type-field="year">
                                 <div class="form-group-custom">
                                     <label for="og-godina" data-i18n="advertise.year">Godina izgradnje</label>
                                     <input type="number" id="og-godina" name="yearBuilt" class="form-control" placeholder="Npr. 2015" min="1900" max="2030" data-i18n-attr="placeholder:advertise.yearPh">
                                 </div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-12" data-type-field="features">
                                 <div class="form-group-custom">
                                     <label data-i18n="advertise.features">Dodatne karakteristike</label>
                                     <div class="row g-2" style="margin-top:4px;">
@@ -332,6 +332,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/renderers.js"></script>
     <script src="js/forms.js"></script>
     <script src="js/script.js"></script>
     <script src="js/scroll-top.js"></script>

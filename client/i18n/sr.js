@@ -307,6 +307,12 @@ PV.i18n.add('sr', {
   },
 
   // Form fields shared by the forms (inquiry, contact, advertise)
+  // Oglasite form: the area label switches to ares for land (forms.js)
+  advertise: {
+    area: 'Površina (m²)',
+    areaLand: 'Površina (ari)',
+  },
+
   form: {
     fullName: 'Ime i prezime',
     phone: 'Telefon',

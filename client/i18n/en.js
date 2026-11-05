@@ -469,6 +469,7 @@ PV.i18n.add('en', {
     address: 'Street and number (optional)',
     addressPh: 'e.g. Bulevar oslobođenja 10',
     area: 'Area (m²)',
+    areaLand: 'Area (ares)',
     areaPh: 'e.g. 75',
     rooms: 'Number of rooms',
     roomOpt: { studio: 'Studio', r1: '1 room', r2: '2 rooms', r3: '3 rooms', r4: '4 rooms', r5plus: '5+ rooms' },

@@ -233,9 +233,29 @@ window.PV = window.PV || {};
     return (document.getElementById(id).value || '').trim();
   }
 
+  // Fields that fit the chosen type: the listing page's filter groups (renderers.js);
+  // "Ostalo" shows them all. A hidden field is not sent, so the agency never gets
+  // "Sobe: Garsonjera" for a garage or a plot.
+  function typeFieldFits(type, field) {
+    return type === 'other' || PV.maps.propertyType.hasGroup(type, field);
+  }
+
+  function syncTypeFields(form) {
+    var type = fieldValue('og-tip');
+    form.querySelectorAll('[data-type-field]').forEach(function (el) {
+      el.hidden = !typeFieldFits(type, el.dataset.typeField);
+    });
+    // Land is measured in ares
+    var isLand = PV.maps.propertyType.chips.zemljiste.indexOf(type) !== -1;
+    form.querySelector('label[for="og-povrsina"]').textContent = isLand ? t('advertise.areaLand') : t('advertise.area');
+  }
+
   function initAdvertiseForm() {
     var form = document.getElementById('advertiseForm');
     if (!form) return;
+
+    syncTypeFields(form);
+    document.getElementById('og-tip').addEventListener('change', function () { syncTypeFields(form); });
 
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
@@ -251,7 +271,8 @@ window.PV = window.PV || {};
       var propertyType = fieldValue('og-tip');
       var city = fieldValue('og-grad');
       var area = parseInt(document.getElementById('og-povrsina').value, 10);
-      var rooms = fieldValue('og-sobe');
+      var fits = function (field) { return typeFieldFits(propertyType, field); };
+      var rooms = fits('rooms') ? fieldValue('og-sobe') : '';
       var expectedPrice = parseInt(document.getElementById('og-cena').value, 10);
       var priceType = fieldValue('og-pregovaranje');
       var description = fieldValue('og-opis');
@@ -273,15 +294,15 @@ window.PV = window.PV || {};
       // Collect optional fields
       var district = fieldValue('og-opstina');
       var address = fieldValue('og-adresa');
-      var floor = fieldValue('og-sprat');
-      var heating = fieldValue('og-grejanje');
-      var yearBuilt = parseInt(document.getElementById('og-godina').value, 10);
+      var floor = fits('floor') ? fieldValue('og-sprat') : '';
+      var heating = fits('heating') ? fieldValue('og-grejanje') : '';
+      var yearBuilt = fits('year') ? parseInt(document.getElementById('og-godina').value, 10) : NaN;
 
       // Collect features
       var features = [];
       featureCheckboxes.forEach(function (f) {
         var cb = document.getElementById(f.id);
-        if (cb && cb.checked) features.push(f.value);
+        if (cb && cb.checked && fits('features')) features.push(f.value);
       });
 
       // Build body
@@ -290,7 +311,6 @@ window.PV = window.PV || {};
         propertyType: propertyType,
         city: city,
         area: area,
-        rooms: rooms,
         expectedPrice: expectedPrice,
         priceType: priceType,
         description: description,
@@ -301,6 +321,7 @@ window.PV = window.PV || {};
       };
 
       // Add optional fields only if present
+      if (rooms) body.rooms = rooms;
       if (district) body.district = district;
       if (address) body.address = address;
       if (floor) body.floor = floor;

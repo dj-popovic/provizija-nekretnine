@@ -1291,10 +1291,11 @@ Supported MVP payload fields:
 
 - `transactionType`: `sale` | `rent`
 - `propertyType`: `apartment` | `house` | `commercial` | `retail` | `hospitality` | `warehouse` | `garage` | `plot` | `farmland` | `industrial_land` | `other` (the listing type keys; `land` was replaced by the three land types on 2026-11-05)
+- Fields that don't fit the type are ignored (2026-11-05, same rules as the listing filters; `other` takes them all): `rooms` (required only for apartment, house, commercial, hospitality, other), `floor` (apartment, commercial), `heating` and `yearBuilt` (not for garage / land), `features` (not for garage / land). For land types `area` is in ares and the e-mail says "ar".
 - `priceType`: `fixed` | `negotiable` | `urgent`
 - `features`: array of `lift` | `parking` | `terrace` | `pool` | `yard` | `airConditioning` | `internet` | `alarm` (duplicates are dropped)
 - Any other value of these four → `400` with that field in `details`.
-- `rooms` (required, ≤ 50 chars) and `floor` (optional, ≤ 50 chars) are the **Serbian text** of the chosen option, e.g. `"Garsonjera"`, `"5+ soba"`, `"Prizemlje"`, `"Poslednji sprat"` — like `heating`. (They were numbers before 2026-11-03: a studio could not be sent and the floor never reached the e-mail.)
+- `rooms` (required for types with rooms, see above; ≤ 50 chars) and `floor` (optional, ≤ 50 chars) are the **Serbian text** of the chosen option, e.g. `"Garsonjera"`, `"5+ soba"`, `"Prizemlje"`, `"Poslednji sprat"` — like `heating`. (They were numbers before 2026-11-03: a studio could not be sent and the floor never reached the e-mail.)
 - `area`, `expectedPrice` (required) and `yearBuilt` (optional) are numbers.
 - Optional `lang` (`"sr"` | `"en"` | `"ru"`): the site language of the visitor. The e-mail stays Serbian and gets a "Jezik posetioca: srpski / engleski / ruski" row. Any other value → `400` (`details[].field = "lang"`); missing → no row.
 - The e-mail to the agency shows Serbian labels for the keys ("Prodaja", "Stan", "Po dogovoru", "Terasa, Klima").
@@ -1307,7 +1308,7 @@ Required in MVP:
 - `propertyType`
 - `city`
 - `area`
-- `rooms`
+- `rooms` (only for types with rooms)
 - `expectedPrice`
 - `priceType`
 - `description`
