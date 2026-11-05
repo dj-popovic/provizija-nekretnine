@@ -24,13 +24,16 @@ window.PV = window.PV || {};
     propertyType: {
       // Type chip / select value → API type keys (RELPER's Kancelarija is
       // already "commercial" in the API)
+      // "Zemljište" is one chip for the three land types (it opens them as subtypes)
       chips: {
         stan: ['apartment'],
         kuca: ['house'],
-        plac: ['plot'],
-        zemljiste: ['farmland'],
+        zemljiste: ['plot', 'farmland', 'industrial_land'],
         poslovni: ['commercial'],
+        lokal: ['retail'],
         garaza: ['garage'],
+        hala: ['warehouse'],
+        ugostiteljski: ['hospitality'],
       },
       toUi: i18n.labels('enum.propertyType'),
     },

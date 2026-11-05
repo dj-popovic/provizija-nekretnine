@@ -60,12 +60,15 @@ window.PV = window.PV || {};
 
   var TYPE_CHIPS = PV.maps.propertyType.chips;
   // Same labels as the type chips on the listing page
-  var TYPE_LABEL_KEYS = { stan: 'apartment', kuca: 'house', plac: 'plot', zemljiste: 'land', poslovni: 'commercial', garaza: 'garage' };
+  var TYPE_LABEL_KEYS = {
+    stan: 'apartment', kuca: 'house', zemljiste: 'land', poslovni: 'commercial',
+    lokal: 'retail', garaza: 'garage', hala: 'warehouse', ugostiteljski: 'hospitality',
+  };
 
   // Same rule as the listing chips: these always, any other type only when the feed has it
   var CORE_TYPES = {
-    sale: ['stan', 'kuca', 'plac', 'zemljiste', 'poslovni'],
-    rent: ['stan', 'kuca', 'poslovni'],
+    sale: ['stan', 'kuca', 'zemljiste', 'poslovni', 'lokal', 'garaza'],
+    rent: ['stan', 'kuca', 'poslovni', 'lokal', 'garaza', 'hala'],
   };
 
   function readPrice(form, name) {

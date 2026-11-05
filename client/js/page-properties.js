@@ -31,18 +31,42 @@ window.PV = window.PV || {};
   var yearMaxEl = document.getElementById('yearMax');
   var plotMinEl = document.getElementById('plotMin');
   var plotMaxEl = document.getElementById('plotMax');
+  var landSubEl = document.getElementById('landSubtypes');
 
   var TYPE_CHIPS = PV.maps.propertyType.chips;
 
   // Chips always shown on a tab; any other chip only when the feed has that type
+  // (agreed with the client, 2026-11-05)
   var CORE_CHIPS = {
-    sale: ['stan', 'kuca', 'plac', 'zemljiste', 'poslovni'],
-    rent: ['stan', 'kuca', 'poslovni'],
+    sale: ['stan', 'kuca', 'zemljiste', 'poslovni', 'lokal', 'garaza'],
+    rent: ['stan', 'kuca', 'poslovni', 'lokal', 'garaza', 'hala'],
     new: ['stan', 'kuca', 'poslovni'],
   };
 
-  // Land types: no rooms, area in ares
-  var LAND_TYPES = ['plot', 'farmland', 'industrial_land'];
+  // Land types (the "Zemljište" chip): no rooms, area in ares
+  var LAND_TYPES = TYPE_CHIPS.zemljiste;
+
+  // Old links: Kancelarija is part of Poslovni prostor, "land" was farmland
+  var OLD_TYPE_KEYS = { office: 'commercial', land: 'farmland' };
+
+  // Which filter groups fit each type: the same table as PROPERTY_TYPE_RULES in the
+  // backend (server/src/modules/shared/models.ts). The names are the data-scope
+  // values in nekretnine.html; "rooms" is the Broj soba dropdown.
+  var BUILDING_GROUPS = ['rooms', 'bathrooms', 'year', 'heating', 'furnished', 'construction', 'condition', 'features', 'equipment'];
+  var NO_ROOMS_GROUPS = BUILDING_GROUPS.filter(function (g) { return g !== 'rooms' && g !== 'furnished'; });
+  var TYPE_GROUPS = {
+    apartment: BUILDING_GROUPS.concat('floor'),
+    house: BUILDING_GROUPS.concat('plotArea', 'infra'),
+    commercial: BUILDING_GROUPS.concat('floor'),
+    retail: NO_ROOMS_GROUPS,
+    hospitality: BUILDING_GROUPS.concat('plotArea', 'infra'),
+    warehouse: NO_ROOMS_GROUPS.concat('plotArea', 'infra'),
+    garage: [],
+    plot: ['infra'],
+    farmland: ['infra'],
+    industrial_land: ['infra'],
+  };
+  var OTHER_TYPE_GROUPS = BUILDING_GROUPS.concat('plotArea'); // a RELPER type without a key yet
 
   // --- Rooms: the feed stores a studio (garsonjera) as 0.5 rooms ---
   // Hints under the numbers: list.roomHint.r2_5 = "dvoiposoban"
@@ -199,9 +223,10 @@ window.PV = window.PV || {};
     var tab = params.get('newBuild') === 'true' ? 'new' : (params.get('transactionType') === 'rent' ? 'rent' : 'sale');
     filters = emptyFilters(tab, params.get('sort') || 'newest');
 
-    var types = params.getAll('propertyType').filter(Boolean);
+    var types = params.getAll('propertyType').filter(Boolean).map(function (k) { return OLD_TYPE_KEYS[k] || k; });
     var chip = chipFor(types);
-    filters.propertyTypes = chip && chip !== 'sve' ? TYPE_CHIPS[chip].slice() : types;
+    if (chip === 'zemljiste') filters.propertyTypes = LAND_TYPES.filter(function (k) { return types.indexOf(k) !== -1; });
+    else filters.propertyTypes = chip && chip !== 'sve' ? TYPE_CHIPS[chip].slice() : types;
 
     filters.city = params.get('city') || undefined;
     filters.hoods = filters.city ? params.getAll('hood').filter(Boolean) : [];
@@ -303,18 +328,38 @@ window.PV = window.PV || {};
       var empty = optionsLoaded && !isActive && keys.every(function (k) { return !counts[k]; });
       chip.classList.toggle('is-muted', empty);
       chip.disabled = empty;
+      if (val === 'zemljiste') chip.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+    });
+    syncLandSubtypes(active === 'zemljiste', counts);
+  }
+
+  // The land subtypes under an active "Zemljište" chip. None lit = all three;
+  // a lit one narrows the search to it (several can be lit).
+  function syncLandSubtypes(open, counts) {
+    if (!landSubEl) return;
+    landSubEl.hidden = !open;
+    var whole = filters.propertyTypes.length === LAND_TYPES.length;
+    landSubEl.querySelectorAll('.filter-chip').forEach(function (chip) {
+      var key = chip.dataset.land;
+      var on = open && !whole && filters.propertyTypes.indexOf(key) !== -1;
+      chip.classList.toggle('active', on);
+      chip.setAttribute('aria-pressed', on ? 'true' : 'false');
+      var empty = optionsLoaded && !on && !counts[key];
+      chip.classList.toggle('is-muted', empty);
+      chip.disabled = empty;
     });
   }
 
-  // Plots / farmland: rooms off, area in ares
+  // Land: area in ares. Types without rooms (land, Lokal, Hala, Garaža): rooms off.
   function syncLandMode() {
     var land = isLandMode();
     if (areaLabel) areaLabel.textContent = t(land ? 'list.areaLand' : 'list.area');
     if (areaUnit) areaUnit.textContent = t(land ? 'list.unitAres' : 'list.unitM2');
     if (sqmMinEl) { sqmMinEl.step = land ? '1' : '5'; sqmMinEl.setAttribute('aria-label', t(land ? 'list.areaLandFrom' : 'list.areaFrom')); }
     if (sqmMaxEl) { sqmMaxEl.step = land ? '1' : '5'; sqmMaxEl.setAttribute('aria-label', t(land ? 'list.areaLandTo' : 'list.areaTo')); }
-    ui.roomsMin.setDisabled(land, '—');
-    ui.roomsMax.setDisabled(land, '—');
+    var noRooms = !groupVisible('rooms');
+    ui.roomsMin.setDisabled(noRooms, '—');
+    ui.roomsMax.setDisabled(noRooms, '—');
   }
 
   // City and district dropdowns from the last filter-options answer.
@@ -352,39 +397,42 @@ window.PV = window.PV || {};
   // "Više filtera" (#16)
   // ===========================
 
-  // Which groups fit the chosen type (data-scope in the HTML)
-  function scopeVisible(scope) {
+  // A filter group fits when any chosen type has it (all of them fit "Sve")
+  function groupVisible(group) {
     var types = filters.propertyTypes;
-    var land = isLandMode();
-    function anyOf(list) {
-      return !types.length || types.some(function (t) { return list.indexOf(t) !== -1; });
-    }
+    return !types.length || types.some(function (type) {
+      return (TYPE_GROUPS[type] || OTHER_TYPE_GROUPS).indexOf(group) !== -1;
+    });
+  }
+
+  // data-scope in the HTML: group names, plus 'not-new' (hidden on the Novogradnja tab) and 'all'
+  function scopeVisible(scope) {
     return scope.split(' ').every(function (s) {
-      if (s === 'building') return !land;
-      if (s === 'apartment') return anyOf(['apartment']);
-      if (s === 'plot') return !land && anyOf(['house']);
-      if (s === 'infra') return anyOf(['house', 'hospitality', 'warehouse'].concat(LAND_TYPES));
+      if (s === 'all') return true;
       if (s === 'not-new') return !filters.newBuild;
-      return true; // 'all'
+      return groupVisible(s);
     });
   }
 
   // A group that no longer fits the type drops its values, so nothing invisible filters
   function clearHiddenValues() {
-    if (!scopeVisible('building')) {
-      filters.bathroomsMin = filters.yearMin = filters.yearMax = undefined;
-      ['heating', 'furnished', 'construction', 'condition', 'equipment'].forEach(function (k) { filters[k] = []; });
-      filters.features = filters.features.filter(function (k) { return INFRA_KEYS.indexOf(k) !== -1; });
-    }
-    if (!scopeVisible('apartment')) {
+    function hidden(group) { return !groupVisible(group); }
+    if (hidden('rooms')) filters.roomsMin = filters.roomsMax = undefined;
+    if (hidden('bathrooms')) filters.bathroomsMin = undefined;
+    if (hidden('floor')) {
       filters.floorMin = filters.floorMax = undefined;
       filters.notGroundFloor = filters.notTopFloor = false;
     }
-    if (!scopeVisible('infra')) {
+    if (hidden('year')) filters.yearMin = filters.yearMax = undefined;
+    ['heating', 'furnished', 'condition', 'equipment'].forEach(function (k) { if (hidden(k)) filters[k] = []; });
+    if (hidden('construction') || filters.newBuild) filters.construction = [];
+    if (hidden('features')) {
+      filters.features = filters.features.filter(function (k) { return INFRA_KEYS.indexOf(k) !== -1; });
+    }
+    if (hidden('infra')) {
       filters.features = filters.features.filter(function (k) { return INFRA_KEYS.indexOf(k) === -1; });
     }
-    if (!scopeVisible('not-new')) filters.construction = [];
-    if (!scopeVisible('plot') && !isLandMode()) filters.landAreaMin = filters.landAreaMax = undefined;
+    if (hidden('plotArea') && !isLandMode()) filters.landAreaMin = filters.landAreaMax = undefined;
   }
 
   // A muted chip (no listing has that value) is disabled: clicking it does nothing
@@ -803,12 +851,9 @@ window.PV = window.PV || {};
           setInput(sqmMinEl, undefined);
           setInput(sqmMaxEl, undefined);
         }
-        if (isLandMode()) {
-          filters.roomsMin = filters.roomsMax = undefined;
-          ui.roomsMin.setValue('');
-          ui.roomsMax.setValue('');
-        }
         clearHiddenValues();
+        ui.roomsMin.setValue(filters.roomsMin !== undefined ? String(filters.roomsMin) : '');
+        ui.roomsMax.setValue(filters.roomsMax !== undefined ? String(filters.roomsMax) : '');
 
         syncTypeChips();
         syncLandMode();
@@ -816,6 +861,26 @@ window.PV = window.PV || {};
         loadOptions(); // counts follow the type
       });
     });
+
+    // Land subtypes: the first click narrows "all three" to one; clearing the last one
+    // (or lighting all three) goes back to the whole group. Units and filters stay
+    // the same within the group, so only the type list and the counts change.
+    if (landSubEl) {
+      landSubEl.addEventListener('click', function (e) {
+        var chip = e.target.closest('.filter-chip');
+        if (!chip || chip.disabled) return;
+        var key = chip.dataset.land;
+        var whole = filters.propertyTypes.length === LAND_TYPES.length;
+        var picked = whole ? [] : filters.propertyTypes.slice();
+        var at = picked.indexOf(key);
+        if (at === -1) picked.push(key); else picked.splice(at, 1);
+        filters.propertyTypes = picked.length && picked.length < LAND_TYPES.length
+          ? LAND_TYPES.filter(function (k) { return picked.indexOf(k) !== -1; })
+          : LAND_TYPES.slice();
+        syncTypeChips();
+        loadOptions();
+      });
+    }
   }
 
   function readNumber(el) {

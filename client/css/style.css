@@ -2114,6 +2114,8 @@ p, li,
 .filter-chip.is-muted:hover i { color: #c9ccd1; }
 .filter-chips--sub { margin-top: 10px; }
 .filter-chips--sub .filter-chip { padding: 7px 12px; font-size: 13px; }
+.filter-chip-caret { display: inline-block; margin-left: 6px; font-size: 11px; transition: rotate .2s ease-out; }
+.filter-chip.active .filter-chip-caret { rotate: 180deg; }
 
 @media (prefers-reduced-motion: reduce) {
     .more-filters,

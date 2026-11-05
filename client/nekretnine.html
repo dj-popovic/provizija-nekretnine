@@ -95,7 +95,8 @@
                 <div class="filter-panel-title"><i class="bi bi-sliders" aria-hidden="true"></i> <span data-i18n="list.filterTitle">Filtriraj nekretnine</span></div>
                 <div class="row g-4">
 
-                    <!-- Tip nekretnine (Garaža only appears when the feed has one) -->
+                    <!-- Tip nekretnine: which chips a tab always shows is CORE_CHIPS in page-properties.js,
+                         the rest appear only when the feed has that type. "Zemljište" opens its subtypes. -->
                     <div class="col-12">
                         <div class="filter-group">
                             <span class="filter-label" id="lblTip" data-i18n="list.type">Tip nekretnine</span>
@@ -103,10 +104,17 @@
                                 <button type="button" class="filter-chip active" data-filter="tip" data-val="sve" aria-pressed="true" data-i18n="list.chip.all">Sve</button>
                                 <button type="button" class="filter-chip" data-filter="tip" data-val="stan" aria-pressed="false" data-i18n="list.chip.apartment">Stan</button>
                                 <button type="button" class="filter-chip" data-filter="tip" data-val="kuca" aria-pressed="false" data-i18n="list.chip.house">Kuća</button>
-                                <button type="button" class="filter-chip" data-filter="tip" data-val="plac" aria-pressed="false" data-i18n="list.chip.plot">Plac</button>
-                                <button type="button" class="filter-chip" data-filter="tip" data-val="zemljiste" aria-pressed="false" data-i18n="list.chip.land">Zemljište</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="zemljiste" aria-pressed="false" aria-expanded="false" aria-controls="landSubtypes"><span data-i18n="list.chip.land">Zemljište</span><i class="bi bi-chevron-down filter-chip-caret" aria-hidden="true"></i></button>
                                 <button type="button" class="filter-chip" data-filter="tip" data-val="poslovni" aria-pressed="false" data-i18n="list.chip.commercial">Poslovni prostor</button>
-                                <button type="button" class="filter-chip" data-filter="tip" data-val="garaza" aria-pressed="false" hidden data-i18n="list.chip.garage">Garaža</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="lokal" aria-pressed="false" data-i18n="list.chip.retail">Lokal</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="garaza" aria-pressed="false" data-i18n="list.chip.garage">Garaža</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="hala" aria-pressed="false" hidden data-i18n="list.chip.warehouse">Hala</button>
+                                <button type="button" class="filter-chip" data-filter="tip" data-val="ugostiteljski" aria-pressed="false" hidden data-i18n="list.chip.hospitality">Ugostiteljski objekat</button>
+                            </div>
+                            <div class="filter-chips filter-chips--sub" id="landSubtypes" role="group" aria-label="Vrsta zemljišta" data-i18n-attr="aria-label:list.landKind" hidden>
+                                <button type="button" class="filter-chip" data-land="plot" aria-pressed="false" data-i18n="list.landSub.plot">Građevinsko</button>
+                                <button type="button" class="filter-chip" data-land="farmland" aria-pressed="false" data-i18n="list.landSub.farmland">Poljoprivredno</button>
+                                <button type="button" class="filter-chip" data-land="industrial_land" aria-pressed="false" data-i18n="list.landSub.industrial">Industrijsko</button>
                             </div>
                         </div>
                     </div>
@@ -150,7 +158,7 @@
                         </div>
                     </div>
 
-                    <!-- Kvadratura od–do; for Plac / Zemljište it becomes Površina in ares -->
+                    <!-- Kvadratura od–do; for Zemljište it becomes Površina in ares -->
                     <div class="col-12 col-md-6">
                         <div class="filter-group">
                             <span class="filter-label" id="areaLabel" data-i18n="list.area">Kvadratura (m²)</span>
@@ -166,19 +174,19 @@
                 </div>
 
                 <!-- VIŠE FILTERA (#16): opens in place from the actions row.
-                     data-scope hides a group when it doesn't fit the chosen type (page-properties.js). -->
+                     data-scope hides a group when it doesn't fit the chosen type (TYPE_GROUPS in page-properties.js). -->
                 <div class="more-filters" id="moreFilters">
                     <div class="more-filters-inner" id="moreFiltersInner" inert>
                         <div class="more-filters-body">
 
                             <div class="row g-4">
-                                <div class="col-12 col-md-6 col-xl-3" data-scope="building">
+                                <div class="col-12 col-md-6 col-xl-3" data-scope="bathrooms">
                                     <div class="filter-group">
                                         <span class="filter-label" data-i18n="list.bathrooms">Kupatila</span>
                                         <div id="bathSelect"></div>
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-xl-3" data-scope="apartment">
+                                <div class="col-12 col-md-6 col-xl-3" data-scope="floor">
                                     <div class="filter-group">
                                         <span class="filter-label" data-i18n="list.floor">Sprat</span>
                                         <div class="range-selects">
@@ -189,7 +197,7 @@
                                         <div class="filter-chips filter-chips--sub" id="floorChips"></div>
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-xl-3" data-scope="building">
+                                <div class="col-12 col-md-6 col-xl-3" data-scope="year">
                                     <div class="filter-group">
                                         <span class="filter-label" data-i18n="list.year">Godina izgradnje</span>
                                         <div class="price-inputs">
@@ -199,7 +207,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-xl-3" data-scope="plot">
+                                <div class="col-12 col-md-6 col-xl-3" data-scope="plotArea">
                                     <div class="filter-group">
                                         <span class="filter-label" data-i18n="list.plotArea">Površina placa (ari)</span>
                                         <div class="price-inputs">
@@ -214,19 +222,19 @@
 
                             <!-- Chip groups: filled by page-properties.js; a chip with no listing is dimmed -->
                             <div class="more-groups">
-                                <div class="filter-group" data-scope="building">
+                                <div class="filter-group" data-scope="heating">
                                     <span class="filter-label" data-i18n="list.heating">Grejanje</span>
                                     <div class="filter-chips" data-group="heating" role="group" aria-label="Grejanje" data-i18n-attr="aria-label:list.heating"></div>
                                 </div>
-                                <div class="filter-group" data-scope="building">
+                                <div class="filter-group" data-scope="furnished">
                                     <span class="filter-label" data-i18n="list.furnished">Opremljenost</span>
                                     <div class="filter-chips" data-group="furnished" role="group" aria-label="Opremljenost" data-i18n-attr="aria-label:list.furnished"></div>
                                 </div>
-                                <div class="filter-group" data-scope="building not-new">
+                                <div class="filter-group" data-scope="construction not-new">
                                     <span class="filter-label" data-i18n="list.construction">Gradnja</span>
                                     <div class="filter-chips" data-group="construction" role="group" aria-label="Gradnja" data-i18n-attr="aria-label:list.construction"></div>
                                 </div>
-                                <div class="filter-group" data-scope="building">
+                                <div class="filter-group" data-scope="condition">
                                     <span class="filter-label" data-i18n="list.condition">Stanje</span>
                                     <div class="filter-chips" data-group="condition" role="group" aria-label="Stanje" data-i18n-attr="aria-label:list.condition"></div>
                                 </div>
@@ -236,7 +244,7 @@
                                 </div>
                             </div>
 
-                            <div class="filter-group more-section" data-scope="building">
+                            <div class="filter-group more-section" data-scope="features">
                                 <span class="filter-label" data-i18n="list.features">Karakteristike</span>
                                 <div class="filter-chips" data-group="feature" role="group" aria-label="Karakteristike" data-i18n-attr="aria-label:list.features"></div>
                             </div>
@@ -246,7 +254,7 @@
                                     <span class="filter-label" data-i18n="list.infra">Infrastruktura i dozvole</span>
                                     <div class="filter-chips" data-group="infra" role="group" aria-label="Infrastruktura i dozvole" data-i18n-attr="aria-label:list.infra"></div>
                                 </div>
-                                <div class="filter-group" data-scope="building">
+                                <div class="filter-group" data-scope="equipment">
                                     <span class="filter-label" data-i18n="list.equipment">Oprema</span>
                                     <div class="filter-chips" data-group="equipment" role="group" aria-label="Oprema" data-i18n-attr="aria-label:list.equipment"></div>
                                 </div>
