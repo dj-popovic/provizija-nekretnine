@@ -179,6 +179,10 @@ window.PV = window.PV || {};
     if (s.constructionYear != null) {
       rows += specRow(t('detail.spec.year'), s.constructionYear);
     }
+    var perUnit = pricePerUnit(p);
+    if (perUnit) {
+      rows += specRow(perUnit.label, perUnit.value);
+    }
 
     if (!rows) {
       rows = '<p class="text-muted" style="font-size:14px;">' + t('detail.spec.none') + '</p>';
@@ -192,6 +196,17 @@ window.PV = window.PV || {};
         '</div>' +
       '</div>'
     );
+  }
+
+  // Last spec row (agreed with the client, 2026-11-05): price per m², or per are for
+  // land (its area is in ares). Not for rent, and not for "cena na upit".
+  function pricePerUnit(p) {
+    var s = p.specs || {};
+    if (p.transactionType !== 'sale' || p.price == null) return null;
+    var per = function (size) { return { n: PV.render.formatNumber(Math.round(p.price / size)) }; };
+    if (s.area) return { label: t('detail.spec.pricePerM2'), value: t('units.pricePerM2', per(s.area)) };
+    if (s.landArea) return { label: t('detail.spec.pricePerAre'), value: t('units.pricePerAre', per(s.landArea)) };
+    return null;
   }
 
   function specRow(label, value) {

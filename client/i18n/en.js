@@ -108,6 +108,8 @@ PV.i18n.add('en', {
   },
 
   units: {
+    pricePerM2: '{n} €/m²',
+    pricePerAre: '{n} €/are',
     area: '{n} m²',
     ares: { one: '{n} are', other: '{n} ares' },
     studio: 'Studio',
@@ -352,6 +354,8 @@ PV.i18n.add('en', {
       heating: 'Heating',
       registration: 'Title registered',
       year: 'Year built',
+      pricePerM2: 'Price per m²',
+      pricePerAre: 'Price per are',
     },
     features: {
       prev: 'Previous features',

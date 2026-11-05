@@ -87,6 +87,8 @@ PV.i18n.add('sr', {
 
   // {n} = formatted number. Plural forms: one / few / other (+ fraction for decimals)
   units: {
+    pricePerM2: '{n} €/m²',
+    pricePerAre: '{n} €/ar',
     area: '{n} m²',
     ares: { other: '{n} ar' },
     studio: 'Garsonjera',
@@ -269,6 +271,8 @@ PV.i18n.add('sr', {
       heating: 'Grejanje',
       registration: 'Uknjiženost',
       year: 'Godina gradnje',
+      pricePerM2: 'Cena po m²',
+      pricePerAre: 'Cena po aru',
     },
     features: {
       prev: 'Prethodne karakteristike',

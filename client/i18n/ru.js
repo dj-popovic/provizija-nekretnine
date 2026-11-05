@@ -109,6 +109,8 @@ PV.i18n.add('ru', {
 
   // Plural forms: one / few / many / other (other = decimals: "2,5 комнаты")
   units: {
+    pricePerM2: '{n} €/м²',
+    pricePerAre: '{n} €/сот.',
     area: '{n} м²',
     ares: { other: '{n} сот.' },
     studio: 'Студия',
@@ -354,6 +356,8 @@ PV.i18n.add('ru', {
       heating: 'Отопление',
       registration: 'Право зарегистрировано',
       year: 'Год постройки',
+      pricePerM2: 'Цена за м²',
+      pricePerAre: 'Цена за сотку',
     },
     features: {
       prev: 'Предыдущие особенности',
