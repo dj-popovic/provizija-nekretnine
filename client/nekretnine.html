@@ -96,7 +96,7 @@
                 <div class="row g-4">
 
                     <!-- Tip nekretnine: which chips a tab always shows is CORE_CHIPS in page-properties.js,
-                         the rest appear only when the feed has that type. "Zemljište" opens its subtypes. -->
+                         the rest appear only when the feed has that type. "Zemljište" is a dropdown (all land or one kind). -->
                     <div class="col-12">
                         <div class="filter-group">
                             <span class="filter-label" id="lblTip" data-i18n="list.type">Tip nekretnine</span>
@@ -104,17 +104,12 @@
                                 <button type="button" class="filter-chip active" data-filter="tip" data-val="sve" aria-pressed="true" data-i18n="list.chip.all">Sve</button>
                                 <button type="button" class="filter-chip" data-filter="tip" data-val="stan" aria-pressed="false" data-i18n="list.chip.apartment">Stan</button>
                                 <button type="button" class="filter-chip" data-filter="tip" data-val="kuca" aria-pressed="false" data-i18n="list.chip.house">Kuća</button>
-                                <button type="button" class="filter-chip" data-filter="tip" data-val="zemljiste" aria-pressed="false" aria-expanded="false" aria-controls="landSubtypes"><span data-i18n="list.chip.land">Zemljište</span><i class="bi bi-chevron-down filter-chip-caret" aria-hidden="true"></i></button>
+                                <div id="landSelect"></div>
                                 <button type="button" class="filter-chip" data-filter="tip" data-val="poslovni" aria-pressed="false" data-i18n="list.chip.commercial">Poslovni prostor</button>
                                 <button type="button" class="filter-chip" data-filter="tip" data-val="lokal" aria-pressed="false" data-i18n="list.chip.retail">Lokal</button>
                                 <button type="button" class="filter-chip" data-filter="tip" data-val="garaza" aria-pressed="false" data-i18n="list.chip.garage">Garaža</button>
                                 <button type="button" class="filter-chip" data-filter="tip" data-val="hala" aria-pressed="false" hidden data-i18n="list.chip.warehouse">Hala</button>
                                 <button type="button" class="filter-chip" data-filter="tip" data-val="ugostiteljski" aria-pressed="false" hidden data-i18n="list.chip.hospitality">Ugostiteljski objekat</button>
-                            </div>
-                            <div class="filter-chips filter-chips--sub" id="landSubtypes" role="group" aria-label="Vrsta zemljišta" data-i18n-attr="aria-label:list.landKind" hidden>
-                                <button type="button" class="filter-chip" data-land="plot" aria-pressed="false" data-i18n="list.landSub.plot">Građevinsko</button>
-                                <button type="button" class="filter-chip" data-land="farmland" aria-pressed="false" data-i18n="list.landSub.farmland">Poljoprivredno</button>
-                                <button type="button" class="filter-chip" data-land="industrial_land" aria-pressed="false" data-i18n="list.landSub.industrial">Industrijsko</button>
                             </div>
                         </div>
                     </div>

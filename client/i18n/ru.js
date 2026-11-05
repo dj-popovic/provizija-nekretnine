@@ -243,13 +243,7 @@ PV.i18n.add('ru', {
       warehouse: 'Производственное помещение',
       hospitality: 'Ресторанно-гостиничный объект',
     },
-    // Subtypes under the "Land" chip
-    landKind: 'Вид земли',
-    landSub: {
-      plot: 'Под застройку',
-      farmland: 'Сельскохозяйственная',
-      industrial: 'Промышленная',
-    },
+    landAll: 'Все виды земли',
     city: 'Город',
     allCities: 'Все города',
     searchCity: 'Поиск города',

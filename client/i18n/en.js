@@ -241,13 +241,7 @@ PV.i18n.add('en', {
       warehouse: 'Industrial hall',
       hospitality: 'Hospitality property',
     },
-    // Subtypes under the "Land" chip
-    landKind: 'Land type',
-    landSub: {
-      plot: 'Building',
-      farmland: 'Agricultural',
-      industrial: 'Industrial',
-    },
+    landAll: 'All land',
     city: 'City',
     allCities: 'All cities',
     searchCity: 'Search city',

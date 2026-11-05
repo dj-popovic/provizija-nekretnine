@@ -15,6 +15,25 @@ window.PV = window.PV || {};
   // toUi labels come from the dictionaries (i18n/*.js, "enum" section) in the
   // current language; unknown keys are shown as-is by the pages.
 
+  // Which filter groups (listing page) and form fields (Oglasite) fit each type:
+  // the same table as PROPERTY_TYPE_RULES in the backend (server/src/modules/shared/models.ts).
+  // Group names are the data-scope values in nekretnine.html; "rooms" is the Broj soba dropdown.
+  var BUILDING_GROUPS = ['rooms', 'bathrooms', 'year', 'heating', 'furnished', 'construction', 'condition', 'features', 'equipment'];
+  var NO_ROOMS_GROUPS = BUILDING_GROUPS.filter(function (g) { return g !== 'rooms' && g !== 'furnished'; });
+  var TYPE_GROUPS = {
+    apartment: BUILDING_GROUPS.concat('floor'),
+    house: BUILDING_GROUPS.concat('plotArea', 'infra'),
+    commercial: BUILDING_GROUPS.concat('floor'),
+    retail: NO_ROOMS_GROUPS,
+    hospitality: BUILDING_GROUPS.concat('plotArea', 'infra'),
+    warehouse: NO_ROOMS_GROUPS.concat('plotArea', 'infra'),
+    garage: [],
+    plot: ['infra'],
+    farmland: ['infra'],
+    industrial_land: ['infra'],
+  };
+  var OTHER_TYPE_GROUPS = BUILDING_GROUPS.concat('plotArea'); // a RELPER type without a key yet
+
   var maps = {
     transactionType: {
       // Hero tabs say "Kupovina" / "Izdavanje", the listing subnav "Prodaja" / "Izdavanje"
@@ -34,6 +53,10 @@ window.PV = window.PV || {};
         garaza: ['garage'],
         hala: ['warehouse'],
         ugostiteljski: ['hospitality'],
+      },
+      // Does a filter group / form field fit the type?
+      hasGroup: function (type, group) {
+        return (TYPE_GROUPS[type] || OTHER_TYPE_GROUPS).indexOf(group) !== -1;
       },
       toUi: i18n.labels('enum.propertyType'),
     },

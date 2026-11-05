@@ -81,6 +81,7 @@ window.PV = window.PV || {};
     var transactionType = form.dataset.transaction === 'rent' ? 'rent' : 'sale';
     var state = { type: '', location: { city: '', hoods: [] } };
     var presentTypes = [];
+    var typesLoaded = false;
 
     var picker = PV.ui.locationPicker(form.querySelector('.js-location'), {
       label: t('home.location'),
@@ -99,13 +100,26 @@ window.PV = window.PV || {};
       },
     });
 
+    // "Zemljište" (all land) is followed by its three kinds, indented; a kind with
+    // no listing on this tab is dimmed
     function typeOptions() {
-      return Object.keys(TYPE_CHIPS).filter(function (val) {
+      var list = [];
+      Object.keys(TYPE_CHIPS).filter(function (val) {
         return CORE_TYPES[transactionType].indexOf(val) !== -1 ||
           TYPE_CHIPS[val].some(function (k) { return presentTypes.indexOf(k) !== -1; });
-      }).map(function (val) {
-        return { value: val, label: t('list.chip.' + TYPE_LABEL_KEYS[val]) };
+      }).forEach(function (val) {
+        list.push({ value: val, label: t('list.chip.' + TYPE_LABEL_KEYS[val]) });
+        if (val !== 'zemljiste') return;
+        TYPE_CHIPS.zemljiste.forEach(function (k) {
+          list.push({ value: k, label: PV.maps.propertyType.toUi[k], sub: true, disabled: typesLoaded && presentTypes.indexOf(k) === -1 });
+        });
       });
+      return list;
+    }
+
+    // A chip value ("zemljiste") or one kind of land ("plot")
+    function typeKeys(val) {
+      return val ? TYPE_CHIPS[val] || [val] : [];
     }
 
     // Without an answer the picker just lists nothing; the search itself still works
@@ -115,10 +129,11 @@ window.PV = window.PV || {};
       try {
         var res = await PV.api.get('/api/filter-options', {
           transactionType: transactionType,
-          propertyType: state.type ? TYPE_CHIPS[state.type] : [],
+          propertyType: typeKeys(state.type),
         });
         if (id !== request) return;
         presentTypes = res.data.propertyTypes.map(function (t) { return t.key; });
+        typesLoaded = true;
         picker.setCities(res.data.cities);
         typeSelect.setOptions(typeOptions());
       } catch (err) {
@@ -134,7 +149,7 @@ window.PV = window.PV || {};
 
       var params = new URLSearchParams();
       params.set('transactionType', transactionType);
-      if (state.type) TYPE_CHIPS[state.type].forEach(function (k) { params.append('propertyType', k); });
+      typeKeys(state.type).forEach(function (k) { params.append('propertyType', k); });
       if (state.location.city) {
         params.set('city', state.location.city);
         state.location.hoods.forEach(function (h) { params.append('hood', h); });

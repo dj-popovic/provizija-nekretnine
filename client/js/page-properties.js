@@ -31,7 +31,7 @@ window.PV = window.PV || {};
   var yearMaxEl = document.getElementById('yearMax');
   var plotMinEl = document.getElementById('plotMin');
   var plotMaxEl = document.getElementById('plotMax');
-  var landSubEl = document.getElementById('landSubtypes');
+  var landSelectEl = document.getElementById('landSelect');
 
   var TYPE_CHIPS = PV.maps.propertyType.chips;
 
@@ -49,24 +49,6 @@ window.PV = window.PV || {};
   // Old links: Kancelarija is part of Poslovni prostor, "land" was farmland
   var OLD_TYPE_KEYS = { office: 'commercial', land: 'farmland' };
 
-  // Which filter groups fit each type: the same table as PROPERTY_TYPE_RULES in the
-  // backend (server/src/modules/shared/models.ts). The names are the data-scope
-  // values in nekretnine.html; "rooms" is the Broj soba dropdown.
-  var BUILDING_GROUPS = ['rooms', 'bathrooms', 'year', 'heating', 'furnished', 'construction', 'condition', 'features', 'equipment'];
-  var NO_ROOMS_GROUPS = BUILDING_GROUPS.filter(function (g) { return g !== 'rooms' && g !== 'furnished'; });
-  var TYPE_GROUPS = {
-    apartment: BUILDING_GROUPS.concat('floor'),
-    house: BUILDING_GROUPS.concat('plotArea', 'infra'),
-    commercial: BUILDING_GROUPS.concat('floor'),
-    retail: NO_ROOMS_GROUPS,
-    hospitality: BUILDING_GROUPS.concat('plotArea', 'infra'),
-    warehouse: NO_ROOMS_GROUPS.concat('plotArea', 'infra'),
-    garage: [],
-    plot: ['infra'],
-    farmland: ['infra'],
-    industrial_land: ['infra'],
-  };
-  var OTHER_TYPE_GROUPS = BUILDING_GROUPS.concat('plotArea'); // a RELPER type without a key yet
 
   // --- Rooms: the feed stores a studio (garsonjera) as 0.5 rooms ---
   // Hints under the numbers: list.roomHint.r2_5 = "dvoiposoban"
@@ -225,7 +207,8 @@ window.PV = window.PV || {};
 
     var types = params.getAll('propertyType').filter(Boolean).map(function (k) { return OLD_TYPE_KEYS[k] || k; });
     var chip = chipFor(types);
-    if (chip === 'zemljiste') filters.propertyTypes = LAND_TYPES.filter(function (k) { return types.indexOf(k) !== -1; });
+    // Zemljište: one kind of land, or all three (the dropdown has no other choice)
+    if (chip === 'zemljiste') filters.propertyTypes = types.length === 1 ? types : LAND_TYPES.slice();
     else filters.propertyTypes = chip && chip !== 'sve' ? TYPE_CHIPS[chip].slice() : types;
 
     filters.city = params.get('city') || undefined;
@@ -328,26 +311,24 @@ window.PV = window.PV || {};
       var empty = optionsLoaded && !isActive && keys.every(function (k) { return !counts[k]; });
       chip.classList.toggle('is-muted', empty);
       chip.disabled = empty;
-      if (val === 'zemljiste') chip.setAttribute('aria-expanded', isActive ? 'true' : 'false');
     });
-    syncLandSubtypes(active === 'zemljiste', counts);
+    syncLandSelect(active === 'zemljiste', core, counts);
   }
 
-  // The land subtypes under an active "Zemljište" chip. None lit = all three;
-  // a lit one narrows the search to it (several can be lit).
-  function syncLandSubtypes(open, counts) {
-    if (!landSubEl) return;
-    landSubEl.hidden = !open;
-    var whole = filters.propertyTypes.length === LAND_TYPES.length;
-    landSubEl.querySelectorAll('.filter-chip').forEach(function (chip) {
-      var key = chip.dataset.land;
-      var on = open && !whole && filters.propertyTypes.indexOf(key) !== -1;
-      chip.classList.toggle('active', on);
-      chip.setAttribute('aria-pressed', on ? 'true' : 'false');
-      var empty = optionsLoaded && !on && !counts[key];
-      chip.classList.toggle('is-muted', empty);
-      chip.disabled = empty;
-    });
+  // "Zemljište" chip = a dropdown: all land, or one kind of land (with counts).
+  // Once picked it shows the choice ("Građevinsko zemljište") in the active chip style.
+  function syncLandSelect(isActive, core, counts) {
+    var count = function (k) { return optionsLoaded ? counts[k] || 0 : undefined; };
+    var total = LAND_TYPES.reduce(function (sum, k) { return sum + (counts[k] || 0); }, 0);
+    ui.land.setOptions([{ value: 'all', label: t('list.landAll'), short: t('list.chip.land'), count: optionsLoaded ? total : undefined }]
+      .concat(LAND_TYPES.map(function (k) {
+        return { value: k, label: PV.maps.propertyType.toUi[k], count: count(k) };
+      })));
+    var single = filters.propertyTypes.length === 1;
+    ui.land.setValue(isActive ? (single ? filters.propertyTypes[0] : 'all') : '');
+    var inFeed = LAND_TYPES.some(function (k) { return k in counts; });
+    landSelectEl.hidden = !(core.indexOf('zemljiste') !== -1 || inFeed || isActive);
+    ui.land.setDisabled(optionsLoaded && !isActive && !total, t('list.chip.land'));
   }
 
   // Land: area in ares. Types without rooms (land, Lokal, Hala, Garaža): rooms off.
@@ -400,9 +381,7 @@ window.PV = window.PV || {};
   // A filter group fits when any chosen type has it (all of them fit "Sve")
   function groupVisible(group) {
     var types = filters.propertyTypes;
-    return !types.length || types.some(function (type) {
-      return (TYPE_GROUPS[type] || OTHER_TYPE_GROUPS).indexOf(group) !== -1;
-    });
+    return !types.length || types.some(function (type) { return PV.maps.propertyType.hasGroup(type, group); });
   }
 
   // data-scope in the HTML: group names, plus 'not-new' (hidden on the Novogradnja tab) and 'all'
@@ -762,6 +741,17 @@ window.PV = window.PV || {};
 
   // --- Dropdowns ---
   function setupDropdowns() {
+    // The "Zemljište" type chip (styled as a chip: .pv-dd--chip)
+    ui.land = PV.ui.select(landSelectEl, {
+      label: t('list.chip.land'),
+      placeholder: t('list.chip.land'),
+      searchFrom: 99,
+      onChange: function (val) {
+        setTypes(val === 'all' ? LAND_TYPES.slice() : [val]);
+      },
+    });
+    landSelectEl.classList.add('pv-dd--chip');
+
     ui.city = PV.ui.select(document.getElementById('citySelect'), {
       label: t('list.city'),
       placeholder: t('list.allCities'),
@@ -837,50 +827,35 @@ window.PV = window.PV || {};
   }
 
   // --- Wire up type chips ---
+  // A type chip or the Zemljište dropdown picked new type keys
+  function setTypes(keys) {
+    var wasLand = isLandMode();
+    readInputsInto(filters); // keep what was typed (the area pair is read in the old unit)
+    filters.propertyTypes = keys;
+
+    // m² and ares are different numbers: switching between them clears the pair
+    if (wasLand !== isLandMode()) {
+      filters.areaMin = filters.areaMax = filters.landAreaMin = filters.landAreaMax = undefined;
+      setInput(sqmMinEl, undefined);
+      setInput(sqmMaxEl, undefined);
+    }
+    clearHiddenValues();
+    ui.roomsMin.setValue(filters.roomsMin !== undefined ? String(filters.roomsMin) : '');
+    ui.roomsMax.setValue(filters.roomsMax !== undefined ? String(filters.roomsMax) : '');
+
+    syncTypeChips();
+    syncLandMode();
+    syncMoreFilters();
+    loadOptions(); // counts follow the type
+  }
+
   function setupTypeChips() {
     document.querySelectorAll('.filter-chip[data-filter="tip"]').forEach(function (chip) {
       chip.addEventListener('click', function () {
-        var wasLand = isLandMode();
         var val = this.dataset.val;
-        readInputsInto(filters); // keep what was typed (the area pair is read in the old unit)
-        filters.propertyTypes = val === 'sve' ? [] : TYPE_CHIPS[val].slice();
-
-        // m² and ares are different numbers: switching between them clears the pair
-        if (wasLand !== isLandMode()) {
-          filters.areaMin = filters.areaMax = filters.landAreaMin = filters.landAreaMax = undefined;
-          setInput(sqmMinEl, undefined);
-          setInput(sqmMaxEl, undefined);
-        }
-        clearHiddenValues();
-        ui.roomsMin.setValue(filters.roomsMin !== undefined ? String(filters.roomsMin) : '');
-        ui.roomsMax.setValue(filters.roomsMax !== undefined ? String(filters.roomsMax) : '');
-
-        syncTypeChips();
-        syncLandMode();
-        syncMoreFilters();
-        loadOptions(); // counts follow the type
+        setTypes(val === 'sve' ? [] : TYPE_CHIPS[val].slice());
       });
     });
-
-    // Land subtypes: the first click narrows "all three" to one; clearing the last one
-    // (or lighting all three) goes back to the whole group. Units and filters stay
-    // the same within the group, so only the type list and the counts change.
-    if (landSubEl) {
-      landSubEl.addEventListener('click', function (e) {
-        var chip = e.target.closest('.filter-chip');
-        if (!chip || chip.disabled) return;
-        var key = chip.dataset.land;
-        var whole = filters.propertyTypes.length === LAND_TYPES.length;
-        var picked = whole ? [] : filters.propertyTypes.slice();
-        var at = picked.indexOf(key);
-        if (at === -1) picked.push(key); else picked.splice(at, 1);
-        filters.propertyTypes = picked.length && picked.length < LAND_TYPES.length
-          ? LAND_TYPES.filter(function (k) { return picked.indexOf(k) !== -1; })
-          : LAND_TYPES.slice();
-        syncTypeChips();
-        loadOptions();
-      });
-    }
   }
 
   function readNumber(el) {

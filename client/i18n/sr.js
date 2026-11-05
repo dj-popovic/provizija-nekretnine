@@ -187,6 +187,7 @@ PV.i18n.add('sr', {
       warehouse: 'Hala',
       hospitality: 'Ugostiteljski objekat',
     },
+    landAll: 'Sve zemljište', // the first choice of the Zemljište dropdown
     city: 'Grad',
     allCities: 'Svi gradovi',
     searchCity: 'Pretraži grad',

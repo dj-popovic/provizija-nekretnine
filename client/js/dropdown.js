@@ -247,7 +247,8 @@ window.PV = window.PV || {};
   // opts: label, placeholder, multiple, allOption (single: a first "all" choice
   //       with value ''), searchPlaceholder, searchFrom (show search from this
   //       many options, default 9), emptyText, onChange(value)
-  // option: { value, label, short (closed-field text), hint, count }
+  // option: { value, label, short (closed-field text), hint, count,
+  //           sub (indented under the option before it), disabled (dimmed, not pickable) }
   // ---------------------------------------------------------------------------
 
   function select(container, opts) {
@@ -303,8 +304,8 @@ window.PV = window.PV || {};
       var selected = isSelected(item.value);
       // 0 listings for this choice with the rest of the panel: dimmed and not pickable
       // (a choice that is already selected stays enabled, so it can be removed)
-      var muted = item.count === 0 && !selected;
-      return '<li class="pv-dd-option' + (muted ? ' is-muted" aria-disabled="true' : '') + '" role="option" id="' + listId + '-' + i +
+      var muted = (item.count === 0 || item.disabled) && !selected;
+      return '<li class="pv-dd-option' + (item.sub ? ' pv-dd-option--sub' : '') + (muted ? ' is-muted" aria-disabled="true' : '') + '" role="option" id="' + listId + '-' + i +
         '" data-index="' + i + '" aria-selected="' + selected + '">' +
         (multiple ? '<span class="pv-dd-check" aria-hidden="true"><i class="bi bi-check-lg"></i></span>' : '') +
         '<span class="pv-dd-label">' + esc(item.label) +
