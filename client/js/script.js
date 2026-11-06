@@ -121,38 +121,6 @@ if (statsSection) {
 }
 
 // ===========================
-// Step Cards Animation on Scroll
-// ===========================
-const stepCards = document.querySelectorAll('.step-card');
-if (stepCards.length > 0 && !prefersReducedMotion) {
-    const stepObserver = new IntersectionObserver((entries) => {
-        entries.forEach((entry, index) => {
-            if (entry.isIntersecting) {
-                const card = entry.target;
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-                // Drop the reveal styles afterwards so they don't override the stylesheet
-                card.addEventListener('transitionend', () => {
-                    ['opacity', 'transform', 'transition'].forEach(prop => card.style.removeProperty(prop));
-                }, { once: true });
-                stepObserver.unobserve(card);
-            }
-        });
-    }, {
-        threshold: 0.2
-    });
-
-    stepCards.forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(24px)';
-        card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
-        stepObserver.observe(card);
-    });
-}
-
-// ===========================
 // Mobile Menu Close on Outside Click
 // ===========================
 document.addEventListener('click', function(e) {
