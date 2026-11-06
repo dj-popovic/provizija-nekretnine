@@ -362,6 +362,189 @@ p, li,
     }
 }
 
+/* --- Round-flag look (desktop) ------------------------------------------------
+   The toggle is the current flag in a circle with a thin ring; the other languages
+   drop down as a column of flag circles, one after another (40ms apart). Their
+   code (ENG / RUS) slides out to the left on hover / focus. */
+@media (min-width: 992px) {
+    .lang-switch {
+        margin-left: 1.25rem;
+        margin-right: 0;
+    }
+
+    .site-header .nav-link.lang-switch-toggle {
+        position: relative;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.55), 0 0 0 rgba(232, 196, 106, 0);
+        transition: box-shadow 0.3s var(--ease-out), scale 0.15s ease-out;
+    }
+
+    /* No menu-link underline under the round flag */
+    .site-header .nav-link.lang-switch-toggle::after {
+        display: none;
+    }
+
+    /* 44px hit area */
+    .site-header .nav-link.lang-switch-toggle::before {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+    }
+
+    .site-header.is-solid .nav-link.lang-switch-toggle {
+        box-shadow: 0 0 0 2px rgba(201, 162, 39, 0.55), 0 0 0 rgba(232, 196, 106, 0);
+    }
+
+    .lang-switch:hover .lang-switch-toggle,
+    .lang-switch.is-open .lang-switch-toggle,
+    .site-header .nav-link.lang-switch-toggle:focus-visible {
+        box-shadow: 0 0 0 2px var(--accent), 0 0 16px rgba(232, 196, 106, 0.55);
+    }
+
+    .site-header .nav-link.lang-switch-toggle:focus-visible {
+        outline: none;
+    }
+
+    .site-header .nav-link.lang-switch-toggle:active {
+        scale: 0.96;
+    }
+
+    .lang-switch-toggle .lang-flag,
+    .lang-option .lang-flag {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        outline: none;
+    }
+
+    .lang-switch-toggle .lang-code,
+    .lang-switch-toggle .lang-caret {
+        display: none;
+    }
+
+    /* The list: no panel, just the flags stacked under the toggle. The list itself
+       stays opaque; each flag fades on its own (visibility hides it after they fade) */
+    .lang-switch-menu {
+        opacity: 1;
+        left: 50%;
+        translate: -50% 0;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+        padding: 0;
+        background: none;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+        box-shadow: none;
+        transform: none;
+        transition: visibility 0s linear 0.2s;
+    }
+
+    .lang-switch-menu::before {
+        top: -12px;
+        height: 12px;
+    }
+
+    .lang-option {
+        position: relative;
+        width: 38px;
+        height: 38px;
+        padding: 0;
+        justify-content: center;
+        border-radius: 50%;
+        background: var(--white);
+        box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.9), 0 6px 16px rgba(15, 23, 42, 0.28);
+        opacity: 0;
+        transform: translateY(-8px) scale(0.92);
+        transition: opacity 0.2s var(--ease-out), transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+    }
+
+    .lang-switch.is-open .lang-switch-menu,
+    .lang-switch:hover .lang-switch-menu {
+        transition-delay: 0s;
+    }
+
+    .lang-switch.is-open .lang-option,
+    .lang-switch:hover .lang-option {
+        opacity: 1;
+        transform: none;
+    }
+
+    /* One after another on the way in */
+    .lang-switch.is-open .lang-option:nth-child(2),
+    .lang-switch:hover .lang-option:nth-child(2) { transition-delay: 40ms; }
+    .lang-switch.is-open .lang-option:nth-child(3),
+    .lang-switch:hover .lang-option:nth-child(3) { transition-delay: 80ms; }
+
+    .lang-option:hover,
+    .lang-option:focus-visible {
+        background: var(--white);
+        box-shadow: 0 0 0 2px var(--accent), 0 0 14px rgba(232, 196, 106, 0.6);
+    }
+
+    .lang-option:focus-visible {
+        outline: none;
+    }
+
+    /* Code label slides out to the left */
+    .lang-option span {
+        position: absolute;
+        right: calc(100% + 10px);
+        top: 50%;
+        padding: 4px 9px;
+        border-radius: 6px;
+        background: var(--primary);
+        color: var(--white);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transform: translate(6px, -50%);
+        transition: opacity 0.15s var(--ease-out), transform 0.15s var(--ease-out);
+    }
+
+    .lang-option:hover span,
+    .lang-option:focus-visible span {
+        opacity: 1;
+        transform: translate(0, -50%);
+    }
+}
+
+/* Mobile menu: same round flags inside the three language pills */
+@media (max-width: 991.98px) {
+    .lang-option .lang-flag {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        outline: 1px solid rgba(0, 0, 0, 0.1);
+        outline-offset: -1px;
+    }
+
+    .lang-option {
+        border-radius: 999px;
+        transition: background-color 0.15s var(--ease-out), color 0.15s var(--ease-out), border-color 0.15s var(--ease-out), box-shadow 0.2s var(--ease-out);
+    }
+
+    .lang-option[aria-current="true"] {
+        box-shadow: 0 0 12px rgba(232, 196, 106, 0.35);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lang-option,
+    .lang-option span {
+        transition: opacity 0.15s linear;
+        transform: none;
+    }
+}
+
 /* Burger: one glyph, colored through currentColor in both header states */
 .site-header .navbar-toggler {
     padding: 0.4375rem 0.75rem;
@@ -1885,14 +2068,28 @@ p, li,
 
 .filter-group { margin-bottom: 24px; }
 .filter-group:last-child { margin-bottom: 0; }
+/* Group titles (TIP NEKRETNINE, GRAD…): a step above the options — larger, wider
+   tracking, a small gold dot and a faint gold glow */
 .filter-label {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 12px;
-    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary);
+    text-shadow: 0 0 14px rgba(201, 162, 39, .35);
+}
+.filter-label::before {
+    content: '';
+    flex-shrink: 0;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(201, 162, 39, .7);
 }
 
 /* Chip buttons — one weight for every state, so selecting a chip doesn't shift the row */
@@ -2015,7 +2212,8 @@ p, li,
 .filter-actions .filter-results-count { justify-self: end; margin-left: 0; white-space: nowrap; }
 
 /* The toggle: a soft gold-edged pill with text + gold chevron; on hover / while open it
-   turns white and a gold line fades in under the text */
+   turns white and a soft gold glow fades in around it. Same shadow list in both
+   states, so the glow animates instead of popping. */
 .btn-more-filters {
     position: relative;
     display: inline-flex;
@@ -2031,29 +2229,15 @@ p, li,
     letter-spacing: .3px;
     color: var(--primary);
     cursor: pointer;
-    transition: background-color .2s ease-out, border-color .2s ease-out, box-shadow .2s ease-out, scale .15s ease-out;
-}
-.btn-more-filters::after {
-    content: '';
-    position: absolute;
-    left: 26px;
-    right: 26px;
-    bottom: 6px;
-    height: 2px;
-    border-radius: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0;
-    scale: .4 1;
-    transition: opacity .25s var(--ease-out), scale .25s var(--ease-out);
+    box-shadow: 0 0 0 0 rgba(201, 162, 39, 0), 0 0 0 rgba(232, 196, 106, 0);
+    transition: background-color .25s ease-out, border-color .25s ease-out, box-shadow .4s var(--ease-out), scale .15s ease-out;
 }
 .btn-more-filters:hover,
 .btn-more-filters[aria-expanded="true"] {
     background: var(--white);
     border-color: var(--accent);
-    box-shadow: 0 6px 18px rgba(201, 162, 39, .15);
+    box-shadow: 0 0 0 4px rgba(201, 162, 39, .12), 0 0 22px rgba(232, 196, 106, .45);
 }
-.btn-more-filters:hover::after,
-.btn-more-filters[aria-expanded="true"]::after { opacity: 1; scale: 1 1; }
 .btn-more-filters:active { scale: .96; }
 .btn-more-filters:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 .btn-more-filters-caret { font-size: 16px; color: var(--accent); -webkit-text-stroke: .5px currentColor; transition: rotate .3s var(--ease-out); }
