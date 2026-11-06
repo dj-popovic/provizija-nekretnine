@@ -3072,29 +3072,29 @@ img.agent-contact-avatar { outline: 1px solid var(--image-outline); outline-offs
 .agent-stat-number { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 800; color: var(--primary); display: block; }
 .agent-stat-label { font-size: 11px; color: var(--text-light); font-weight: 500; text-transform: uppercase; letter-spacing: .5px; }
 .agent-contact-btns { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e5e5; }
-.btn-agent-phone { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; background: var(--primary); color: var(--white); border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; transition: background-color .3s, transform .3s, scale .15s ease-out; }
-.btn-agent-phone:hover { background: var(--primary-light); color: var(--white); transform: translateY(-2px); }
-.btn-agent-mail { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; background: transparent; color: var(--primary); border: 2px solid #e5e5e5; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 15px; transition: border-color .3s, color .3s, scale .15s ease-out; }
-.btn-agent-mail:hover { border-color: var(--accent); color: var(--accent); }
+.btn-agent-phone { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; background: var(--primary); color: var(--white); border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 0 0 rgba(30, 58, 138, 0); transition: background-color .3s, box-shadow .35s var(--ease-out), scale .15s ease-out; }
+.btn-agent-phone:hover { background: var(--primary-light); color: var(--white); box-shadow: 0 0 18px rgba(30, 58, 138, .5); }
+.btn-agent-mail { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 14px; background: var(--accent); color: var(--white); border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; box-shadow: 0 0 0 rgba(201, 162, 39, 0); transition: filter .25s ease-out, box-shadow .35s var(--ease-out), scale .15s ease-out; }
+.btn-agent-mail:hover { color: var(--white); filter: brightness(1.05); box-shadow: 0 0 18px rgba(232, 196, 106, .7); }
 /* Long e-mail addresses wrap inside the border instead of running past it */
 .btn-agent-mail { min-width: 0; text-align: center; }
 .btn-agent-mail-text { min-width: 0; overflow-wrap: anywhere; }
-/* WhatsApp / Viber side by side under the phone button. Same family as the e-mail
-   button (white, grey border); the icon carries the app color, and on hover the
-   border and text take it too — like e-mail turns gold. The phone stays the one
-   filled button. */
+/* Profile contact buttons are one family: filled, each in its own color (phone navy,
+   WhatsApp green, Viber purple, e-mail gold), and on hover a soft glow in that color.
+   Same shadow list at rest and on hover, so the glow fades in instead of popping. */
 .agent-chat-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .btn-agent-chat {
     display: flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 12px; border: 2px solid #e5e5e5; border-radius: 8px; background: transparent;
-    color: var(--primary); text-decoration: none; font-weight: 600; font-size: 15px;
-    transition: border-color .3s, color .3s, scale .15s ease-out;
+    padding: 12px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px;
+    color: var(--white);
+    transition: filter .25s ease-out, box-shadow .35s var(--ease-out), scale .15s ease-out;
 }
 .btn-agent-chat i { font-size: 17px; }
-.btn-agent-chat--wa i { color: #25D366; }
-.btn-agent-chat--viber .bi-viber { color: #7360F2; }
-.btn-agent-chat--wa:hover { border-color: #25D366; color: #1DA851; }
-.btn-agent-chat--viber:hover { border-color: #7360F2; color: #7360F2; }
+.btn-agent-chat--wa { background: #25D366; box-shadow: 0 0 0 rgba(37, 211, 102, 0); }
+.btn-agent-chat--viber { background: #7360F2; box-shadow: 0 0 0 rgba(115, 96, 242, 0); }
+.btn-agent-chat:hover { color: var(--white); filter: brightness(1.05); }
+.btn-agent-chat--wa:hover { box-shadow: 0 0 18px rgba(37, 211, 102, .55); }
+.btn-agent-chat--viber:hover { box-shadow: 0 0 18px rgba(115, 96, 242, .55); }
 .btn-agent-chat:active { scale: .96; }
 .btn-agent-chat:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .btn-agent-phone:active,
