@@ -48,8 +48,20 @@ window.PV = window.PV || {};
     if (agent.phone) {
       html += '<a href="tel:' + esc(agent.phone) + '" class="btn-agent-phone"><i class="bi bi-telephone" aria-hidden="true"></i> ' + esc(agent.phone) + '</a>';
     }
+    var chat = PV.render.agentMessengers(agent);
+    if (chat.whatsapp || chat.viber) {
+      html += '<div class="agent-chat-btns">';
+      if (chat.whatsapp) {
+        html += '<a href="' + esc(chat.whatsapp) + '" target="_blank" rel="noopener" class="btn-agent-chat btn-agent-chat--wa" aria-label="' + esc(t('agent.whatsapp', { name: agent.fullName })) + '"><i class="bi bi-whatsapp" aria-hidden="true"></i> WhatsApp</a>';
+      }
+      if (chat.viber) {
+        html += '<a href="' + esc(chat.viber) + '" class="btn-agent-chat btn-agent-chat--viber" aria-label="' + esc(t('agent.viber', { name: agent.fullName })) + '">' + PV.render.viberIcon(18) + ' Viber</a>';
+      }
+      html += '</div>';
+    }
     if (agent.email) {
-      html += '<a href="mailto:' + esc(agent.email) + '" class="btn-agent-mail"><i class="bi bi-envelope" aria-hidden="true"></i> ' + esc(agent.email) + '</a>';
+      // Long addresses wrap inside the button instead of running past its border
+      html += '<a href="mailto:' + esc(agent.email) + '" class="btn-agent-mail"><i class="bi bi-envelope" aria-hidden="true"></i> <span class="btn-agent-mail-text">' + esc(agent.email) + '</span></a>';
     }
 
     html +=

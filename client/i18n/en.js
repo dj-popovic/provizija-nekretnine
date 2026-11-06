@@ -156,6 +156,8 @@ PV.i18n.add('en', {
     viewProfile: 'View profile – {name}',
     call: 'Call {name}',
     email: 'Email {name}',
+    whatsapp: 'WhatsApp – {name}',
+    viber: 'Viber – {name}',
     tag: 'Agent profile',
     inquiryTitle: 'Send an inquiry – {name}',
     formLabel: 'Contact form for the agent',

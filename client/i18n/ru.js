@@ -158,6 +158,8 @@ PV.i18n.add('ru', {
     viewProfile: 'Профиль – {name}',
     call: 'Позвонить: {name}',
     email: 'Написать: {name}',
+    whatsapp: 'WhatsApp – {name}',
+    viber: 'Viber – {name}',
     tag: 'Профиль агента',
     inquiryTitle: 'Отправить запрос – {name}',
     formLabel: 'Форма связи с агентом',

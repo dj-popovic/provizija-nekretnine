@@ -70,7 +70,8 @@
     var rect = hero.getBoundingClientRect();
     width = rect.width;
     height = rect.height;
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // Soft glowing dots look the same at 1.5x; full 2x/3x only costs GPU time
+    dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
     canvas.style.width = width + 'px';

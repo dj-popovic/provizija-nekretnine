@@ -121,6 +121,8 @@ PV.i18n.add('sr', {
     viewProfile: 'Pogledaj profil – {name}',
     call: 'Pozovi {name}',
     email: 'Email {name}',
+    whatsapp: 'WhatsApp – {name}',
+    viber: 'Viber – {name}',
     // Agent profile page (page-agent.js)
     tag: 'Profil agenta',
     inquiryTitle: 'Pošaljite upit – {name}',
